@@ -42,7 +42,7 @@ DB_HOST=db.<YOUR-PROJECT-ID>.supabase.co
 DB_PORT=5432
 DB_NAME=postgres
 ```
-### env file just replace with this detials below
+### env file just replace with this detials belowh
 PORT=3000
 DB_USER=postgres
 DB_PASSWORD=Ragul@2006ts
