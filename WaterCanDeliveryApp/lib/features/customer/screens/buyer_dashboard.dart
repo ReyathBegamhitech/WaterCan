@@ -6,6 +6,7 @@ import 'product_detail_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../auth/screens/login_screen.dart';
+import '../../../core/constants/api_constants.dart';
 
 class BuyerDashboardScreen extends StatefulWidget {
   final String customerName;
@@ -130,7 +131,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                 setModalState(() { isLoading = true; });
                                 try {
                                   final response = await http.put(
-                                    Uri.parse('http://localhost:3000/api/auth/phone'),
+                                    Uri.parse(ApiConstants.updatePhone),
                                     headers: {'Content-Type': 'application/json'},
                                     body: jsonEncode({
                                       'oldPhone': _addressLine2,
@@ -271,11 +272,11 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary.withOpacity(0.1), // bg-primary/10
+      backgroundColor: AppColors.surfaceContainerLow,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: AppBar(
-          backgroundColor: AppColors.surface.withOpacity(0.85),
+          backgroundColor: AppColors.surfaceContainerLow,
           elevation: 1,
           shadowColor: Colors.black.withOpacity(0.1),
           titleSpacing: 16,

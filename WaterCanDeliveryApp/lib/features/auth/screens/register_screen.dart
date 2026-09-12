@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/api_constants.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/custom_text_field.dart';
-import 'package:flutter/gestures.dart';
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import '../../customer/screens/buyer_dashboard.dart';
 
@@ -21,6 +22,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _sameAsPhone = false;
   bool _isLoading = false;
 
+  // Real-time OTP State
+  bool _isPhoneVerified = false;
+  bool _otpSent = false;
+  bool _isSendingOtp = false;
+  bool _isVerifyingOtp = false;
+  int _timerSeconds = 45;
+  Timer? _countdownTimer;
+  String? _lastReceivedOtp;
+
   final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
@@ -29,16 +39,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _phoneController = TextEditingController(text: '');
   final TextEditingController _whatsappController = TextEditingController(text: '');
 
+  // 4-digit OTP Controllers & Focus Nodes
+  final TextEditingController _otp1Controller = TextEditingController();
+  final TextEditingController _otp2Controller = TextEditingController();
+  final TextEditingController _otp3Controller = TextEditingController();
+  final TextEditingController _otp4Controller = TextEditingController();
+
+  final FocusNode _focus1 = FocusNode();
+  final FocusNode _focus2 = FocusNode();
+  final FocusNode _focus3 = FocusNode();
+  final FocusNode _focus4 = FocusNode();
+
   @override
   void initState() {
     super.initState();
     _passwordController.addListener(() {
       setState(() {});
     });
+
+    _phoneController.addListener(() {
+      // If phone number is modified after OTP was sent or verified, reset verification
+      if (_isPhoneVerified || _otpSent) {
+        setState(() {
+          _isPhoneVerified = false;
+          _otpSent = false;
+          _timerSeconds = 45;
+          _countdownTimer?.cancel();
+          _otp1Controller.clear();
+          _otp2Controller.clear();
+          _otp3Controller.clear();
+          _otp4Controller.clear();
+          _lastReceivedOtp = null;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     _customerNameController.dispose();
     _emailController.dispose();
     _addressController.dispose();
@@ -46,7 +85,238 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _confirmPasswordController.dispose();
     _phoneController.dispose();
     _whatsappController.dispose();
+    _otp1Controller.dispose();
+    _otp2Controller.dispose();
+    _otp3Controller.dispose();
+    _otp4Controller.dispose();
+    _focus1.dispose();
+    _focus2.dispose();
+    _focus3.dispose();
+    _focus4.dispose();
     super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    setState(() {
+      _timerSeconds = 45;
+    });
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_timerSeconds > 0) {
+        setState(() {
+          _timerSeconds--;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> _sendOtp() async {
+    final phone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+    if (phone.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid 10-digit phone number first.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSendingOtp = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConstants.sendOtp),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'phone': phone}),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        final otp = data['otp']?.toString() ?? '';
+        setState(() {
+          _otpSent = true;
+          _lastReceivedOtp = otp;
+          _otp1Controller.clear();
+          _otp2Controller.clear();
+          _otp3Controller.clear();
+          _otp4Controller.clear();
+        });
+        _startCountdown();
+
+        final bool smsSent = data['smsSent'] == true;
+        final String gateway = data['gateway']?.toString() ?? '';
+
+        if (mounted) {
+          if (smsSent) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.mark_email_read_outlined, color: Colors.greenAccent, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Real SMS OTP sent to +91 $phone via $gateway! Check your mobile SMS inbox.',
+                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 5),
+                backgroundColor: const Color(0xFF16A34A),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.sms_outlined, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'OTP for +91 $phone is $otp',
+                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+                action: SnackBarAction(
+                  label: 'AUTO-FILL',
+                  textColor: Colors.amberAccent,
+                  onPressed: () => _autoFillOtp(otp),
+                ),
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 6),
+                backgroundColor: const Color(0xFF1E293B),
+              ),
+            );
+          }
+
+          _focus1.requestFocus();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Failed to send OTP.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error connecting to backend: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSendingOtp = false;
+        });
+      }
+    }
+  }
+
+  void _autoFillOtp(String otp) {
+    if (otp.length == 4) {
+      _otp1Controller.text = otp[0];
+      _otp2Controller.text = otp[1];
+      _otp3Controller.text = otp[2];
+      _otp4Controller.text = otp[3];
+      _verifyOtp();
+    }
+  }
+
+  Future<void> _verifyOtp() async {
+    final enteredOtp = '${_otp1Controller.text}${_otp2Controller.text}${_otp3Controller.text}${_otp4Controller.text}'.trim();
+    if (enteredOtp.length < 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter the 4-digit OTP code.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final phone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+
+    setState(() {
+      _isVerifyingOtp = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConstants.verifyOtp),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phone': phone,
+          'otp': enteredOtp,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        _countdownTimer?.cancel();
+        setState(() {
+          _isPhoneVerified = true;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.greenAccent, size: 20),
+                  SizedBox(width: 8),
+                  Text('Phone number verified successfully!'),
+                ],
+              ),
+              backgroundColor: Color(0xFF16A34A),
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Invalid OTP code. Try again.'),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error connecting to backend: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isVerifyingOtp = false;
+        });
+      }
+    }
   }
 
   Future<void> _register() async {
@@ -55,6 +325,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _addressController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields.')));
+      return;
+    }
+    if (!_isPhoneVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please verify your phone number via OTP before registering.'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return;
     }
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -78,7 +358,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.203.29.64:3000/api/auth/register'),
+        Uri.parse(ApiConstants.register),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'customerName': _customerNameController.text,
@@ -91,6 +371,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       final data = jsonDecode(response.body);
+      if (!mounted) return;
+
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful!')));
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BuyerDashboardScreen(
@@ -102,9 +384,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Registration failed.')));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error connecting to server.')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error connecting to server.')));
+      }
     } finally {
-      setState(() { _isLoading = false; });
+      if (mounted) {
+        setState(() { _isLoading = false; });
+      }
     }
   }
 
@@ -127,37 +413,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildOtpCell(BuildContext context, {bool first = false, bool last = false}) {
+  Widget _buildOtpCell({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    FocusNode? nextFocus,
+    FocusNode? prevFocus,
+    bool isFirst = false,
+    bool isLast = false,
+  }) {
     return Container(
       width: 48,
       height: 56,
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
+        color: _isPhoneVerified
+            ? const Color(0xFFF0FDF4)
+            : AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: _isPhoneVerified
+              ? const Color(0xFF16A34A)
+              : (controller.text.isNotEmpty ? AppColors.primary : AppColors.outlineVariant.withOpacity(0.4)),
+          width: _isPhoneVerified || controller.text.isNotEmpty ? 1.5 : 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 2,
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 3,
             offset: const Offset(0, 1),
           ),
         ],
       ),
       alignment: Alignment.center,
       child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        enabled: !_isPhoneVerified,
         onChanged: (value) {
-          if (value.isNotEmpty && !last) {
-            FocusScope.of(context).nextFocus();
-          } else if (value.isEmpty && !first) {
-            FocusScope.of(context).previousFocus();
+          if (value.isNotEmpty) {
+            if (nextFocus != null) {
+              nextFocus.requestFocus();
+            } else if (isLast) {
+              focusNode.unfocus();
+              if (_otp1Controller.text.isNotEmpty &&
+                  _otp2Controller.text.isNotEmpty &&
+                  _otp3Controller.text.isNotEmpty &&
+                  _otp4Controller.text.isNotEmpty) {
+                _verifyOtp();
+              }
+            }
+          } else if (value.isEmpty && prevFocus != null) {
+            prevFocus.requestFocus();
           }
+          setState(() {});
         },
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 22,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
+          fontWeight: FontWeight.w700,
+          color: _isPhoneVerified ? const Color(0xFF16A34A) : AppColors.primary,
         ),
         decoration: const InputDecoration(
           border: InputBorder.none,
@@ -264,18 +579,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Phone Number *',
                     hintText: 'Enter 10-digit number',
                     prefixWidget: _buildPhonePrefix(),
-                    suffixIcon: Icons.check_circle,
+                    suffixWidget: _isPhoneVerified
+                        ? const Padding(
+                            padding: EdgeInsets.only(right: 12.0),
+                            child: Icon(Icons.check_circle, color: Color(0xFF16A34A)),
+                          )
+                        : null,
                     controller: _phoneController,
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const SizedBox(width: 4),
+                      Icon(
+                        _isPhoneVerified
+                            ? Icons.check_circle_outline
+                            : (_otpSent ? Icons.sms_outlined : Icons.phonelink_ring_outlined),
+                        size: 14,
+                        color: _isPhoneVerified
+                            ? const Color(0xFF16A34A)
+                            : (_otpSent ? AppColors.primary : AppColors.outline),
+                      ),
+                      const SizedBox(width: 4),
                       Text(
-                        'Phone number verified successfully.',
+                        _isPhoneVerified
+                            ? 'Phone number verified successfully.'
+                            : (_otpSent
+                                ? 'OTP sent to this number. Please enter code below.'
+                                : 'Verification required via SMS OTP.'),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          color: AppColors.secondary,
+                          fontWeight: _isPhoneVerified ? FontWeight.w600 : FontWeight.normal,
+                          color: _isPhoneVerified
+                              ? const Color(0xFF16A34A)
+                              : (_otpSent ? AppColors.primary : AppColors.outline),
                         ),
                       ),
                     ],
@@ -288,8 +625,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLow,
+                  color: _isPhoneVerified ? const Color(0xFFF0FDF4) : AppColors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _isPhoneVerified ? const Color(0xFF16A34A).withOpacity(0.3) : Colors.transparent,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,38 +637,85 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'OTP Verification',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.onSurface,
-                          ),
-                        ),
                         Row(
                           children: [
-                            const Icon(Icons.timer_outlined, size: 16, color: AppColors.secondary),
-                            const SizedBox(width: 4),
                             Text(
-                              '00:45',
+                              'OTP Verification',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.secondary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _isPhoneVerified ? const Color(0xFF16A34A) : AppColors.onSurface,
                               ),
                             ),
+                            if (_isPhoneVerified) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDCFCE7),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'VERIFIED',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF16A34A),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
+                        if (!_isPhoneVerified)
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.timer_outlined,
+                                size: 16,
+                                color: _otpSent && _timerSeconds > 0 ? const Color(0xFF16A34A) : AppColors.outline,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '00:${_timerSeconds.toString().padLeft(2, '0')}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: _otpSent && _timerSeconds > 0 ? const Color(0xFF16A34A) : AppColors.outline,
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildOtpCell(context, first: true),
-                        _buildOtpCell(context),
-                        _buildOtpCell(context),
-                        _buildOtpCell(context, last: true),
+                        _buildOtpCell(
+                          controller: _otp1Controller,
+                          focusNode: _focus1,
+                          nextFocus: _focus2,
+                          isFirst: true,
+                        ),
+                        _buildOtpCell(
+                          controller: _otp2Controller,
+                          focusNode: _focus2,
+                          prevFocus: _focus1,
+                          nextFocus: _focus3,
+                        ),
+                        _buildOtpCell(
+                          controller: _otp3Controller,
+                          focusNode: _focus3,
+                          prevFocus: _focus2,
+                          nextFocus: _focus4,
+                        ),
+                        _buildOtpCell(
+                          controller: _otp4Controller,
+                          focusNode: _focus4,
+                          prevFocus: _focus3,
+                          isLast: true,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -338,22 +725,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: SizedBox(
                             height: 40,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: _isPhoneVerified || _isSendingOtp ? null : _sendOtp,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.surfaceContainerHighest,
-                                foregroundColor: AppColors.onSurface,
+                                backgroundColor: _otpSent ? AppColors.surfaceContainerHighest : AppColors.primary,
+                                foregroundColor: _otpSent ? AppColors.onSurface : AppColors.onPrimary,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              child: Text(
-                                'SEND OTP',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              child: _isSendingOtp
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                    )
+                                  : Text(
+                                      _otpSent ? 'RESEND OTP' : 'SEND OTP',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),
@@ -362,22 +755,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: SizedBox(
                             height: 40,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: _isPhoneVerified || _isVerifyingOtp || !_otpSent ? null : _verifyOtp,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryContainer,
-                                foregroundColor: AppColors.onPrimaryContainer,
+                                backgroundColor: _isPhoneVerified ? const Color(0xFF16A34A) : AppColors.primaryContainer,
+                                foregroundColor: _isPhoneVerified ? Colors.white : AppColors.onPrimaryContainer,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              child: Text(
-                                'VERIFY',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              child: _isVerifyingOtp
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        if (_isPhoneVerified) ...[
+                                          const Icon(Icons.check, size: 16, color: Colors.white),
+                                          const SizedBox(width: 4),
+                                        ],
+                                        Text(
+                                          _isPhoneVerified ? 'VERIFIED' : 'VERIFY',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
                         ),
@@ -387,30 +795,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        InkWell(
-                          onTap: () {},
-                          child: Text(
-                            'Resend OTP',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            const Icon(Icons.verified, size: 16, color: AppColors.secondary),
-                            const SizedBox(width: 4),
-                            Text(
-                              'OTP verified successfully.',
+                        if (!_isPhoneVerified) ...[
+                          InkWell(
+                            onTap: (_otpSent && _timerSeconds == 0 && !_isSendingOtp)
+                                ? _sendOtp
+                                : null,
+                            child: Text(
+                              'Resend OTP',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                color: AppColors.secondary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: (_otpSent && _timerSeconds == 0)
+                                    ? AppColors.primary
+                                    : AppColors.outline.withOpacity(0.5),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          if (_lastReceivedOtp != null)
+                            InkWell(
+                              onTap: () => _autoFillOtp(_lastReceivedOtp!),
+                              child: Text(
+                                'Auto-fill: $_lastReceivedOtp',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF16A34A),
+                                ),
+                              ),
+                            ),
+                        ] else ...[
+                          Row(
+                            children: [
+                              const Icon(Icons.verified, size: 16, color: Color(0xFF16A34A)),
+                              const SizedBox(width: 4),
+                              Text(
+                                'OTP verified successfully.',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF16A34A),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/api_constants.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/primary_button.dart';
 import 'dart:convert';
@@ -40,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.203.29.64:3000/api/auth/login'),
+        Uri.parse(ApiConstants.login),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'phone': _phoneController.text,

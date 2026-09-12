@@ -90,11 +90,11 @@ class ProductDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary.withOpacity(0.1),
+      backgroundColor: AppColors.surfaceContainerLow,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: AppBar(
-          backgroundColor: AppColors.primary.withOpacity(0.1),
+          backgroundColor: AppColors.surfaceContainerLow,
           elevation: 1,
           shadowColor: Colors.black.withOpacity(0.04),
           titleSpacing: 0,

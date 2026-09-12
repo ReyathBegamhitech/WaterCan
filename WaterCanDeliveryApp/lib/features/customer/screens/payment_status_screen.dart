@@ -49,7 +49,7 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.surfaceContainerLow,
       body: Column(
         children: [
           Expanded(
@@ -309,7 +309,9 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '25L Water Can',
+                                          widget.order.items.isNotEmpty 
+                                              ? widget.order.items.first.product.name 
+                                              : '25L Water Can',
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 17,
                                             fontWeight: FontWeight.w700,
@@ -328,7 +330,9 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
                                               ),
                                             ),
                                             Text(
-                                              '1',
+                                              widget.order.items.isNotEmpty 
+                                                  ? '${widget.order.items.fold<int>(0, (sum, i) => sum + i.quantity)}'
+                                                  : '1',
                                               style: GoogleFonts.plusJakartaSans(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.bold,
@@ -427,8 +431,10 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
                               _buildBreakdownRow('Empty Can Deposit', '₹0 (Returned)'),
                               _buildBreakdownRow(
                                 'Payment Method', 
-                                widget.order.paymentMethod == 'upi' ? 'UPI (Google Pay)' : 'Cash on Delivery',
-                                icon: widget.order.paymentMethod == 'upi' ? Icons.account_balance_wallet : Icons.payments,
+                                widget.order.paymentMethod.startsWith('UPI') 
+                                    ? widget.order.paymentMethod 
+                                    : (widget.order.paymentMethod == 'upi' ? 'UPI (Online)' : widget.order.paymentMethod),
+                                icon: widget.order.paymentMethod.toLowerCase().contains('upi') ? Icons.account_balance_wallet : Icons.payments,
                               ),
                               _buildBreakdownRow('Reference ID', widget.order.id, isMono: true),
                               
@@ -488,11 +494,11 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
                 child: ElevatedButton(
                   onPressed: () {
                     Provider.of<OrderController>(context, listen: false).placeOrder(widget.order);
+                    final navigator = Navigator.of(context);
 
                     Future.delayed(const Duration(milliseconds: 2500), () {
                       if (mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
+                        navigator.pushAndRemoveUntil(
                           MaterialPageRoute(builder: (context) => const BuyerDashboardScreen(customerName: 'User', address: '', phone: '')),
                           (Route<dynamic> route) => false,
                         );

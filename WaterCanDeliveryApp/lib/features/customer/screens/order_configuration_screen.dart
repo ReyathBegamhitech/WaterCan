@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/constants/app_colors.dart';
 import '../models/order_model.dart';
 import '../models/product_model.dart';
+import '../widgets/upi_payment_sheet.dart';
 import 'payment_status_screen.dart';
 
 class OrderConfigurationScreen extends StatefulWidget {
@@ -342,7 +343,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary.withOpacity(0.1),
+      backgroundColor: AppColors.surfaceContainerLow,
 
       body: Stack(
         children: [
@@ -755,8 +756,17 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                     width: 280, // Medium-lengthened width
                     height: 52,
                     child: ElevatedButton(
-                    onPressed: () {
-                      if (_calculateTotal() == 0) return; // Prevent empty orders
+                    onPressed: () async {
+                      if (_calculateTotal() == 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please add at least 1 water can to proceed.'),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                        return;
+                      }
                       
                       final items = <CartItem>[];
                       if (qty25L > 0) {
@@ -768,7 +778,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                             name: '25L Refill Can',
                             price: price25L.toDouble(),
                             imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBtFDY8L4f3JKhamQcGZaXg9fa3RstoZchc3JyiqdlCNdnoRt3Qcx-nqXK6C8KSNnLdAVkSLH0Khz0Gjfs1iqcSazsbdqrIdHyiCWDlN5zWyCoyjQQNDczOhlThRGzp_LzSDQ2Nz09alZY_AGfZsVC0LmgNveXjKZNx4OlCrdScsnSvLD289zYwQg2zj4qj6ZKYCIih2Z3FCEpQ8gCVbVwBXNMvyme2fFUzskpD8cCUrBVLis1pbaR2',
-                            shopName: 'Blue Drop Water Co.',
+                            shopName: widget.shop['name'] ?? 'Blue Drop Water Co.',
                           ),
                         ));
                       }
@@ -781,7 +791,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                             name: '15L Dispenser Can',
                             price: price15L.toDouble(),
                             imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdgL5IALKwRiltkZqoDMPcUa05FP4rMG9v-qW6t8D4_zGjCmXjT3G-9136bYs4gNs1gwqj4Jhu8tKzSN5lYDggj7q8OWb9wN8ZYR_Zq3MeXiRtfI4B-j4OH1vu_Ytth_s5CS1d66rgOrMPT-yN5sCA4JNi9-gJwvG_UEkRCpHmSmJx6lBK37PXHS0p01SfsVvpKIz5U40POAZZAQnGDXkozBGSxWHHKC5PGnkqtlUcBdulK-w9xpi_',
-                            shopName: 'Blue Drop Water Co.',
+                            shopName: widget.shop['name'] ?? 'Blue Drop Water Co.',
                           ),
                         ));
                       }
@@ -794,28 +804,52 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                             name: '5L Mini Bottle',
                             price: price5L.toDouble(),
                             imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAet-1rb_NdGWMMjB0XFPCWZs2tPo8xJNywp8bDviNbrW1eTNTvTqz1DncuC9UeqWDgVcJ1bThd1934sHn2W06qu1I66hWvCwXinOF2P3b2k16ZaytIs71YkQtu7D4MJs1ziN9RhomXmlwrD-nEHxfXf1ewFzMWe_VWURXG5vlGv80c5UgH4nHuLubO2b4VRABwgmNL1Z5VrnOJzHgj6sihTjjWy1lWQw_qw8ykVRG5Pw23NdZ83OOh',
-                            shopName: 'Blue Drop Water Co.',
+                            shopName: widget.shop['name'] ?? 'Blue Drop Water Co.',
                           ),
                         ));
                       }
                       
+                      final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch.toString().substring(5, 10)}';
+                      final totalAmount = _calculateTotal().toDouble();
+                      final currentShopName = widget.shop['name'] ?? 'Blue Drop Water Co.';
+
+                      String finalPaymentMethod = 'Cash on Delivery';
+
+                      if (_paymentMethod == 'upi') {
+                        // Open dynamic UPI app selector bottom sheet
+                        final selectedApp = await UpiPaymentSheet.show(
+                          context: context,
+                          totalAmount: totalAmount,
+                          orderId: orderId,
+                          shopName: currentShopName,
+                        );
+
+                        if (selectedApp == null) {
+                          // User dismissed bottom sheet without completing payment
+                          return;
+                        }
+                        finalPaymentMethod = 'UPI ($selectedApp)';
+                      }
+
                       final newOrder = OrderModel(
-                        id: 'ORD-${DateTime.now().millisecondsSinceEpoch.toString().substring(5, 10)}',
+                        id: orderId,
                         items: items,
-                        totalAmount: _calculateTotal().toDouble(),
+                        totalAmount: totalAmount,
                         timestamp: DateTime.now(),
-                        paymentMethod: _paymentMethod,
-                        shopName: 'Blue Drop Water Co.',
+                        paymentMethod: finalPaymentMethod,
+                        shopName: currentShopName,
                       );
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentStatusScreen(
-                            order: newOrder,
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PaymentStatusScreen(
+                              order: newOrder,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
