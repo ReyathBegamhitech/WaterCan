@@ -1,9 +1,16 @@
+# Build artifacts
+*.apk
+*.aab
+
+# OS files
+.DS_Store
+Thumbs.db
+
 # Miscellaneous
 *.class
 *.log
 *.pyc
 *.swp
-.DS_Store
 .atom/
 .build/
 .buildlog/

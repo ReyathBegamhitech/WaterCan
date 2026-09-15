@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../customer/controllers/order_controller.dart';
+import '../../customer/controllers/user_controller.dart';
 import '../widgets/seller_order_card.dart';
 import 'seller_analytics_screen.dart';
 import 'seller_editor_screen.dart';
@@ -108,23 +109,61 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                             final order = activeOrders[index];
                             final orderMap = order.toSellerOrderMap();
                             return SellerOrderCard(
-                              orderId: orderMap['orderId'],
-                              time: orderMap['time'],
-                              status: orderMap['status'],
-                              buyerName: orderMap['buyerName'],
-                              buyerPhone: orderMap['buyerPhone'],
-                              quantity: orderMap['quantity'],
-                              pricePerCan: orderMap['pricePerCan'],
+                              order: order,
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => SellerOrderStatusScreen(
-                                      order: orderMap,
+                                      order: order,
                                       onStatusUpdate: (newStatus) {
                                         orderCtrl.updateOrderStatusByString(order.id, newStatus);
                                       },
                                     ),
+                                  ),
+                                );
+                              },
+                              onAccept: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Accept Order'),
+                                    content: const Text('Are you sure you want to accept this COD order?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          orderCtrl.updateOrderStatusByString(order.id, 'Accepted');
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('Accept', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              onDecline: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Decline Order'),
+                                    content: const Text('Are you sure you want to decline this order? This action cannot be undone.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          orderCtrl.updateOrderStatusByString(order.id, 'Cancelled');
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('Decline', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ],
                                   ),
                                 );
                               },
@@ -134,6 +173,115 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                 ),
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showProfileSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          decoration: const BoxDecoration(
+            color: AppColors.surfaceContainerLowest,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: AppColors.seller100,
+                child: Icon(Icons.storefront, size: 40, color: AppColors.seller700),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Blue Drop Water Co.',
+                style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.seller800),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              
+              Row(
+                children: [
+                  const Icon(Icons.location_on, color: AppColors.seller500),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Outer Ring Road, Bengaluru',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 16, color: AppColors.onSurface),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              Row(
+                children: [
+                  const Icon(Icons.phone, color: AppColors.seller500),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      '+91 98765 43210',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 16, color: AppColors.onSurface),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.logout),
+                  label: Text('Logout', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16)),
+                  onPressed: () {
+                    // Close the bottom sheet first
+                    Navigator.pop(context);
+                    // Show confirmation dialog
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Logout'),
+                        content: const Text('Are you sure you want to logout?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                (route) => false,
+                              );
+                            },
+                            child: const Text('Yes', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -176,13 +324,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
             ),
           ),
           InkWell(
-            onTap: () {
-              // Logout logic for now
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
-            },
+            onTap: _showProfileSheet,
             child: Container(
               width: 32,
               height: 32,
