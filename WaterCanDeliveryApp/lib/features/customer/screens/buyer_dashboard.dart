@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../controllers/user_controller.dart';
 import 'my_orders_screen.dart';
 import 'product_detail_screen.dart';
 import 'dart:convert';
@@ -9,15 +11,15 @@ import '../../auth/screens/login_screen.dart';
 import '../../../core/constants/api_constants.dart';
 
 class BuyerDashboardScreen extends StatefulWidget {
-  final String customerName;
-  final String address;
-  final String phone;
+  final String? customerName;
+  final String? address;
+  final String? phone;
 
   const BuyerDashboardScreen({
     super.key,
-    required this.customerName,
-    required this.address,
-    required this.phone,
+    this.customerName,
+    this.address,
+    this.phone,
   });
 
   @override
@@ -26,25 +28,34 @@ class BuyerDashboardScreen extends StatefulWidget {
 
 class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _selectedLocation = 'All';
+  String _sortBy = 'default';
+
+  bool get _isFilterActive => _selectedLocation != 'All' || _sortBy != 'default';
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  void _showProfileSheet() {
+  void _showProfileSheet(UserController userCtrl) {
+    bool isEditingName = false;
     bool isEditingPhone = false;
     bool isOtpSent = false;
     bool isLoading = false;
-    TextEditingController phoneController = TextEditingController(text: _addressLine2);
+    TextEditingController nameController = TextEditingController(text: userCtrl.customerName);
+    TextEditingController phoneController = TextEditingController(text: userCtrl.phone);
     TextEditingController otpController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
+      builder: (bottomSheetContext) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             return Container(
@@ -61,16 +72,143 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const CircleAvatar(
-                    radius: 40,
-                    backgroundColor: AppColors.primaryContainer,
-                    child: Icon(Icons.person, size: 40, color: AppColors.primary),
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: AppColors.primaryContainer,
+                        child: Text(
+                          userCtrl.customerName.trim().isNotEmpty
+                              ? userCtrl.customerName.trim()[0].toUpperCase()
+                              : 'U',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setModalState(() {
+                            isEditingName = !isEditingName;
+                            nameController.text = userCtrl.customerName;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: Icon(
+                            isEditingName ? Icons.close : Icons.edit,
+                            size: 14,
+                            color: AppColors.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    widget.customerName,
-                    style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
+                  if (isEditingName) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: nameController,
+                            autofocus: true,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: 'Full Name',
+                              hintText: 'Enter your name',
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          tooltip: 'Save Name',
+                          icon: const Icon(Icons.check_circle, color: AppColors.primary, size: 28),
+                          onPressed: () async {
+                            final newName = nameController.text.trim();
+                            if (newName.isNotEmpty) {
+                              await userCtrl.updateName(newName);
+                              setModalState(() {
+                                isEditingName = false;
+                              });
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Name updated to "$newName"'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                        IconButton(
+                          tooltip: 'Cancel',
+                          icon: const Icon(Icons.cancel_outlined, color: AppColors.onSurfaceVariant, size: 28),
+                          onPressed: () {
+                            setModalState(() {
+                              isEditingName = false;
+                              nameController.text = userCtrl.customerName;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    InkWell(
+                      onTap: () {
+                        setModalState(() {
+                          isEditingName = true;
+                          nameController.text = userCtrl.customerName;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                userCtrl.customerName,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              tooltip: 'Edit Name',
+                              icon: const Icon(Icons.edit, size: 20, color: AppColors.primary),
+                              onPressed: () {
+                                setModalState(() {
+                                  isEditingName = true;
+                                  nameController.text = userCtrl.customerName;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 24),
                   
                   Row(
@@ -85,7 +223,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                 keyboardType: TextInputType.phone,
                               )
                             : Text(
-                                _addressLine2,
+                                userCtrl.phone.isNotEmpty ? userCtrl.phone : 'No phone number provided',
                                 style: GoogleFonts.plusJakartaSans(fontSize: 16),
                               ),
                       ),
@@ -105,7 +243,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: () {
-                        if (phoneController.text.isNotEmpty && phoneController.text != _addressLine2) {
+                        if (phoneController.text.isNotEmpty && phoneController.text != userCtrl.phone) {
                           setModalState(() {
                             isOtpSent = true;
                           });
@@ -134,19 +272,25 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                     Uri.parse(ApiConstants.updatePhone),
                                     headers: {'Content-Type': 'application/json'},
                                     body: jsonEncode({
-                                      'oldPhone': _addressLine2,
+                                      'oldPhone': userCtrl.phone,
                                       'newPhone': phoneController.text,
                                     }),
                                   );
                                   if (response.statusCode == 200) {
-                                    setState(() { _addressLine2 = phoneController.text; });
-                                    Navigator.pop(context);
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phone number updated!')));
+                                    await userCtrl.updatePhone(phoneController.text);
+                                    if (bottomSheetContext.mounted) {
+                                      Navigator.pop(bottomSheetContext);
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phone number updated!')));
+                                    }
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update phone.')));
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update phone.')));
+                                    }
                                   }
                                 } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error connecting to server.')));
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error connecting to server.')));
+                                  }
                                 } finally {
                                   setModalState(() { isLoading = false; });
                                 }
@@ -173,21 +317,25 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                       onPressed: () {
                         showDialog(
                           context: context,
-                          builder: (context) => AlertDialog(
+                          builder: (dialogCtx) => AlertDialog(
                             title: const Text('Logout'),
                             content: const Text('Are you sure you want to logout?'),
                             actions: [
                               TextButton(
-                                onPressed: () => Navigator.pop(context),
+                                onPressed: () => Navigator.pop(dialogCtx),
                                 child: const Text('No'),
                               ),
                               TextButton(
-                                onPressed: () {
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                                    (route) => false,
-                                  );
+                                onPressed: () async {
+                                  await userCtrl.clear();
+                                  if (context.mounted) {
+                                    Navigator.pop(dialogCtx);
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                      (route) => false,
+                                    );
+                                  }
                                 },
                                 child: const Text('Yes', style: TextStyle(color: AppColors.error)),
                               ),
@@ -206,14 +354,124 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     );
   }
 
-  late String _addressLine1;
-  late String _addressLine2;
+  void _showEditNameDialog(UserController userCtrl) {
+    final TextEditingController nameEditController = TextEditingController(text: userCtrl.customerName);
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.person, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text(
+              'Edit Your Name',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Update your display name across the app:',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nameEditController,
+              autofocus: true,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+              decoration: InputDecoration(
+                labelText: 'Full Name',
+                hintText: 'Enter your name',
+                prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.primary),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.plusJakartaSans(
+                color: AppColors.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              final newName = nameEditController.text.trim();
+              if (newName.isNotEmpty) {
+                await userCtrl.updateName(newName);
+                if (dialogCtx.mounted) {
+                  Navigator.pop(dialogCtx);
+                }
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Name updated to "$newName"'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              }
+            },
+            child: Text(
+              'Save',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    _addressLine1 = widget.address.isNotEmpty ? widget.address : 'No address provided';
-    _addressLine2 = widget.phone;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final userCtrl = Provider.of<UserController>(context, listen: false);
+      if (userCtrl.customerName.isEmpty || userCtrl.customerName == 'User') {
+        if (widget.customerName != null && widget.customerName!.isNotEmpty && widget.customerName != 'User') {
+          userCtrl.updateName(widget.customerName!);
+        }
+      }
+      if (userCtrl.phone.isEmpty && widget.phone != null && widget.phone!.isNotEmpty) {
+        userCtrl.updatePhone(widget.phone!);
+      }
+      if (userCtrl.addressLine1.isEmpty && widget.address != null && widget.address!.isNotEmpty) {
+        userCtrl.updateAddress(
+          addressLine1: widget.address!,
+          addressLine2: '',
+        );
+      }
+    });
   }
 
   final List<Map<String, String>> shops = [
@@ -269,71 +527,379 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     },
   ];
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: AppBar(
-          backgroundColor: AppColors.surfaceContainerLow,
-          elevation: 1,
-          shadowColor: Colors.black.withOpacity(0.1),
-          titleSpacing: 16,
-          leadingWidth: 150, // Increased to prevent overflow
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 16.0, top: 12, bottom: 12),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen())),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerHigh, // Darker background to look more like a button
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)), // Added subtle border
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.receipt_long, color: AppColors.primary, size: 20),
-                    const SizedBox(width: 6),
-                    Text(
-                      'My Orders',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.onSurface,
+  List<Map<String, String>> get _filteredShops {
+    List<Map<String, String>> list = List.from(shops);
+
+    // 1. Filter by location
+    if (_selectedLocation != 'All') {
+      list = list.where((shop) {
+        final loc = (shop['location'] ?? '').toLowerCase();
+        return loc.contains(_selectedLocation.toLowerCase());
+      }).toList();
+    }
+
+    // 2. Filter by search query
+    if (_searchQuery.trim().isNotEmpty) {
+      final query = _searchQuery.trim().toLowerCase();
+      list = list.where((shop) {
+        final name = (shop['name'] ?? '').toLowerCase();
+        final loc = (shop['location'] ?? '').toLowerCase();
+        return name.contains(query) || loc.contains(query);
+      }).toList();
+    }
+
+    // 3. Sort
+    if (_sortBy == 'name_asc') {
+      list.sort((a, b) => (a['name'] ?? '').toLowerCase().compareTo((b['name'] ?? '').toLowerCase()));
+    } else if (_sortBy == 'name_desc') {
+      list.sort((a, b) => (b['name'] ?? '').toLowerCase().compareTo((a['name'] ?? '').toLowerCase()));
+    }
+
+    return list;
+  }
+
+  void _showFilterSheet() {
+    String tempLocation = _selectedLocation;
+    String tempSort = _sortBy;
+
+    const List<String> locations = [
+      'All',
+      'Bellandur',
+      'Outer Ring Road',
+      'Koramangala',
+      'HSR Layout',
+      'Marathahalli',
+      'Whitefield',
+      'Indiranagar',
+      'BTM Layout',
+      'Electronic City',
+      'Jayanagar',
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              decoration: const BoxDecoration(
+                color: AppColors.surfaceContainerLowest,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.outlineVariant.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.tune, color: AppColors.primary, size: 20),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Filters & Sort',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setSheetState(() {
+                            tempLocation = 'All';
+                            tempSort = 'default';
+                          });
+                        },
+                        child: Text(
+                          'Reset All',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'SORT BY',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onSurfaceVariant,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildSortChip(
+                        label: 'Recommended',
+                        icon: Icons.star_outline,
+                        isSelected: tempSort == 'default',
+                        onTap: () => setSheetState(() => tempSort = 'default'),
+                      ),
+                      _buildSortChip(
+                        label: 'Name (A to Z)',
+                        icon: Icons.arrow_downward,
+                        isSelected: tempSort == 'name_asc',
+                        onTap: () => setSheetState(() => tempSort = 'name_asc'),
+                      ),
+                      _buildSortChip(
+                        label: 'Name (Z to A)',
+                        icon: Icons.arrow_upward,
+                        isSelected: tempSort == 'name_desc',
+                        onTap: () => setSheetState(() => tempSort = 'name_desc'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'FILTER BY LOCATION',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onSurfaceVariant,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 160),
+                    child: SingleChildScrollView(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: locations.map((loc) {
+                          final isSelected = tempLocation == loc;
+                          return ChoiceChip(
+                            label: Text(loc),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setSheetState(() {
+                                tempLocation = selected ? loc : 'All';
+                              });
+                            },
+                            labelStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected ? AppColors.onPrimary : AppColors.onSurface,
+                            ),
+                            selectedColor: AppColors.primary,
+                            backgroundColor: AppColors.surfaceContainerLow,
+                            side: BorderSide(
+                              color: isSelected ? AppColors.primary : AppColors.outlineVariant.withOpacity(0.5),
+                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            showCheckmark: false,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _selectedLocation = tempLocation;
+                          _sortBy = tempSort;
+                        });
+                        Navigator.pop(modalContext);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.onPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 2,
+                      ),
+                      child: Text(
+                        'Apply Filters',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSortChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.outlineVariant.withOpacity(0.5),
           ),
-          centerTitle: true,
-          title: Text(
-            'Hello 👋 ${widget.customerName.split(' ').first}',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.onSurface,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
             ),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: InkWell(
-                onTap: _showProfileSheet,
-                child: const CircleAvatar(
-                  backgroundColor: AppColors.primary,
-                  radius: 20,
-                  child: const Icon(Icons.person, color: AppColors.onPrimary, size: 20),
-                ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? AppColors.onPrimary : AppColors.onSurface,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<UserController>(
+      builder: (context, userCtrl, _) {
+        final finalShops = _filteredShops;
+        final displayName = userCtrl.customerName.isNotEmpty
+            ? userCtrl.customerName
+            : (widget.customerName?.isNotEmpty == true ? widget.customerName! : 'User');
+        final givenAddress = userCtrl.addressLine1.isNotEmpty
+            ? userCtrl.addressLine1
+            : (widget.address?.isNotEmpty == true ? widget.address! : '');
+        final displayAddress = givenAddress.isNotEmpty ? givenAddress : 'No address provided';
+
+        return Scaffold(
+          backgroundColor: AppColors.surfaceContainerLow,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: AppBar(
+              backgroundColor: AppColors.surfaceContainerLow,
+              elevation: 1,
+              shadowColor: Colors.black.withOpacity(0.1),
+              titleSpacing: 16,
+              leadingWidth: 150, // Increased to prevent overflow
+              leading: Padding(
+                padding: const EdgeInsets.only(left: 16.0, top: 12, bottom: 12),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen())),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceContainerHigh, // Darker background to look more like a button
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)), // Added subtle border
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.receipt_long, color: AppColors.primary, size: 20),
+                        const SizedBox(width: 6),
+                        Text(
+                          'My Orders',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              centerTitle: true,
+              title: InkWell(
+                onTap: () => _showEditNameDialog(userCtrl),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Text(
+                    'Hello 👋 ${displayName.split(' ').first}',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: InkWell(
+                    onTap: () => _showProfileSheet(userCtrl),
+                    child: CircleAvatar(
+                      backgroundColor: AppColors.primary,
+                      radius: 20,
+                      child: Text(
+                        userCtrl.customerName.trim().isNotEmpty
+                            ? userCtrl.customerName.trim()[0].toUpperCase()
+                            : 'U',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: AppColors.onPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
       body: SingleChildScrollView(
         controller: _scrollController,
         padding: const EdgeInsets.all(16.0),
@@ -361,6 +927,12 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
+                      controller: _searchController,
+                      onChanged: (val) {
+                        setState(() {
+                          _searchQuery = val;
+                        });
+                      },
                       style: GoogleFonts.plusJakartaSans(fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Search by shop name or location...',
@@ -370,20 +942,142 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                         ),
                         border: InputBorder.none,
                         isDense: true,
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 16, color: AppColors.onSurfaceVariant),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() {
+                                    _searchQuery = '';
+                                  });
+                                },
+                              )
+                            : null,
                       ),
                     ),
                   ),
                   InkWell(
-                    onTap: () {},
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(shape: BoxShape.circle),
-                      child: const Icon(Icons.tune, color: AppColors.onSurfaceVariant, size: 20),
+                    onTap: _showFilterSheet,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: _isFilterActive
+                                ? AppColors.primary.withOpacity(0.12)
+                                : Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: _isFilterActive
+                                ? Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.5)
+                                : null,
+                          ),
+                          child: Icon(
+                            Icons.tune,
+                            color: _isFilterActive ? AppColors.primary : AppColors.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        ),
+                        if (_isFilterActive)
+                          Positioned(
+                            top: 2,
+                            right: 2,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
+
+            // Active Filter Tags
+            if (_isFilterActive || _searchQuery.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    if (_selectedLocation != 'All')
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: InputChip(
+                          avatar: const Icon(Icons.location_on, size: 14, color: AppColors.primary),
+                          label: Text(_selectedLocation, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600)),
+                          onDeleted: () => setState(() => _selectedLocation = 'All'),
+                          deleteIconColor: AppColors.primary,
+                          backgroundColor: AppColors.primary.withOpacity(0.08),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+                        ),
+                      ),
+                    if (_sortBy != 'default')
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: InputChip(
+                          avatar: const Icon(Icons.sort, size: 14, color: AppColors.primary),
+                          label: Text(
+                            _sortBy == 'name_asc' ? 'Name: A-Z' : 'Name: Z-A',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600),
+                          ),
+                          onDeleted: () => setState(() => _sortBy = 'default'),
+                          deleteIconColor: AppColors.primary,
+                          backgroundColor: AppColors.primary.withOpacity(0.08),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+                        ),
+                      ),
+                    if (_searchQuery.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: InputChip(
+                          avatar: const Icon(Icons.search, size: 14, color: AppColors.primary),
+                          label: Text('Search: "$_searchQuery"', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600)),
+                          onDeleted: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          deleteIconColor: AppColors.primary,
+                          backgroundColor: AppColors.primary.withOpacity(0.08),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+                        ),
+                      ),
+                    TextButton(
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                          _selectedLocation = 'All';
+                          _sortBy = 'default';
+                        });
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'Clear all',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Delivering To Card
@@ -428,8 +1122,12 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                             ),
                             InkWell(
                               onTap: () {
-                                final TextEditingController line1Ctrl = TextEditingController(text: _addressLine1);
-                                final TextEditingController line2Ctrl = TextEditingController(text: _addressLine2);
+                                final TextEditingController line1Ctrl = TextEditingController(
+                                  text: userCtrl.addressLine1,
+                                );
+                                final TextEditingController line2Ctrl = TextEditingController(
+                                  text: userCtrl.addressLine2,
+                                );
                                 showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,
@@ -437,9 +1135,9 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                   shape: const RoundedRectangleBorder(
                                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                                   ),
-                                  builder: (context) => Padding(
+                                  builder: (modalContext) => Padding(
                                     padding: EdgeInsets.only(
-                                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                                      bottom: MediaQuery.of(modalContext).viewInsets.bottom,
                                       left: 20, right: 20, top: 20,
                                     ),
                                     child: Column(
@@ -467,12 +1165,19 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                         SizedBox(
                                           width: double.infinity,
                                           child: ElevatedButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                _addressLine1 = line1Ctrl.text;
-                                                _addressLine2 = line2Ctrl.text;
-                                              });
-                                              Navigator.pop(context);
+                                            onPressed: () async {
+                                              await userCtrl.updateAddress(
+                                                addressLine1: line1Ctrl.text,
+                                                addressLine2: line2Ctrl.text,
+                                              );
+                                              if (modalContext.mounted) {
+                                                Navigator.pop(modalContext);
+                                              }
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Delivery address updated!')),
+                                                );
+                                              }
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: AppColors.primary,
@@ -509,24 +1214,38 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 6),
+                        InkWell(
+                          onTap: () => _showEditNameDialog(userCtrl),
+                          borderRadius: BorderRadius.circular(4),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.person_outline, size: 14, color: AppColors.primary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  displayName,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         Text(
-                          _addressLine1,
+                          displayAddress,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.onSurface,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          _addressLine2,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -555,7 +1274,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Available Shops',
+                        'Available Shops (${finalShops.length})',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -581,19 +1300,79 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Shop Grid with 3D Scroll Effect
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.75, // Adjust based on card height
-              ),
-              itemCount: shops.length,
-              itemBuilder: (context, index) {
-                final shop = shops[index];
+            // Shop Grid with 3D Scroll Effect or Empty State
+            if (finalShops.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+                margin: const EdgeInsets.only(top: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: AppColors.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.search_off, size: 40, color: AppColors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No shops found',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'No suppliers match your search or filter criteria.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                          _selectedLocation = 'All';
+                          _sortBy = 'default';
+                        });
+                      },
+                      icon: const Icon(Icons.refresh, size: 16),
+                      label: const Text('Reset Filters'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.onPrimary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.75, // Adjust based on card height
+                ),
+                itemCount: finalShops.length,
+                itemBuilder: (context, index) {
+                  final shop = finalShops[index];
                 
                 return AnimatedBuilder(
                   animation: _scrollController,
@@ -648,6 +1427,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 

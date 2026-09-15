@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../customer/controllers/order_controller.dart';
 import '../widgets/seller_history_order_card.dart';
 
 class SellerOrderHistoryScreen extends StatefulWidget {
@@ -14,90 +16,86 @@ class _SellerOrderHistoryScreenState extends State<SellerOrderHistoryScreen> {
   // 'completed' or 'cancelled'
   String _activeTab = 'completed';
 
-  final List<Map<String, dynamic>> _completedOrders = [
-    {
-      'orderId': '#1021',
-      'time': 'Yesterday, 04:30 PM',
-      'status': 'Delivered',
-      'buyerName': 'Rajesh Kumar',
-      'buyerPhone': '+91 98451 23091',
-      'amount': 120,
-      'address': 'Flat 402, Green Glen Heights, Bellandur, Bangalore',
-    },
-    {
-      'orderId': '#1019',
-      'time': 'Yesterday, 01:15 PM',
-      'status': 'Delivered',
-      'buyerName': 'Sneha Reddy',
-      'buyerPhone': '+91 98840 51923',
-      'amount': 160,
-      'address': '#12, 4th Cross, Indiranagar, Bangalore',
-    },
-    {
-      'orderId': '#1015',
-      'time': '24 Oct, 11:20 AM',
-      'status': 'Delivered',
-      'buyerName': 'Priya Sharma',
-      'buyerPhone': '+91 97123 45678',
-      'amount': 80,
-      'address': 'Villa 203, Palm Meadows, Whitefield',
-    },
-  ];
-
-  final List<Map<String, dynamic>> _cancelledOrders = [
-    {
-      'orderId': '#1017',
-      'time': '23 Oct, 03:40 PM',
-      'status': 'Cancelled',
-      'buyerName': 'Amit Patel',
-      'buyerPhone': '+91 99201 88412',
-      'amount': 80,
-      'address': 'Flat 102, Shanti Nilayam, Koramangala 4th Block',
-    },
-    {
-      'orderId': '#1008',
-      'time': '21 Oct, 10:10 AM',
-      'status': 'Cancelled',
-      'buyerName': 'Vikram Singh',
-      'buyerPhone': '+91 98112 34901',
-      'amount': 240,
-      'address': 'Tower B, Flat 804, Brigade Metropolis, Mahadevapura',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAF5F0),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                itemCount: _activeTab == 'completed' ? _completedOrders.length : _cancelledOrders.length,
-                itemBuilder: (context, index) {
-                  final order = _activeTab == 'completed' ? _completedOrders[index] : _cancelledOrders[index];
-                  return SellerHistoryOrderCard(
-                    orderId: order['orderId'],
-                    time: order['time'],
-                    status: order['status'],
-                    buyerName: order['buyerName'],
-                    buyerPhone: order['buyerPhone'],
-                    amount: order['amount'],
-                    address: order['address'],
-                  );
-                },
-              ),
+    return Consumer<OrderController>(
+      builder: (context, orderCtrl, _) {
+        final completedOrders = orderCtrl.completedOrders.map((o) => o.toSellerHistoryMap()).toList();
+        final cancelledOrders = orderCtrl.cancelledOrders.map((o) => o.toSellerHistoryMap()).toList();
+        final currentList = _activeTab == 'completed' ? completedOrders : cancelledOrders;
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFFAF5F0),
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(completedOrders.length, cancelledOrders.length),
+                Expanded(
+                  child: currentList.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 72,
+                                  height: 72,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.seller100,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.history, size: 36, color: AppColors.seller600),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _activeTab == 'completed' ? 'No Delivered Orders' : 'No Cancelled Orders',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.seller800,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  _activeTab == 'completed'
+                                      ? 'Orders delivered to customers will show here.'
+                                      : 'Terminated or cancelled orders will show here.',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          itemCount: currentList.length,
+                          itemBuilder: (context, index) {
+                            final order = currentList[index];
+                            return SellerHistoryOrderCard(
+                              orderId: order['orderId'],
+                              time: order['time'],
+                              status: order['status'],
+                              buyerName: order['buyerName'],
+                              buyerPhone: order['buyerPhone'],
+                              amount: order['amount'],
+                              address: order['address'],
+                            );
+                          },
+                        ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(int completedCount, int cancelledCount) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       decoration: BoxDecoration(
@@ -162,14 +160,14 @@ class _SellerOrderHistoryScreenState extends State<SellerOrderHistoryScreen> {
               children: [
                 _buildTabButton(
                   title: 'COMPLETED ORDERS',
-                  badgeCount: 3,
+                  badgeCount: completedCount,
                   isActive: _activeTab == 'completed',
                   onTap: () => setState(() => _activeTab = 'completed'),
                 ),
                 const SizedBox(width: 4),
                 _buildTabButton(
                   title: 'CANCELLED ORDERS',
-                  badgeCount: 2,
+                  badgeCount: cancelledCount,
                   isActive: _activeTab == 'cancelled',
                   onTap: () => setState(() => _activeTab = 'cancelled'),
                 ),

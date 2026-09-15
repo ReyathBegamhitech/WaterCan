@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../auth/screens/login_screen.dart';
+import '../../customer/controllers/order_controller.dart';
 import '../widgets/seller_order_card.dart';
 import 'seller_analytics_screen.dart';
 import 'seller_editor_screen.dart';
@@ -17,6 +19,7 @@ class SellerDashboardScreen extends StatefulWidget {
 
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -25,6 +28,9 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<OrderController>(context, listen: false).startPollingSellerOrders();
+    });
   }
 
   @override
@@ -33,101 +39,104 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
     super.dispose();
   }
 
-  // Mock Data from HTML
-  final List<Map<String, dynamic>> _mockOrders = [
-    {
-      'orderId': '#1024',
-      'time': '10:30 AM',
-      'status': 'Accepted',
-      'buyerName': 'Rajesh Kumar',
-      'buyerPhone': '+91 98451 23091',
-      'quantity': 3,
-      'pricePerCan': 80,
-    },
-    {
-      'orderId': '#1025',
-      'time': '09:15 AM',
-      'status': 'Preparing',
-      'buyerName': 'Priya Sharma',
-      'buyerPhone': '+91 97123 45678',
-      'quantity': 2,
-      'pricePerCan': 80,
-    },
-    {
-      'orderId': '#1026',
-      'time': '08:45 AM',
-      'status': 'Preparing',
-      'buyerName': 'Amit Patel',
-      'buyerPhone': '+91 99201 88412',
-      'quantity': 5,
-      'pricePerCan': 80,
-    },
-    {
-      'orderId': '#1027',
-      'time': '08:10 AM',
-      'status': 'Accepted',
-      'buyerName': 'Sneha Reddy',
-      'buyerPhone': '+91 98840 51923',
-      'quantity': 1,
-      'pricePerCan': 80,
-    },
-    {
-      'orderId': '#1028',
-      'time': '07:30 AM',
-      'status': 'Delivered',
-      'buyerName': 'Vikram Singh',
-      'buyerPhone': '+91 98112 34901',
-      'quantity': 4,
-      'pricePerCan': 80,
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.seller50,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopNav(),
-            _buildHeader(),
-            _buildFilterRow(),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                itemCount: _mockOrders.length,
-                itemBuilder: (context, index) {
-                  final order = _mockOrders[index];
-                  return SellerOrderCard(
-                    orderId: order['orderId'],
-                    time: order['time'],
-                    status: order['status'],
-                    buyerName: order['buyerName'],
-                    buyerPhone: order['buyerPhone'],
-                    quantity: order['quantity'],
-                    pricePerCan: order['pricePerCan'],
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SellerOrderStatusScreen(
-                            order: order,
-                            onStatusUpdate: (newStatus) {
-                              setState(() {
-                                _mockOrders[index]['status'] = newStatus;
-                              });
-                            },
+    return Consumer<OrderController>(
+      builder: (context, orderCtrl, _) {
+        final activeOrders = orderCtrl.activeOrders.where((o) {
+          if (_searchQuery.trim().isEmpty) return true;
+          final q = _searchQuery.toLowerCase().trim();
+          return (o.customerName?.toLowerCase().contains(q) ?? false) ||
+                 o.id.toLowerCase().contains(q) ||
+                 (o.customerPhone?.contains(q) ?? false) ||
+                 o.sellerStatusString.toLowerCase().contains(q);
+        }).toList();
+
+        return Scaffold(
+          backgroundColor: AppColors.seller50,
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildTopNav(),
+                _buildHeader(),
+                _buildFilterRow(activeOrders.length),
+                Expanded(
+                  child: activeOrders.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.seller100,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.seller300, width: 2),
+                                  ),
+                                  child: const Icon(Icons.inventory_2_outlined, size: 40, color: AppColors.seller600),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Awaiting Orders',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.seller800,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Customer orders placed in the app will appear here in real time.',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade600,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          itemCount: activeOrders.length,
+                          itemBuilder: (context, index) {
+                            final order = activeOrders[index];
+                            final orderMap = order.toSellerOrderMap();
+                            return SellerOrderCard(
+                              orderId: orderMap['orderId'],
+                              time: orderMap['time'],
+                              status: orderMap['status'],
+                              buyerName: orderMap['buyerName'],
+                              buyerPhone: orderMap['buyerPhone'],
+                              quantity: orderMap['quantity'],
+                              pricePerCan: orderMap['pricePerCan'],
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SellerOrderStatusScreen(
+                                      order: orderMap,
+                                      onStatusUpdate: (newStatus) {
+                                        orderCtrl.updateOrderStatusByString(order.id, newStatus);
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -275,7 +284,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
     );
   }
 
-  Widget _buildFilterRow() {
+  Widget _buildFilterRow(int count) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
@@ -296,7 +305,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(color: AppColors.seller500, borderRadius: BorderRadius.circular(12)),
-                  child: Text('5', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: Text('$count', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
                 )
               ],
             ),
@@ -316,6 +325,11 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                 const SizedBox(width: 4),
                 Expanded(
                   child: TextField(
+                    onChanged: (val) {
+                      setState(() {
+                        _searchQuery = val;
+                      });
+                    },
                     decoration: InputDecoration(
                       hintText: 'Filter / Search...',
                       hintStyle: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.grey.shade400, fontWeight: FontWeight.w500),

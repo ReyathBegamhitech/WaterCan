@@ -22,6 +22,7 @@ dependencies:
   http: ^1.2.0
   url_launcher: ^6.2.0
   dotted_border: ^3.1.0
+  shared_preferences: ^2.5.5
 
   # Firebase (Temporarily commented out to fix web build for UI preview)
   # firebase_core: ^2.15.1

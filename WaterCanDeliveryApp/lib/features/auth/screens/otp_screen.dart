@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../customer/controllers/user_controller.dart';
 import '../../customer/screens/buyer_dashboard.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -161,13 +163,25 @@ class _OtpScreenState extends State<OtpScreen> {
             ),
           );
 
+          final name = widget.customerName ?? 'User';
+          final phoneNum = widget.phoneNumber;
+          final addr = widget.address ?? '';
+
+          await Provider.of<UserController>(context, listen: false).setUser(
+            name: name,
+            phone: phoneNum,
+            address: addr,
+          );
+
+          if (!mounted) return;
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => BuyerDashboardScreen(
-                customerName: widget.customerName ?? 'User',
-                phone: widget.phoneNumber,
-                address: widget.address ?? '',
+                customerName: name,
+                phone: phoneNum,
+                address: addr,
               ),
             ),
           );

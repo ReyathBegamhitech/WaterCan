@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../models/order_model.dart';
 import '../controllers/order_controller.dart';
+import '../controllers/user_controller.dart';
 import 'buyer_dashboard.dart';
 
 class PaymentStatusScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -404,14 +406,22 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
                                             ),
                                           ),
                                           const SizedBox(height: 4),
-                                          Text(
-                                            'Flat 402, Green Glen Heights, Sector 4, Outer Ring Road, Bellandur, Bengaluru - 560103',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500,
-                                              color: AppColors.onSurface,
-                                              height: 1.4,
-                                            ),
+                                          Consumer<UserController>(
+                                            builder: (context, userCtrl, _) {
+                                              final addressToDisplay = widget.order.deliveryAddress.isNotEmpty &&
+                                                      widget.order.deliveryAddress != 'No address provided'
+                                                  ? widget.order.deliveryAddress
+                                                  : userCtrl.displayAddress;
+                                              return Text(
+                                                addressToDisplay,
+                                                style: GoogleFonts.plusJakartaSans(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: AppColors.onSurface,
+                                                  height: 1.4,
+                                                ),
+                                              );
+                                            },
                                           ),
                                         ],
                                       ),
@@ -492,14 +502,23 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
               child: SizedBox(
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Provider.of<OrderController>(context, listen: false).placeOrder(widget.order);
+                  onPressed: _isProcessing ? null : () {
+                    setState(() {
+                      _isProcessing = true;
+                    });
+                    final userCtrl = Provider.of<UserController>(context, listen: false);
                     final navigator = Navigator.of(context);
 
                     Future.delayed(const Duration(milliseconds: 2500), () {
                       if (mounted) {
                         navigator.pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => const BuyerDashboardScreen(customerName: 'User', address: '', phone: '')),
+                          MaterialPageRoute(
+                            builder: (context) => BuyerDashboardScreen(
+                              customerName: userCtrl.customerName,
+                              address: userCtrl.addressLine1,
+                              phone: userCtrl.phone,
+                            ),
+                          ),
                           (Route<dynamic> route) => false,
                         );
                       }

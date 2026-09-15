@@ -7,6 +7,8 @@ import '../widgets/custom_text_field.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import '../../customer/controllers/user_controller.dart';
 import '../../customer/screens/buyer_dashboard.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -374,11 +376,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
 
       if (response.statusCode == 201) {
+        final name = _customerNameController.text.trim();
+        final phone = _phoneController.text.trim();
+        final address = _addressController.text.trim();
+        final email = _emailController.text.trim();
+
+        await Provider.of<UserController>(context, listen: false).setUser(
+          name: name,
+          phone: phone,
+          address: address,
+          email: email,
+        );
+
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful!')));
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BuyerDashboardScreen(
-          customerName: _customerNameController.text,
-          phone: _phoneController.text,
-          address: _addressController.text,
+          customerName: name,
+          phone: phone,
+          address: address,
         )));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Registration failed.')));

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/customer/controllers/order_controller.dart';
+import 'features/customer/controllers/user_controller.dart';
 
 void main() {
   runApp(const WaterCanDeliveryApp());
@@ -17,6 +18,7 @@ class WaterCanDeliveryApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => OrderController()),
+        ChangeNotifierProvider(create: (_) => UserController()..loadFromPrefs()),
       ],
       child: MaterialApp(
         title: 'Water Can Delivery App',

@@ -1,22 +1,162 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../models/order_model.dart';
 import '../models/product_model.dart';
+import '../controllers/order_controller.dart';
+import '../controllers/user_controller.dart';
 import '../widgets/upi_payment_sheet.dart';
 import 'payment_status_screen.dart';
 
 class OrderConfigurationScreen extends StatefulWidget {
   final Map<String, String> shop;
+  final String? deliveryAddress;
 
-  const OrderConfigurationScreen({super.key, required this.shop});
+  const OrderConfigurationScreen({
+    super.key,
+    required this.shop,
+    this.deliveryAddress,
+  });
 
   @override
   State<OrderConfigurationScreen> createState() => _OrderConfigurationScreenState();
 }
 
 class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
+  String? _customDeliveryAddress;
+  bool _isProcessing = false;
+
+  String _getEffectiveDeliveryAddress(BuildContext context) {
+    if (_customDeliveryAddress != null && _customDeliveryAddress!.trim().isNotEmpty) {
+      return _customDeliveryAddress!;
+    }
+    if (widget.deliveryAddress != null && widget.deliveryAddress!.trim().isNotEmpty) {
+      return widget.deliveryAddress!;
+    }
+    final userAddress = Provider.of<UserController>(context, listen: false).fullAddress;
+    if (userAddress.isNotEmpty && userAddress != 'No address provided') {
+      return userAddress;
+    }
+    return UserController.defaultFullAddress;
+  }
+
+  void _showEditAddressModal(BuildContext context) {
+    final currentAddress = _getEffectiveDeliveryAddress(context);
+    final ctrl = TextEditingController(text: currentAddress);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 20,
+        ),
+        decoration: const BoxDecoration(
+          color: AppColors.surfaceContainerLowest,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Edit Delivery Address',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Customizing delivery address for this order',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: ctrl,
+              maxLines: 2,
+              decoration: InputDecoration(
+                labelText: 'Delivery Address',
+                labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                prefixIcon: const Icon(Icons.location_on_outlined, size: 20),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final updated = ctrl.text.trim();
+                      if (updated.isNotEmpty) {
+                        setState(() {
+                          _customDeliveryAddress = updated;
+                        });
+                        Navigator.pop(sheetContext);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Delivery address updated for this order!')),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: Text(
+                      'Update',
+                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // State variables for each can size
   int qty25L = 1;
   bool hasEmpty25L = true;
@@ -409,7 +549,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                             ),
                           ),
                           InkWell(
-                            onTap: () {},
+                            onTap: () => _showEditAddressModal(context),
                             borderRadius: BorderRadius.circular(6),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -438,14 +578,18 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                           const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 16),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              'Flat 402, Green Glen Heights, Sector 4, Outer Ring Road, Bellandur, Bengaluru - 560103',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.onSurface,
-                                height: 1.4,
-                              ),
+                            child: Consumer<UserController>(
+                              builder: (context, userCtrl, _) {
+                                return Text(
+                                  _getEffectiveDeliveryAddress(context),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.onSurface,
+                                    height: 1.4,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -756,7 +900,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                     width: 280, // Medium-lengthened width
                     height: 52,
                     child: ElevatedButton(
-                    onPressed: () async {
+                    onPressed: _isProcessing ? null : () async {
                       if (_calculateTotal() == 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -767,6 +911,10 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                         );
                         return;
                       }
+
+                      setState(() {
+                        _isProcessing = true;
+                      });
                       
                       final items = <CartItem>[];
                       if (qty25L > 0) {
@@ -826,10 +974,16 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
 
                         if (selectedApp == null) {
                           // User dismissed bottom sheet without completing payment
+                          setState(() {
+                            _isProcessing = false;
+                          });
                           return;
                         }
                         finalPaymentMethod = 'UPI ($selectedApp)';
                       }
+
+                      final userCtrl = Provider.of<UserController>(context, listen: false);
+                      final effectiveDeliveryAddress = _getEffectiveDeliveryAddress(context);
 
                       final newOrder = OrderModel(
                         id: orderId,
@@ -838,7 +992,12 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                         timestamp: DateTime.now(),
                         paymentMethod: finalPaymentMethod,
                         shopName: currentShopName,
+                        deliveryAddress: effectiveDeliveryAddress,
+                        customerName: userCtrl.customerName,
+                        customerPhone: userCtrl.phone,
                       );
+
+                      Provider.of<OrderController>(context, listen: false).placeOrder(newOrder);
 
                       if (context.mounted) {
                         Navigator.push(
@@ -848,7 +1007,17 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                               order: newOrder,
                             ),
                           ),
-                        );
+                        ).then((_) {
+                          if (mounted) {
+                            setState(() {
+                              _isProcessing = false;
+                            });
+                          }
+                        });
+                      } else {
+                        setState(() {
+                          _isProcessing = false;
+                        });
                       }
                     },
                     style: ElevatedButton.styleFrom(

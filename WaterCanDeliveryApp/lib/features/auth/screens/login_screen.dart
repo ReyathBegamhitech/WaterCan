@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constants.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/primary_button.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../customer/controllers/user_controller.dart';
 import '../../customer/screens/buyer_dashboard.dart';
 import '../../seller/screens/seller_dashboard.dart';
 import 'register_screen.dart';
@@ -51,17 +53,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login successful!')));
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BuyerDashboardScreen(
-              customerName: data['user']['fullName'],
-              address: data['user']['address'],
-              phone: data['user']['phone'],
+        final fullName = data['user']?['fullName'] ?? 'User';
+        final address = data['user']?['address'] ?? '';
+        final phone = data['user']?['phone'] ?? _phoneController.text;
+
+        if (mounted) {
+          await Provider.of<UserController>(context, listen: false).setUser(
+            name: fullName,
+            phone: phone,
+            address: address,
+          );
+
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login successful!')));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BuyerDashboardScreen(
+                customerName: fullName,
+                address: address,
+                phone: phone,
+              ),
             ),
-          ),
-        );
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Login failed.')));
       }

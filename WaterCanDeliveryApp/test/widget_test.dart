@@ -1,30 +1,211 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:water_can_delivery_app/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:water_can_delivery_app/features/customer/controllers/user_controller.dart';
+import 'package:water_can_delivery_app/features/customer/controllers/order_controller.dart';
+import 'package:water_can_delivery_app/features/customer/models/order_model.dart';
+import 'package:water_can_delivery_app/features/customer/models/product_model.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const WaterCanDeliveryApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  group('UserController Tests', () {
+    test('Initial user details default properly', () {
+      final controller = UserController();
+      expect(controller.customerName, 'User');
+      expect(controller.phone, '');
+      expect(controller.addressLine1, '');
+      expect(controller.addressLine2, '');
+      expect(controller.fullAddress, '');
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    test('setUser updates state and calculates fullAddress', () async {
+      final controller = UserController();
+      await controller.setUser(
+        name: 'John Doe',
+        phone: '9876543210',
+        address: '123 Water Street',
+        addressLine2: 'Bengaluru, 560001',
+      );
+
+      expect(controller.customerName, 'John Doe');
+      expect(controller.phone, '9876543210');
+      expect(controller.addressLine1, '123 Water Street');
+      expect(controller.addressLine2, 'Bengaluru, 560001');
+      expect(controller.fullAddress, '123 Water Street, Bengaluru, 560001');
+      expect(controller.isLoggedIn, true);
+    });
+
+    test('updatePhone and updateAddress update state and retain values', () async {
+      final controller = UserController();
+      await controller.setUser(
+        name: 'Alice',
+        phone: '1111111111',
+        address: 'Old Address',
+      );
+
+      await controller.updatePhone('9999999999');
+      expect(controller.phone, '9999999999');
+      expect(controller.customerName, 'Alice');
+
+      await controller.updateAddress(
+        addressLine1: 'New Flat 401',
+        addressLine2: 'Indiranagar',
+      );
+      expect(controller.addressLine1, 'New Flat 401');
+      expect(controller.addressLine2, 'Indiranagar');
+      expect(controller.phone, '9999999999');
+      expect(controller.customerName, 'Alice');
+    });
+
+    test('updateName updates customerName and persists in state', () async {
+      final controller = UserController();
+      await controller.setUser(
+        name: 'Alice',
+        phone: '1111111111',
+        address: 'Old Address',
+      );
+
+      await controller.updateName('Alice Smith');
+      expect(controller.customerName, 'Alice Smith');
+      expect(controller.phone, '1111111111');
+
+      // Verify that loadFromPrefs retains updated name
+      final newController = UserController();
+      await newController.loadFromPrefs();
+      expect(newController.customerName, 'Alice Smith');
+    });
+
+
+    test('loadFromPrefs loads previously saved values across sessions', () async {
+      SharedPreferences.setMockInitialValues({
+        'user_name': 'Saved User',
+        'user_phone': '8888888888',
+        'user_address_1': 'Saved House 12',
+        'user_address_2': 'Koramangala',
+        'user_is_logged_in': true,
+      });
+
+      final controller = UserController();
+      await controller.loadFromPrefs();
+
+      expect(controller.customerName, 'Saved User');
+      expect(controller.phone, '8888888888');
+      expect(controller.addressLine1, 'Saved House 12');
+      expect(controller.addressLine2, 'Koramangala');
+      expect(controller.isLoggedIn, true);
+    });
+
+    test('clear resets user details on logout', () async {
+      final controller = UserController();
+      await controller.setUser(
+        name: 'Temp User',
+        phone: '1234567890',
+        address: 'Temp Address',
+      );
+
+      await controller.clear();
+
+      expect(controller.customerName, 'User');
+      expect(controller.phone, '');
+      expect(controller.addressLine1, '');
+      expect(controller.addressLine2, '');
+      expect(controller.isLoggedIn, false);
+    });
+
+    test('Custom address does not overwrite default user profile address when not saved as default', () async {
+      final controller = UserController();
+      await controller.setUser(
+        name: 'Jane Doe',
+        phone: '9876543210',
+        address: 'Permanent Flat 101',
+        addressLine2: 'HSR Layout, Bengaluru',
+      );
+
+      expect(controller.fullAddress, 'Permanent Flat 101, HSR Layout, Bengaluru');
+
+      // Individual order customized address simulated
+      const individualOrderAddress = 'Temporary Office Tower, Whitefield';
+      expect(individualOrderAddress, isNot(equals(controller.fullAddress)));
+
+      // Ensure user profile retains permanent address
+      expect(controller.fullAddress, 'Permanent Flat 101, HSR Layout, Bengaluru');
+    });
+  });
+
+  group('OrderController Tests', () {
+    test('OrderController is initially empty', () {
+      final orderCtrl = OrderController();
+      expect(orderCtrl.activeOrders, isEmpty);
+      expect(orderCtrl.completedOrders, isEmpty);
+      expect(orderCtrl.cancelledOrders, isEmpty);
+    });
+
+    test('placeOrder adds active order with real-time seller map conversion', () {
+      final orderCtrl = OrderController();
+      final order = OrderModel(
+        id: '1099',
+        items: [
+          CartItem(
+            product: ProductModel(
+              id: 'p1',
+              name: '20L Pure Water Can',
+              price: 80,
+              imageUrl: 'assets/images/can.png',
+              shopName: 'Aqua Pure',
+            ),
+            quantity: 3,
+          )
+        ],
+        totalAmount: 240,
+        timestamp: DateTime.now(),
+        paymentMethod: 'UPI (GPay)',
+        customerName: 'Reyath',
+        customerPhone: '9876543210',
+        deliveryAddress: 'House 42, 2nd Cross',
+      );
+
+      orderCtrl.placeOrder(order);
+
+      expect(orderCtrl.activeOrders.length, 1);
+      expect(orderCtrl.activeOrders.first.id, '1099');
+
+      final sellerMap = orderCtrl.activeOrders.first.toSellerOrderMap();
+      expect(sellerMap['buyerName'], 'Reyath');
+      expect(sellerMap['buyerPhone'], '9876543210');
+      expect(sellerMap['quantity'], 3);
+      expect(sellerMap['status'], 'Placed');
+      expect(sellerMap['deliveryAddress'], 'House 42, 2nd Cross');
+    });
+
+    test('updateOrderStatusByString responsively updates order status and lists', () {
+      final orderCtrl = OrderController();
+      final order = OrderModel(
+        id: '1099',
+        items: [],
+        totalAmount: 160,
+        timestamp: DateTime.now(),
+        paymentMethod: 'Cash on Delivery',
+        customerName: 'Reyath',
+      );
+      orderCtrl.placeOrder(order);
+
+      // Seller accepts order
+      orderCtrl.updateOrderStatusByString('#1099', 'Accepted');
+      expect(orderCtrl.getOrder('1099')?.status, OrderStatus.accepted);
+      expect(orderCtrl.activeOrders.length, 1);
+
+      // Seller marks delivered
+      orderCtrl.updateOrderStatusByString('1099', 'Delivered');
+      expect(orderCtrl.getOrder('1099')?.status, OrderStatus.delivered);
+      expect(orderCtrl.activeOrders, isEmpty);
+      expect(orderCtrl.completedOrders.length, 1);
+      expect(orderCtrl.completedOrders.first.toSellerHistoryMap()['status'], 'Delivered');
+    });
   });
 }
+
+

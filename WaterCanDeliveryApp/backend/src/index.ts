@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import pool from './config/db';
 import authRoutes from './routes/authRoutes';
+import orderRoutes from './routes/orderRoutes';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Root route
 app.get('/', (req, res) => {

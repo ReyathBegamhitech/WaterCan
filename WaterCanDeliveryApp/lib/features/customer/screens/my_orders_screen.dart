@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../models/order_model.dart';
 import '../controllers/order_controller.dart';
+import '../controllers/user_controller.dart';
 import 'track_delivery_screen.dart';
 
 class MyOrdersScreen extends StatefulWidget {
@@ -15,6 +16,18 @@ class MyOrdersScreen extends StatefulWidget {
 
 class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStateMixin {
   String _selectedTab = 'active';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userCtrl = Provider.of<UserController>(context, listen: false);
+      final phone = userCtrl.phone;
+      if (phone.isNotEmpty) {
+        Provider.of<OrderController>(context, listen: false).startPollingUserOrders(phone);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,19 +78,23 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               color: AppColors.surface.withOpacity(0.95),
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    _buildTab('active', 'Active', '2'),
-                    _buildTab('completed', 'Delivered', '4'),
-                    _buildTab('cancelled', 'Cancelled', '1'),
-                  ],
-                ),
+              child: Consumer<OrderController>(
+                builder: (context, controller, _) {
+                  return Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        _buildTab('active', 'Active', controller.activeOrders.length.toString()),
+                        _buildTab('completed', 'Delivered', controller.completedOrders.length.toString()),
+                        _buildTab('cancelled', 'Cancelled', controller.cancelledOrders.length.toString()),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
 
@@ -191,11 +208,60 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
 
   Widget _buildOrdersList(List<OrderModel> orders, bool isActiveList) {
     if (orders.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 40),
-        child: Text(
-          'No orders found here.',
-          style: GoogleFonts.plusJakartaSans(color: AppColors.outline),
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.receipt_long_outlined,
+                size: 40,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Orders Yet',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'When you place an order, it will show up here so you can track its delivery.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: AppColors.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+              label: Text(
+                'Explore Water Cans',
+                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
         ),
       );
     }
