@@ -243,14 +243,45 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                   if (isEditingPhone && !isOtpSent) ...[
                     const SizedBox(height: 12),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (phoneController.text.isNotEmpty && phoneController.text != userCtrl.phone) {
-                          setModalState(() {
-                            isOtpSent = true;
-                          });
+                          setModalState(() { isLoading = true; });
+                          try {
+                            final response = await http.post(
+                              Uri.parse(ApiConstants.sendOtp),
+                              headers: {'Content-Type': 'application/json'},
+                              body: jsonEncode({'phone': phoneController.text}),
+                            );
+                            final data = jsonDecode(response.body);
+                            
+                            if (response.statusCode == 200 && data['success'] == true) {
+                              setModalState(() {
+                                isOtpSent = true;
+                              });
+                              if (bottomSheetContext.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('OTP sent! ${data['message'] ?? ''}'))
+                                );
+                              }
+                            } else {
+                              if (bottomSheetContext.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(data['message'] ?? 'Failed to send OTP.'))
+                                );
+                              }
+                            }
+                          } catch (e) {
+                            if (bottomSheetContext.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error connecting to server.')));
+                            }
+                          } finally {
+                            setModalState(() { isLoading = false; });
+                          }
                         }
                       },
-                      child: const Text('Send OTP'),
+                      child: isLoading 
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Text('Send OTP'),
                     ),
                   ],
 
@@ -258,7 +289,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                     const SizedBox(height: 16),
                     TextField(
                       controller: otpController,
-                      decoration: const InputDecoration(hintText: 'Enter OTP (Type 1234)'),
+                      decoration: const InputDecoration(hintText: 'Enter 4-digit OTP'),
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 12),
@@ -266,37 +297,57 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
                             onPressed: () async {
-                              if (otpController.text == '1234') {
+                              if (otpController.text.length >= 4) {
                                 setModalState(() { isLoading = true; });
                                 try {
-                                  final response = await http.put(
-                                    Uri.parse(ApiConstants.updatePhone),
+                                  // Verify OTP first
+                                  final verifyResponse = await http.post(
+                                    Uri.parse(ApiConstants.verifyOtp),
                                     headers: {'Content-Type': 'application/json'},
                                     body: jsonEncode({
-                                      'oldPhone': userCtrl.phone,
-                                      'newPhone': phoneController.text,
+                                      'phone': phoneController.text,
+                                      'otp': otpController.text
                                     }),
                                   );
-                                  if (response.statusCode == 200) {
-                                    await userCtrl.updatePhone(phoneController.text);
-                                    if (bottomSheetContext.mounted) {
-                                      Navigator.pop(bottomSheetContext);
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phone number updated!')));
+                                  
+                                  final verifyData = jsonDecode(verifyResponse.body);
+                                  
+                                  if (verifyResponse.statusCode == 200 && verifyData['success'] == true) {
+                                    // OTP Verified, now update phone number
+                                    final response = await http.put(
+                                      Uri.parse(ApiConstants.updatePhone),
+                                      headers: {'Content-Type': 'application/json'},
+                                      body: jsonEncode({
+                                        'oldPhone': userCtrl.phone,
+                                        'newPhone': phoneController.text,
+                                      }),
+                                    );
+                                    
+                                    if (response.statusCode == 200) {
+                                      await userCtrl.updatePhone(phoneController.text);
+                                      if (bottomSheetContext.mounted) {
+                                        Navigator.pop(bottomSheetContext);
+                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phone number updated successfully!')));
+                                      }
+                                    } else {
+                                      if (bottomSheetContext.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update phone.')));
+                                      }
                                     }
                                   } else {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update phone.')));
+                                    if (bottomSheetContext.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(verifyData['message'] ?? 'Invalid OTP')));
                                     }
                                   }
                                 } catch (e) {
-                                  if (context.mounted) {
+                                  if (bottomSheetContext.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error connecting to server.')));
                                   }
                                 } finally {
                                   setModalState(() { isLoading = false; });
                                 }
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid OTP')));
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter the full OTP')));
                               }
                             },
                             child: const Text('Verify & Save'),
