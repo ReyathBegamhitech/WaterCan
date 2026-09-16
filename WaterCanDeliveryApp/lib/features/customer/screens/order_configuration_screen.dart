@@ -172,44 +172,39 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
   int empty5L = 0;
 
   String _paymentMethod = 'upi';
+  bool _isFastDelivery = false;
 
   // Prices per can
   final int price25L = 50;
-  final int price15L = 35;
-  final int price5L = 25;
-  final int emptyCanDeposit = 150;
+  final int price15L = 30;
+  final int price5L = 20;
 
   int _calculateTotal() {
     int total = 0;
     
     // 25L logic
     total += qty25L * price25L;
-    if (!hasEmpty25L) {
-      total += qty25L * emptyCanDeposit;
-    } else {
-      int missing25L = qty25L - empty25L;
-      if (missing25L > 0) total += missing25L * emptyCanDeposit;
+    if (hasEmpty25L && empty25L > 0) {
+      total -= empty25L * 10;
     }
 
     // 15L logic
     total += qty15L * price15L;
-    if (!hasEmpty15L) {
-      total += qty15L * emptyCanDeposit;
-    } else {
-      int missing15L = qty15L - empty15L;
-      if (missing15L > 0) total += missing15L * emptyCanDeposit;
+    if (hasEmpty15L && empty15L > 0) {
+      total -= empty15L * 10;
     }
 
     // 5L logic
     total += qty5L * price5L;
-    if (!hasEmpty5L) {
-      total += qty5L * emptyCanDeposit;
-    } else {
-      int missing5L = qty5L - empty5L;
-      if (missing5L > 0) total += missing5L * emptyCanDeposit;
+    if (hasEmpty5L && empty5L > 0) {
+      total -= empty5L * 10;
     }
 
-    return total;
+    if (_isFastDelivery) {
+      total += 50;
+    }
+
+    return total > 0 ? total : 0;
   }
 
   // SVG Strings
@@ -842,40 +837,206 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                   ),
                 ),
 
-                // TOTAL AMOUNT Section
+                // DELIVERY OPTIONS Section
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  margin: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceContainerLowest,
                     border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'DELIVERY OPTIONS',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.onSurfaceVariant,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const Icon(Icons.local_shipping, size: 16, color: AppColors.primary),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () => setState(() => _isFastDelivery = false),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: !_isFastDelivery ? const Color(0xFFF0FDF4) : Colors.transparent,
+                            border: Border.all(color: !_isFastDelivery ? const Color(0xFF16A34A) : AppColors.outlineVariant.withOpacity(0.5)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Radio<bool>(
+                                value: false,
+                                groupValue: _isFastDelivery,
+                                onChanged: (val) => setState(() => _isFastDelivery = val!),
+                                activeColor: AppColors.primary,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Standard Delivery', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                    Text('Delivered by end of day', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.onSurfaceVariant)),
+                                  ],
+                                ),
+                              ),
+                              Text('FREE', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w900, color: const Color(0xFF16A34A))),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => setState(() => _isFastDelivery = true),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: _isFastDelivery ? const Color(0xFFFFF1F2) : Colors.transparent,
+                            border: Border.all(color: _isFastDelivery ? const Color(0xFFE11D48) : AppColors.outlineVariant.withOpacity(0.5)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Radio<bool>(
+                                value: true,
+                                groupValue: _isFastDelivery,
+                                onChanged: (val) => setState(() => _isFastDelivery = val!),
+                                activeColor: const Color(0xFFE11D48),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text('Fast Delivery', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFFE11D48))),
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(color: const Color(0xFFE11D48), borderRadius: BorderRadius.circular(4)),
+                                          child: Text('⚡ PRIORITY', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5)),
+                                        ),
+                                      ],
+                                    ),
+                                    Text('Delivered in 30-45 mins', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.onSurfaceVariant)),
+                                  ],
+                                ),
+                              ),
+                              Text('+₹50', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w900, color: const Color(0xFFE11D48))),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+
+                // TOTAL AMOUNT Breakdown Section
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLowest,
+                    border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'TOTAL AMOUNT',
+                        'BILL DETAILS',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                          color: AppColors.onSurface,
+                          color: AppColors.onSurfaceVariant,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      Text(
-                        '₹${_calculateTotal()}',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                        ),
+                      const SizedBox(height: 12),
+                      Builder(
+                        builder: (context) {
+                          int subtotal = (qty25L * price25L) + (qty15L * price15L) + (qty5L * price5L);
+                          int emptyDiscount = 0;
+                          if (hasEmpty25L && empty25L > 0) emptyDiscount += empty25L * 10;
+                          if (hasEmpty15L && empty15L > 0) emptyDiscount += empty15L * 10;
+                          if (hasEmpty5L && empty5L > 0) emptyDiscount += empty5L * 10;
+                          int finalTotal = _calculateTotal();
+                          return Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Item Subtotal', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.onSurface)),
+                                  Text('₹$subtotal', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                ],
+                              ),
+                              if (emptyDiscount > 0) ...[
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.recycling, size: 14, color: Color(0xFF16A34A)),
+                                        const SizedBox(width: 4),
+                                        Text('Empty Can Discount', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: const Color(0xFF16A34A))),
+                                      ],
+                                    ),
+                                    Text('-₹$emptyDiscount', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF16A34A))),
+                                  ],
+                                ),
+                              ],
+                              if (_isFastDelivery) ...[
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.bolt, size: 14, color: Color(0xFFE11D48)),
+                                        const SizedBox(width: 4),
+                                        Text('Fast Delivery Fee', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.onSurface)),
+                                      ],
+                                    ),
+                                    Text('+₹50', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                  ],
+                                ),
+                              ],
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Divider(height: 1),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'TO PAY',
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
+                                  ),
+                                  Text(
+                                    '₹$finalTotal',
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -996,6 +1157,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                         deliveryAddress: effectiveDeliveryAddress,
                         customerName: userCtrl.customerName,
                         customerPhone: userCtrl.phone,
+                        isFastDelivery: _isFastDelivery,
                       );
 
                       Provider.of<OrderController>(context, listen: false).placeOrder(newOrder);

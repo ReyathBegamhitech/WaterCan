@@ -145,6 +145,25 @@ class SellerOrderCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  if (order.isFastDelivery) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE11D48),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '⚡ FAST',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   Text(
                     order.formattedDate,
                     style: GoogleFonts.plusJakartaSans(
@@ -307,7 +326,7 @@ class SellerOrderCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '₹${(item.product.price * item.quantity).round()}',
+                            '₹${(item.product.price * item.quantity).round() - ((item.returnEmptyCans ?? 0) * 10)}',
                             style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.seller800),
                           ),
                         ],

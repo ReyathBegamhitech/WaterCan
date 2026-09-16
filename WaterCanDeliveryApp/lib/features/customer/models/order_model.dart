@@ -20,6 +20,7 @@ class OrderModel {
   final String deliveryAddress;
   final String? customerName;
   final String? customerPhone;
+  final bool isFastDelivery;
 
   OrderModel({
     required this.id,
@@ -32,6 +33,7 @@ class OrderModel {
     this.deliveryAddress = '',
     this.customerName,
     this.customerPhone,
+    this.isFastDelivery = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -45,6 +47,7 @@ class OrderModel {
         'deliveryAddress': deliveryAddress,
         'customerName': customerName,
         'customerPhone': customerPhone,
+        'is_fast_delivery': isFastDelivery,
       };
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
@@ -56,8 +59,9 @@ class OrderModel {
         status: OrderStatus.values[json['status'] ?? 0],
         shopName: json['shopName'],
         deliveryAddress: json['deliveryAddress'] ?? '',
-        customerName: json['customerName'],
-        customerPhone: json['customerPhone'],
+        customerName: json['customerName'] ?? json['buyer_name'],
+        customerPhone: json['customerPhone'] ?? json['buyer_phone'],
+        isFastDelivery: json['is_fast_delivery'] ?? json['isFastDelivery'] ?? false,
       );
 
   int get totalQuantity => items.fold(0, (sum, item) => sum + item.quantity);
@@ -97,6 +101,7 @@ class OrderModel {
       'buyerPhone': customerPhone?.isNotEmpty == true ? customerPhone! : 'Not provided',
       'amount': totalAmount.round(),
       'address': deliveryAddress.isNotEmpty ? deliveryAddress : 'No address provided',
+      'isFastDelivery': isFastDelivery,
       'rawId': id,
     };
   }

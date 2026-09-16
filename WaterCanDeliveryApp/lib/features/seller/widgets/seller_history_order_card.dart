@@ -11,6 +11,7 @@ class SellerHistoryOrderCard extends StatelessWidget {
   final String buyerPhone;
   final int amount;
   final String address;
+  final bool isFastDelivery;
 
   const SellerHistoryOrderCard({
     super.key,
@@ -21,6 +22,7 @@ class SellerHistoryOrderCard extends StatelessWidget {
     required this.buyerPhone,
     required this.amount,
     required this.address,
+    this.isFastDelivery = false,
   });
 
   bool get isDelivered => status == 'Delivered';
@@ -76,6 +78,25 @@ class SellerHistoryOrderCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    if (isFastDelivery) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE11D48),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '⚡ FAST',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     Text(
                       time,
                       style: GoogleFonts.plusJakartaSans(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w500),

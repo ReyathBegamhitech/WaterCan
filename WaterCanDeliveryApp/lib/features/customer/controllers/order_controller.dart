@@ -152,7 +152,11 @@ class OrderController extends ChangeNotifier {
       List<CartItem> items = [];
       if (item['order_details'] != null) {
         try {
-          final detailsList = item['order_details'] as List;
+          var detailsData = item['order_details'];
+          if (detailsData is String) {
+            detailsData = jsonDecode(detailsData);
+          }
+          final detailsList = detailsData as List;
           items = detailsList.map((i) => CartItem.fromJson(i)).toList();
         } catch (e) {
           debugPrint('Error parsing order_details: $e');
@@ -236,6 +240,7 @@ class OrderController extends ChangeNotifier {
         'payment_method': newOrder.paymentMethod,
         'delivery_address': newOrder.deliveryAddress,
         'order_details': newOrder.items.map((i) => i.toJson()).toList(),
+        'is_fast_delivery': newOrder.isFastDelivery,
       };
 
       final res = await http.post(

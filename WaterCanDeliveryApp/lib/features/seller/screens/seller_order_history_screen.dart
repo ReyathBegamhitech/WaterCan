@@ -83,6 +83,7 @@ class _SellerOrderHistoryScreenState extends State<SellerOrderHistoryScreen> {
                               buyerPhone: order['buyerPhone'],
                               amount: order['amount'],
                               address: order['address'],
+                              isFastDelivery: order['isFastDelivery'] ?? false,
                             );
                           },
                         ),
