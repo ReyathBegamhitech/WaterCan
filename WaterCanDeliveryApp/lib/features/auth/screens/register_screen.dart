@@ -150,56 +150,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
         _startCountdown();
 
-        final bool smsSent = data['smsSent'] == true;
-        final String gateway = data['gateway']?.toString() ?? '';
-
         if (mounted) {
-          if (smsSent) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.mark_email_read_outlined, color: Colors.greenAccent, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Real SMS OTP sent to +91 $phone via $gateway! Check your mobile SMS inbox.',
-                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-                      ),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.mark_email_read_outlined, color: Colors.greenAccent, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      data['message'] ?? 'SMS sent successfully!',
+                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
                     ),
-                  ],
-                ),
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 5),
-                backgroundColor: const Color(0xFF16A34A),
+                  ),
+                ],
               ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.sms_outlined, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'OTP for +91 $phone is $otp',
-                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-                action: SnackBarAction(
-                  label: 'AUTO-FILL',
-                  textColor: Colors.amberAccent,
-                  onPressed: () => _autoFillOtp(otp),
-                ),
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 6),
-                backgroundColor: const Color(0xFF1E293B),
-              ),
-            );
-          }
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 5),
+              backgroundColor: const Color(0xFF16A34A),
+            ),
+          );
 
           _focus1.requestFocus();
         }

@@ -130,15 +130,20 @@ router.post('/send-otp', async (req: Request, res: Response): Promise<void> => {
   // Attempt real telecom SMS dispatch
   const smsResult = await dispatchRealSms(cleanPhone, otp);
 
+  if (!smsResult.sent) {
+    otpStore.delete(cleanPhone);
+    res.status(400).json({
+      success: false,
+      message: 'Failed to send real SMS: ' + (smsResult.error || 'No SMS gateway configured')
+    });
+    return;
+  }
+
   res.status(200).json({
     success: true,
-    message: smsResult.sent 
-      ? `Real SMS OTP sent to +91 ${cleanPhone}!` 
-      : (smsResult.error || `OTP generated for +91 ${cleanPhone}`),
-    smsSent: smsResult.sent,
-    gateway: smsResult.gateway,
-    smsError: smsResult.error,
-    otp, // Always returned for dev convenience and in-app prompt
+    message: `SMS sent successfully to +91 ${cleanPhone}!`,
+    smsSent: true,
+    gateway: smsResult.gateway
   });
 });
 
