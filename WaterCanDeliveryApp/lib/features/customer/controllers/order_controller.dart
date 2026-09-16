@@ -212,6 +212,7 @@ class OrderController extends ChangeNotifier {
         customerName: item['buyer_name'],
         customerPhone: item['user_phone'],
         deliveryAddress: item['delivery_address'] ?? '',
+        isFastDelivery: item['is_fast_delivery'] ?? false,
       ));
     }
     
