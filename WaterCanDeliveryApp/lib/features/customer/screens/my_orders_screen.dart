@@ -333,6 +333,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
             qtyDetails: order.items.isNotEmpty ? '${order.items.first.quantity} Cans' : '',
             price: '₹${order.totalAmount.toInt()}',
             isCancelled: isCancelled,
+            isFastDelivery: order.isFastDelivery,
             actions: actions,
           ),
         );
@@ -353,6 +354,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
     required String qtyDetails,
     required String price,
     bool isCancelled = false,
+    bool isFastDelivery = false,
     required List<Widget> actions,
   }) {
     return Container(
@@ -402,6 +404,25 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
                       color: AppColors.onSurfaceVariant,
                     ),
                   ),
+                  if (isFastDelivery) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE11D48),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '⚡ FAST',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
               Container(
