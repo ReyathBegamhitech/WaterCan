@@ -51,7 +51,7 @@ class OrderModel {
         id: json['id'],
         items: (json['items'] as List).map((i) => CartItem.fromJson(i)).toList(),
         totalAmount: json['totalAmount'],
-        timestamp: DateTime.parse(json['timestamp']),
+        timestamp: DateTime.parse(json['timestamp']).toLocal(),
         paymentMethod: json['paymentMethod'],
         status: OrderStatus.values[json['status'] ?? 0],
         shopName: json['shopName'],
@@ -105,7 +105,11 @@ class OrderModel {
     // Simple formatter for our UI
     final today = DateTime.now();
     if (timestamp.day == today.day && timestamp.month == today.month && timestamp.year == today.year) {
-      return 'Today, ${timestamp.hour > 12 ? timestamp.hour - 12 : timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')} ${timestamp.hour >= 12 ? 'PM' : 'AM'}';
+      int hour = timestamp.hour;
+      String amPm = hour >= 12 ? 'PM' : 'AM';
+      if (hour > 12) hour -= 12;
+      if (hour == 0) hour = 12;
+      return 'Today, $hour:${timestamp.minute.toString().padLeft(2, '0')} $amPm';
     }
     return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
   }

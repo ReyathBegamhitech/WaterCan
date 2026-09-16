@@ -175,10 +175,26 @@ class OrderController extends ChangeNotifier {
         ];
       }
 
-      final createdAt = item['created_at'];
+      final createdAt = item['created_at'] ?? item['time'];
       DateTime time = DateTime.now();
       if (createdAt != null) {
-        time = DateTime.tryParse(createdAt) ?? DateTime.now();
+        time = (DateTime.tryParse(createdAt) ?? DateTime.now()).toLocal();
+        // If it's the string "Today, ...", parse it to prevent it from always showing current time
+        if (createdAt.toString().startsWith('Today')) {
+          try {
+            final timeStr = createdAt.toString().split(', ')[1]; // e.g. "10:24 AM"
+            final parts = timeStr.split(' ');
+            final hm = parts[0].split(':');
+            int h = int.parse(hm[0]);
+            int m = int.parse(hm[1]);
+            if (parts[1] == 'PM' && h != 12) h += 12;
+            if (parts[1] == 'AM' && h == 12) h = 0;
+            final now = DateTime.now();
+            time = DateTime(now.year, now.month, now.day, h, m);
+          } catch (e) {
+            time = DateTime.now(); 
+          }
+        }
       }
 
       newOrders.add(OrderModel(
@@ -186,7 +202,7 @@ class OrderController extends ChangeNotifier {
         items: items,
         totalAmount: total,
         timestamp: time,
-        paymentMethod: 'Cash/UPI',
+        paymentMethod: item['payment_method'] ?? 'Cash on Delivery',
         status: status,
         shopName: item['shop_name'],
         customerName: item['buyer_name'],
@@ -216,7 +232,8 @@ class OrderController extends ChangeNotifier {
         'quantity': newOrder.totalQuantity,
         'price_per_can': newOrder.pricePerUnit,
         'total_price': newOrder.totalAmount,
-        'time': newOrder.formattedDate,
+        'time': newOrder.timestamp.toIso8601String(),
+        'payment_method': newOrder.paymentMethod,
         'delivery_address': newOrder.deliveryAddress,
         'order_details': newOrder.items.map((i) => i.toJson()).toList(),
       };
