@@ -56,7 +56,7 @@ async function dispatchRealSms(phone: string, otp: string): Promise<{ sent: bool
   if (twoFactorKey) {
     try {
       console.log(`📡 [2Factor] Dispatching real SMS to +91 ${phone}...`);
-      const response = await fetch(`https://2factor.in/v2/SMS/${twoFactorKey}/SMS/${phone}/${otp}/OTP1`);
+      const response = await fetch(`https://2factor.in/API/V1/${twoFactorKey}/SMS/${phone}/${otp}/OTP1`);
       const data = await response.json() as any;
       console.log(`📲 [2Factor Response]:`, data);
       return { sent: true, gateway: '2Factor' };
