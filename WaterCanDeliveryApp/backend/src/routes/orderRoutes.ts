@@ -6,16 +6,16 @@ const router = Router();
 // Place a new order
 router.post('/', async (req, res) => {
   try {
-    const { user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time } = req.body;
+    const { user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address, order_details } = req.body;
     
     if (!user_phone || !shop_name || !quantity || !total_price) {
       return res.status(400).json({ success: false, message: 'Missing required order fields' });
     }
 
     const result = await pool.query(
-      `INSERT INTO app_orders (user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time]
+      `INSERT INTO app_orders (user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address, order_details) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address || '', order_details ? JSON.stringify(order_details) : null]
     );
 
     res.status(201).json({ success: true, order: result.rows[0] });

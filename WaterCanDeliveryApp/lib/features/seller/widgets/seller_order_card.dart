@@ -241,77 +241,105 @@ class SellerOrderCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           
-          // Order Items Details
+          // Order Items Details (Expandable)
           Container(
-            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppColors.seller50,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.seller200),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...order.items.map((item) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.water_drop, size: 14, color: AppColors.seller500),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${item.quantity}x ${item.product.name}',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black87),
-                              ),
-                              if (item.returnEmptyCans != null && item.returnEmptyCans! > 0)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2),
-                                  child: Text(
-                                    '${item.returnEmptyCans} empty cans to return',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade800),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          '₹${(item.product.price * item.quantity).round()}',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.seller800),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                childrenPadding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+                iconColor: AppColors.seller800,
+                collapsedIconColor: AppColors.seller600,
+                title: Row(
                   children: [
-                    Row(
-                      children: [
-                        Icon(isUPI ? Icons.qr_code : Icons.money, size: 16, color: isUPI ? Colors.purple : Colors.green),
-                        const SizedBox(width: 6),
-                        Text(
-                          isUPI ? 'Paid via UPI' : 'Cash on Delivery',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13, 
-                            fontWeight: FontWeight.bold, 
-                            color: isUPI ? Colors.purple.shade700 : Colors.green.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
+                    const Icon(Icons.water_drop, size: 16, color: AppColors.seller500),
+                    const SizedBox(width: 8),
                     Text(
-                      'Total: ₹${order.totalAmount.round()}',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.black),
+                      '${order.totalQuantity}x Water Cans Ordered',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87),
                     ),
                   ],
                 ),
-              ],
+                children: [
+                  ...order.items.map((item) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8, left: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 5),
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(color: AppColors.seller400, shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${item.quantity}x ${item.product.name}',
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                                ),
+                                if (item.returnEmptyCans != null && item.returnEmptyCans! > 0)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      '${item.returnEmptyCans} empty cans to return',
+                                      style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade800),
+                                    ),
+                                  ),
+                                if (item.returnEmptyCans == 0 || item.returnEmptyCans == null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      'No empty cans provided',
+                                      style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade600),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            '₹${(item.product.price * item.quantity).round()}',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.seller800),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  const Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(isUPI ? Icons.qr_code : Icons.money, size: 16, color: isUPI ? Colors.purple : Colors.green),
+                          const SizedBox(width: 6),
+                          Text(
+                            isUPI ? 'Paid via UPI' : 'Cash on Delivery',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13, 
+                              fontWeight: FontWeight.bold, 
+                              color: isUPI ? Colors.purple.shade700 : Colors.green.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'Total: ₹${order.totalAmount.round()}',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
           

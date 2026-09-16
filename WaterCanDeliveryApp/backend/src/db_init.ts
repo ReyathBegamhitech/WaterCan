@@ -14,6 +14,8 @@ async function init() {
         total_price NUMERIC,
         status VARCHAR(50) DEFAULT 'Placed',
         time VARCHAR(50),
+        delivery_address TEXT,
+        order_details JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);

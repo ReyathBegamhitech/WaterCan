@@ -149,17 +149,31 @@ class OrderController extends ChangeNotifier {
       else if (s == 'delivered') status = OrderStatus.delivered;
       else if (s.contains('cancel')) status = OrderStatus.cancelled;
 
-      // Create a dummy cart item representing the backend summary
-      final cartItem = CartItem(
-        product: ProductModel(
-          id: 'p1', 
-          name: 'Water Can', 
-          price: pricePerCan, 
-          imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBtFDY8L4f3JKhamQcGZaXg9fa3RstoZchc3JyiqdlCNdnoRt3Qcx-nqXK6C8KSNnLdAVkSLH0Khz0Gjfs1iqcSazsbdqrIdHyiCWDlN5zWyCoyjQQNDczOhlThRGzp_LzSDQ2Nz09alZY_AGfZsVC0LmgNveXjKZNx4OlCrdScsnSvLD289zYwQg2zj4qj6ZKYCIih2Z3FCEpQ8gCVbVwBXNMvyme2fFUzskpD8cCUrBVLis1pbaR2', 
-          shopName: item['shop_name'] ?? ''
-        ),
-        quantity: quantity,
-      );
+      List<CartItem> items = [];
+      if (item['order_details'] != null) {
+        try {
+          final detailsList = item['order_details'] as List;
+          items = detailsList.map((i) => CartItem.fromJson(i)).toList();
+        } catch (e) {
+          debugPrint('Error parsing order_details: $e');
+        }
+      }
+      
+      if (items.isEmpty) {
+        // Fallback to dummy cart item representing the backend summary
+        items = [
+          CartItem(
+            product: ProductModel(
+              id: 'p1', 
+              name: 'Water Can', 
+              price: pricePerCan, 
+              imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBtFDY8L4f3JKhamQcGZaXg9fa3RstoZchc3JyiqdlCNdnoRt3Qcx-nqXK6C8KSNnLdAVkSLH0Khz0Gjfs1iqcSazsbdqrIdHyiCWDlN5zWyCoyjQQNDczOhlThRGzp_LzSDQ2Nz09alZY_AGfZsVC0LmgNveXjKZNx4OlCrdScsnSvLD289zYwQg2zj4qj6ZKYCIih2Z3FCEpQ8gCVbVwBXNMvyme2fFUzskpD8cCUrBVLis1pbaR2', 
+              shopName: item['shop_name'] ?? ''
+            ),
+            quantity: quantity,
+          )
+        ];
+      }
 
       final createdAt = item['created_at'];
       DateTime time = DateTime.now();
@@ -169,7 +183,7 @@ class OrderController extends ChangeNotifier {
 
       newOrders.add(OrderModel(
         id: id,
-        items: [cartItem],
+        items: items,
         totalAmount: total,
         timestamp: time,
         paymentMethod: 'Cash/UPI',
@@ -177,7 +191,7 @@ class OrderController extends ChangeNotifier {
         shopName: item['shop_name'],
         customerName: item['buyer_name'],
         customerPhone: item['user_phone'],
-        deliveryAddress: '', // Handled if backend provides it, left blank for now
+        deliveryAddress: item['delivery_address'] ?? '',
       ));
     }
     
@@ -203,6 +217,8 @@ class OrderController extends ChangeNotifier {
         'price_per_can': newOrder.pricePerUnit,
         'total_price': newOrder.totalAmount,
         'time': newOrder.formattedDate,
+        'delivery_address': newOrder.deliveryAddress,
+        'order_details': newOrder.items.map((i) => i.toJson()).toList(),
       };
 
       final res = await http.post(
