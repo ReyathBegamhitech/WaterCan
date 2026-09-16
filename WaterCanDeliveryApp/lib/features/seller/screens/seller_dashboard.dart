@@ -51,7 +51,11 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                  o.id.toLowerCase().contains(q) ||
                  (o.customerPhone?.contains(q) ?? false) ||
                  o.sellerStatusString.toLowerCase().contains(q);
-        }).toList();
+        }).toList()..sort((a, b) {
+          if (a.isFastDelivery && !b.isFastDelivery) return -1;
+          if (!a.isFastDelivery && b.isFastDelivery) return 1;
+          return b.timestamp.compareTo(a.timestamp); // Newest first
+        });
 
         return Scaffold(
           backgroundColor: AppColors.seller50,
