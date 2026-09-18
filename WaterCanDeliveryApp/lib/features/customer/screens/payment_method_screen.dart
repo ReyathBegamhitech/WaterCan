@@ -32,6 +32,217 @@ class PaymentMethodScreen extends StatefulWidget {
 class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   String? _paymentMethod;
   bool _isProcessing = false;
+  bool _isAddressConfirmed = false;
+  late String _currentDeliveryAddress;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentDeliveryAddress = widget.deliveryAddress;
+  }
+
+  void _showEditAddressModal(BuildContext context) {
+    final userCtrl = Provider.of<UserController>(context, listen: false);
+    final defaultL1 = userCtrl.addressLine1;
+    final defaultL2 = userCtrl.addressLine2;
+
+    // Split the current address if possible, or just use it as line 1
+    String currentL1 = _currentDeliveryAddress;
+    String currentL2 = '';
+    if (_currentDeliveryAddress.contains(', ')) {
+      final parts = _currentDeliveryAddress.split(', ');
+      currentL1 = parts[0];
+      currentL2 = parts.length > 1 ? parts.sublist(1).join(', ') : '';
+    } else if (currentL1 == UserController.defaultFullAddress) {
+      currentL1 = defaultL1;
+      currentL2 = defaultL2;
+    }
+
+    final line1Ctrl = TextEditingController(text: currentL1);
+    final line2Ctrl = TextEditingController(text: currentL2);
+    bool saveAsDefault = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (modalContext, setModalState) {
+          return Container(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: MediaQuery.of(modalContext).viewInsets.bottom + 20,
+            ),
+            decoration: const BoxDecoration(
+              color: AppColors.surfaceContainerLowest,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Edit Delivery Address',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Update delivery destination for your water cans',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: line1Ctrl,
+                    decoration: InputDecoration(
+                      labelText: 'Flat / House No. / Building / Apartment',
+                      labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      prefixIcon: const Icon(Icons.home_outlined, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: line2Ctrl,
+                    decoration: InputDecoration(
+                      labelText: 'Street / Area / Landmark / Pincode',
+                      labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      prefixIcon: const Icon(Icons.location_on_outlined, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () {
+                      setModalState(() {
+                        saveAsDefault = !saveAsDefault;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: saveAsDefault,
+                            activeColor: AppColors.primary,
+                            onChanged: (val) {
+                              setModalState(() {
+                                saveAsDefault = val ?? false;
+                              });
+                            },
+                          ),
+                          Expanded(
+                            child: Text(
+                              'Save as my default profile address',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                color: AppColors.onSurface,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(sheetContext),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final l1 = line1Ctrl.text.trim();
+                            final l2 = line2Ctrl.text.trim();
+                            if (l1.isEmpty && l2.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please enter an address')),
+                              );
+                              return;
+                            }
+
+                            if (saveAsDefault) {
+                              await userCtrl.updateAddress(
+                                addressLine1: l1,
+                                addressLine2: l2,
+                              );
+                            }
+                            
+                            setState(() {
+                              if (l1.isEmpty) {
+                                _currentDeliveryAddress = l2;
+                              } else if (l2.isEmpty) {
+                                _currentDeliveryAddress = l1;
+                              } else {
+                                _currentDeliveryAddress = '$l1, $l2';
+                              }
+                            });
+
+                            if (sheetContext.mounted) {
+                              Navigator.pop(sheetContext);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.onPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          child: Text(
+                            saveAsDefault ? 'Save & Apply' : 'Apply to Order',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,9 +315,117 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
+                // ADDRESS CARD
                 Text(
-                  'SELECT PAYMENT METHOD',
+                  'DELIVERY ADDRESS',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _isAddressConfirmed ? AppColors.surfaceContainerLowest : const Color(0xFFF0FDF4),
+                    border: Border.all(
+                      color: _isAddressConfirmed ? AppColors.outlineVariant.withOpacity(0.5) : const Color(0xFF16A34A),
+                      width: _isAddressConfirmed ? 1 : 2,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.location_on, color: _isAddressConfirmed ? AppColors.onSurfaceVariant : const Color(0xFF16A34A), size: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Delivering to',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _currentDeliveryAddress,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                color: AppColors.onSurfaceVariant,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _isAddressConfirmed 
+                            ? () => setState(() => _isAddressConfirmed = false) 
+                            : () => _showEditAddressModal(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          _isAddressConfirmed ? 'Change' : 'Edit',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                if (!_isAddressConfirmed) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _isAddressConfirmed = true;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.onPrimary,
+                        elevation: 4,
+                        shadowColor: AppColors.primary.withOpacity(0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'DELIVER TO THIS ADDRESS',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+
+                if (_isAddressConfirmed) ...[
+                  const SizedBox(height: 24),
+                  
+                  Text(
+                    'SELECT PAYMENT METHOD',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -238,16 +557,20 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                     ),
                   ),
                 ),
+                ],
               ],
             ),
           ),
           
           // Sticky Bottom Action Area
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
+          
+          // Sticky Bottom Action Area - Only show if address is confirmed
+          if (_isAddressConfirmed)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
               padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 24),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLowest,
@@ -293,7 +616,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                           timestamp: DateTime.now(),
                           paymentMethod: finalPaymentMethod,
                           shopName: widget.shopName,
-                          deliveryAddress: widget.deliveryAddress,
+                          deliveryAddress: _currentDeliveryAddress,
                           customerName: userCtrl.customerName,
                           customerPhone: userCtrl.phone,
                           isFastDelivery: widget.isFastDelivery,
