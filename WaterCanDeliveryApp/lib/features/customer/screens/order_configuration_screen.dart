@@ -10,6 +10,7 @@ import '../controllers/user_controller.dart';
 import '../widgets/upi_payment_sheet.dart';
 import 'payment_status_screen.dart';
 import 'buyer_dashboard.dart';
+import 'payment_method_screen.dart';
 
 class OrderConfigurationScreen extends StatefulWidget {
   final Map<String, String> shop;
@@ -646,196 +647,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                   onEmptyQtyChanged: (val) => setState(() => empty5L = val > qty5L ? qty5L : val),
                 ),
 
-                // PAYMENT METHOD Section
-                Container(
-                  margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerLowest,
-                    border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'PAYMENT METHOD',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                              color: AppColors.onSurfaceVariant,
-                            ),
-                          ),
-                          Text(
-                            '100% Secure',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      
-                      // UPI Option
-                      GestureDetector(
-                        onTap: () => setState(() => _paymentMethod = 'upi'),
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: _paymentMethod == 'upi' ? const Color(0xFFF0FDF4) : Colors.transparent, // light green background
-                            border: Border.all(
-                              color: _paymentMethod == 'upi' ? const Color(0xFF16A34A) : AppColors.outlineVariant.withOpacity(0.5),
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.surfaceContainerLowest,
-                                      border: Border.all(
-                                        color: _paymentMethod == 'upi' ? const Color(0xFFDCFCE7) : AppColors.outlineVariant.withOpacity(0.3),
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.02),
-                                          blurRadius: 2,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(Icons.account_balance_wallet, size: 18, color: _paymentMethod == 'upi' ? const Color(0xFF16A34A) : AppColors.onSurfaceVariant),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'UPI',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.onSurface,
-                                          height: 1.2,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Google Pay, PhonePe, Paytm & more',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 10,
-                                          color: AppColors.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Radio<String>(
-                                value: 'upi',
-                                groupValue: _paymentMethod,
-                                onChanged: (val) => setState(() => _paymentMethod = val!),
-                                activeColor: AppColors.primary,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
 
-                      // COD Option
-                      GestureDetector(
-                        onTap: () => setState(() => _paymentMethod = 'cod'),
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: _paymentMethod == 'cod' ? const Color(0xFFF0FDF4) : AppColors.surface, // light green background
-                            border: Border.all(
-                              color: _paymentMethod == 'cod' ? const Color(0xFF16A34A) : AppColors.outlineVariant.withOpacity(0.5),
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.surface,
-                                      border: Border.all(
-                                        color: AppColors.outlineVariant.withOpacity(0.5),
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.02),
-                                          blurRadius: 2,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(Icons.payments, size: 18, color: _paymentMethod == 'cod' ? const Color(0xFF16A34A) : AppColors.onSurfaceVariant),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Cash on Delivery',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.onSurface,
-                                          height: 1.2,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Pay cash or scan QR at doorstep',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 10,
-                                          color: AppColors.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Radio<String>(
-                                value: 'cod',
-                                groupValue: _paymentMethod,
-                                onChanged: (val) => setState(() => _paymentMethod = val!),
-                                activeColor: AppColors.primary,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
 
                 // DELIVERY OPTIONS Section
                 Container(
@@ -1119,134 +931,24 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                         ));
                       }
                       
-                      final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch.toString().substring(5, 10)}';
                       final totalAmount = _calculateTotal().toDouble();
                       final currentShopName = widget.shop['name'] ?? 'Blue Drop Water Co.';
-
-                      String finalPaymentMethod = 'Cash on Delivery';
-
-                      if (_paymentMethod == 'upi') {
-                        // Open dynamic UPI app selector bottom sheet
-                        final selectedApp = await UpiPaymentSheet.show(
-                          context: context,
-                          totalAmount: totalAmount,
-                          orderId: orderId,
-                          shopName: currentShopName,
-                        );
-
-                        if (selectedApp == null) {
-                          // User dismissed bottom sheet without completing payment
-                          setState(() {
-                            _isProcessing = false;
-                          });
-                          return;
-                        }
-                        finalPaymentMethod = 'UPI ($selectedApp)';
-                      }
-
-                      final userCtrl = Provider.of<UserController>(context, listen: false);
                       final effectiveDeliveryAddress = _getEffectiveDeliveryAddress(context);
 
-                      final newOrder = OrderModel(
-                        id: orderId,
-                        items: items,
-                        totalAmount: totalAmount,
-                        timestamp: DateTime.now(),
-                        paymentMethod: finalPaymentMethod,
-                        shopName: currentShopName,
-                        deliveryAddress: effectiveDeliveryAddress,
-                        customerName: userCtrl.customerName,
-                        customerPhone: userCtrl.phone,
-                        isFastDelivery: _isFastDelivery,
-                      );
-
-                      Provider.of<OrderController>(context, listen: false).placeOrder(newOrder);
-
-                      if (context.mounted) {
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext dialogCtx) {
-                            return AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                              backgroundColor: AppColors.surfaceContainerLowest,
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 72,
-                                    height: 72,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.secondaryContainer,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.check_circle,
-                                      size: 56,
-                                      color: AppColors.secondary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Order Placed!',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.onSurface,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Your order has been placed successfully.',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14,
-                                      color: AppColors.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(dialogCtx); // close dialog
-                                      Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => BuyerDashboardScreen(
-                                            customerName: userCtrl.customerName,
-                                            address: userCtrl.addressLine1,
-                                            phone: userCtrl.phone,
-                                          ),
-                                        ),
-                                        (route) => false,
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: AppColors.onPrimary,
-                                      padding: const EdgeInsets.symmetric(vertical: 14),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    ),
-                                    child: Text(
-                                      'CONTINUE',
-                                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ).then((_) {
-                          if (mounted) {
-                            setState(() {
-                              _isProcessing = false;
-                            });
-                          }
-                        });
-                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentMethodScreen(
+                            items: items,
+                            totalAmount: totalAmount,
+                            shopName: currentShopName,
+                            deliveryAddress: effectiveDeliveryAddress,
+                            isFastDelivery: _isFastDelivery,
+                          ),
+                        ),
+                      ).then((_) {
+                        if (mounted) setState(() => _isProcessing = false);
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -1258,9 +960,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                       ),
                     ),
                     child: Text(
-                      _paymentMethod == 'upi' 
-                          ? 'PAY ₹${_calculateTotal()} & PLACE ORDER' 
-                          : 'PLACE ORDER',
+                      'PROCEED TO PAYMENT',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
