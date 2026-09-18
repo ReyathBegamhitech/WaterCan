@@ -195,22 +195,13 @@ class _SellerOrderStatusScreenState extends State<SellerOrderStatusScreen> {
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('SELLER MODULE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.seller600, letterSpacing: 0.5)),
                   Text('ORDER STATUS', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black87, letterSpacing: -0.5)),
                 ],
               ),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.seller100,
-              border: Border.all(color: AppColors.seller200),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text('Live Sync', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.seller800)),
-          )
         ],
       ),
     );

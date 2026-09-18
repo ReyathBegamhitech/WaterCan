@@ -261,11 +261,11 @@ class SellerOrderCard extends StatelessWidget {
           const SizedBox(height: 12),
           
           // Order Items Details (Expandable)
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.seller50,
+          Material(
+            color: AppColors.seller50,
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.seller200),
+              side: const BorderSide(color: AppColors.seller200),
             ),
             child: Theme(
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),

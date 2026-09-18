@@ -71,37 +71,39 @@ class UserController extends ChangeNotifier {
     String city = '',
     String pincode = '',
     String email = '',
+    bool rememberDevice = true,
   }) async {
     _customerName = name.trim().isNotEmpty ? name.trim() : 'User';
     _phone = phone.trim();
-    if (doorNo.isNotEmpty || _doorNo.isEmpty) {
-      _doorNo = doorNo.trim();
-    }
-    if (street.isNotEmpty) {
-      _street = street.trim();
-    }
-    if (city.isNotEmpty) {
-      _city = city.trim();
-    }
-    if (pincode.isNotEmpty) {
-      _pincode = pincode.trim();
-    }
-    if (email.isNotEmpty) {
-      _email = email.trim();
-    }
+    _doorNo = doorNo.trim();
+    _street = street.trim();
+    _city = city.trim();
+    _pincode = pincode.trim();
+    _email = email.trim();
     _isLoggedIn = true;
     notifyListeners();
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyName, _customerName);
-      await prefs.setString(_keyPhone, _phone);
-      await prefs.setString(_keyDoorNo, _doorNo);
-      await prefs.setString(_keyStreet, _street);
-      await prefs.setString(_keyCity, _city);
-      await prefs.setString(_keyPincode, _pincode);
-      await prefs.setString(_keyEmail, _email);
-      await prefs.setBool(_keyIsLoggedIn, true);
+      if (rememberDevice) {
+        await prefs.setString(_keyName, _customerName);
+        await prefs.setString(_keyPhone, _phone);
+        await prefs.setString(_keyDoorNo, _doorNo);
+        await prefs.setString(_keyStreet, _street);
+        await prefs.setString(_keyCity, _city);
+        await prefs.setString(_keyPincode, _pincode);
+        await prefs.setString(_keyEmail, _email);
+        await prefs.setBool(_keyIsLoggedIn, true);
+      } else {
+        await prefs.remove(_keyName);
+        await prefs.remove(_keyPhone);
+        await prefs.remove(_keyDoorNo);
+        await prefs.remove(_keyStreet);
+        await prefs.remove(_keyCity);
+        await prefs.remove(_keyPincode);
+        await prefs.remove(_keyEmail);
+        await prefs.remove(_keyIsLoggedIn);
+      }
     } catch (e) {
       debugPrint('Error saving user prefs: $e');
     }

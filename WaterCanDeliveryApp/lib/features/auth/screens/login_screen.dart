@@ -9,7 +9,8 @@ import 'package:http/http.dart' as http;
 import '../../customer/screens/buyer_dashboard.dart';
 import '../../seller/screens/seller_dashboard.dart';
 import 'register_screen.dart';
-
+import 'package:provider/provider.dart';
+import '../../customer/controllers/user_controller.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,11 +21,51 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _rememberDevice = false;
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAutoLogin();
+    });
+  }
+
+  Future<void> _checkAutoLogin() async {
+    final userCtrl = Provider.of<UserController>(context, listen: false);
+    await userCtrl.loadFromPrefs();
+    if (userCtrl.isLoggedIn) {
+      if (!mounted) return;
+      if (userCtrl.phone.toLowerCase().contains('seller')) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SellerDashboardScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BuyerDashboardScreen(
+              customerName: userCtrl.customerName,
+              address: userCtrl.displayAddress,
+              phone: userCtrl.phone,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _login() async {
     if (_phoneController.text == 'seller123' && _passwordController.text == '123456') {
+      await Provider.of<UserController>(context, listen: false).setUser(
+        name: 'Test Seller',
+        phone: 'seller123',
+        rememberDevice: _rememberDevice,
+      );
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const SellerDashboardScreen()),
@@ -33,6 +74,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (_phoneController.text == 'buyer123' && _passwordController.text == '123456') {
+      await Provider.of<UserController>(context, listen: false).setUser(
+        name: 'Test Buyer',
+        phone: 'buyer123',
+        doorNo: '123 Main St',
+        rememberDevice: _rememberDevice,
+      );
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -65,14 +113,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login successful!')));
+
+        final user = data['user'];
+        await Provider.of<UserController>(context, listen: false).setUser(
+          name: user['fullName'] ?? '',
+          phone: user['phone'] ?? '',
+          doorNo: user['doorNo'] ?? '',
+          street: user['street'] ?? '',
+          city: user['city'] ?? '',
+          pincode: user['pincode'] ?? '',
+          email: user['email'] ?? '',
+          rememberDevice: _rememberDevice,
+        );
+
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => BuyerDashboardScreen(
-              customerName: data['user']['fullName'],
-              address: data['user']['address'],
-              phone: data['user']['phone'],
+              customerName: user['fullName'],
+              address: [user['doorNo'], user['street'], user['city'], user['pincode']].where((p) => p != null && p.toString().isNotEmpty).join(', '),
+              phone: user['phone'],
             ),
           ),
         );
@@ -248,6 +311,35 @@ class _LoginScreenState extends State<LoginScreen> {
                               _obscurePassword = !_obscurePassword;
                             });
                           },
+                        ),
+                        const SizedBox(height: 12),
+                        
+                        // Remember Device Checkbox
+                        Row(
+                          children: [
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Checkbox(
+                                value: _rememberDevice,
+                                activeColor: AppColors.primary,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _rememberDevice = value);
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Remember this device',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 14,
+                                color: AppColors.onSurface,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 24), // pt-space-xs + space-md roughly
                         

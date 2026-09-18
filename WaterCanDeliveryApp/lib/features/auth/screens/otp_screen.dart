@@ -170,7 +170,7 @@ class _OtpScreenState extends State<OtpScreen> {
           await Provider.of<UserController>(context, listen: false).setUser(
             name: name,
             phone: phoneNum,
-            address: addr,
+            doorNo: addr, // Mapping addr to doorNo as a fallback
           );
 
           if (!mounted) return;

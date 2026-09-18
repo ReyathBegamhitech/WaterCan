@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../customer/controllers/order_controller.dart';
 import '../../customer/controllers/user_controller.dart';
+import '../../customer/models/order_model.dart';
 import '../widgets/seller_order_card.dart';
 import 'seller_analytics_screen.dart';
 import 'seller_editor_screen.dart';
@@ -21,6 +22,9 @@ class SellerDashboardScreen extends StatefulWidget {
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   String _selectedFilter = 'All';
+  int _fastOrdersPage = 0;
+  int _standardOrdersPage = 0;
+  static const int _itemsPerPage = 4;
   int _previousOrderCount = -1;
   bool _showNewOrderBanner = false;
   OrderController? _orderCtrl;
@@ -81,6 +85,17 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
           if (!a.isFastDelivery && b.isFastDelivery) return 1;
           return b.timestamp.compareTo(a.timestamp); // Newest first
         });
+
+        final fastOrders = activeOrders.where((o) => o.isFastDelivery).toList();
+        final standardOrders = activeOrders.where((o) => !o.isFastDelivery).toList();
+
+        final fastStartIndex = _fastOrdersPage * _itemsPerPage;
+        final fastEndIndex = (fastStartIndex + _itemsPerPage > fastOrders.length) ? fastOrders.length : fastStartIndex + _itemsPerPage;
+        final fastPageOrders = fastOrders.isNotEmpty ? fastOrders.sublist(fastStartIndex, fastEndIndex) : [];
+
+        final standardStartIndex = _standardOrdersPage * _itemsPerPage;
+        final standardEndIndex = (standardStartIndex + _itemsPerPage > standardOrders.length) ? standardOrders.length : standardStartIndex + _itemsPerPage;
+        final standardPageOrders = standardOrders.isNotEmpty ? standardOrders.sublist(standardStartIndex, standardEndIndex) : [];
 
         return Scaffold(
           backgroundColor: AppColors.seller50,
@@ -146,79 +161,28 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                             ),
                           ),
                         )
-                      : ListView.builder(
+                      : SingleChildScrollView(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          itemCount: activeOrders.length,
-                          itemBuilder: (context, index) {
-                            final order = activeOrders[index];
-                            final orderMap = order.toSellerOrderMap();
-                            
-                            Widget orderCard = SellerOrderCard(
-                              order: order,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => SellerOrderStatusScreen(
-                                      order: order,
-                                      onStatusUpdate: (newStatus) {
-                                        orderCtrl.updateOrderStatusByString(order.id, newStatus);
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
-                              onAccept: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Accept Order'),
-                                    content: const Text('Are you sure you want to accept this COD order?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          orderCtrl.updateOrderStatusByString(order.id, 'Accepted');
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('Accept', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                              onDecline: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Decline Order'),
-                                    content: const Text('Are you sure you want to decline this order? This action cannot be undone.'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          orderCtrl.updateOrderStatusByString(order.id, 'Cancelled');
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('Decline', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-
-                            if (index > 0 && activeOrders[index - 1].isFastDelivery && !order.isFastDelivery) {
-                              return Column(
-                                children: [
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (fastOrders.isNotEmpty) ...[
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
+                                  child: Text('Fast Delivery Orders', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.seller800)),
+                                ),
+                                ...fastPageOrders.map((o) => _buildOrderCard(o, orderCtrl)),
+                                _buildPaginationControls(
+                                  currentPage: _fastOrdersPage,
+                                  totalItems: fastOrders.length,
+                                  onPageChanged: (newPage) => setState(() => _fastOrdersPage = newPage),
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                              if (standardOrders.isNotEmpty) ...[
+                                if (fastOrders.isNotEmpty)
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                                     child: Row(
                                       children: [
                                         Expanded(child: Divider(color: Colors.grey.shade400, thickness: 1.5)),
@@ -229,15 +193,21 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                                         Expanded(child: Divider(color: Colors.grey.shade400, thickness: 1.5)),
                                       ],
                                     ),
+                                  )
+                                else
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
+                                    child: Text('Standard Orders', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.seller800)),
                                   ),
-                                  const SizedBox(height: 8),
-                                  orderCard,
-                                ],
-                              );
-                            }
-
-                            return orderCard;
-                          },
+                                ...standardPageOrders.map((o) => _buildOrderCard(o, orderCtrl)),
+                                _buildPaginationControls(
+                                  currentPage: _standardOrdersPage,
+                                  totalItems: standardOrders.length,
+                                  onPageChanged: (newPage) => setState(() => _standardOrdersPage = newPage),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                 ),
               ],
@@ -335,7 +305,9 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                             child: const Text('No'),
                           ),
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
+                              await Provider.of<UserController>(context, listen: false).clear();
+                              if (!context.mounted) return;
                               Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -542,6 +514,8 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                       if (newValue != null) {
                         setState(() {
                           _selectedFilter = newValue;
+                          _fastOrdersPage = 0;
+                          _standardOrdersPage = 0;
                         });
                       }
                     },
@@ -557,6 +531,102 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
               ],
             ),
           )
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildOrderCard(OrderModel order, OrderController orderCtrl) {
+    return SellerOrderCard(
+      order: order,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SellerOrderStatusScreen(
+              order: order,
+              onStatusUpdate: (newStatus) {
+                orderCtrl.updateOrderStatusByString(order.id, newStatus);
+              },
+            ),
+          ),
+        );
+      },
+      onAccept: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Accept Order'),
+            content: const Text('Are you sure you want to accept this COD order?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              ),
+              TextButton(
+                onPressed: () {
+                  orderCtrl.updateOrderStatusByString(order.id, 'Accepted');
+                  Navigator.pop(context);
+                },
+                child: const Text('Accept', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+      },
+      onDecline: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Decline Order'),
+            content: const Text('Are you sure you want to decline this order? This action cannot be undone.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              ),
+              TextButton(
+                onPressed: () {
+                  orderCtrl.updateOrderStatusByString(order.id, 'Cancelled');
+                  Navigator.pop(context);
+                },
+                child: const Text('Decline', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPaginationControls({
+    required int currentPage,
+    required int totalItems,
+    required ValueChanged<int> onPageChanged,
+  }) {
+    if (totalItems <= _itemsPerPage) return const SizedBox.shrink();
+    int totalPages = (totalItems / _itemsPerPage).ceil();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: currentPage > 0 ? () => onPageChanged(currentPage - 1) : null,
+          ),
+          Text(
+            'Page ${currentPage + 1} of $totalPages',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.seller800,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: currentPage < totalPages - 1 ? () => onPageChanged(currentPage + 1) : null,
+          ),
         ],
       ),
     );

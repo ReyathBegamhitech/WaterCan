@@ -128,22 +128,51 @@ class _SellerOrderHistoryScreenState extends State<SellerOrderHistoryScreen> {
                   const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('SELLER MODULE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.seller600, letterSpacing: 1.0)),
-                      Text('ORDER HISTORY', style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black87, letterSpacing: -0.5)),
+                      ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [AppColors.seller700, AppColors.seller400],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ).createShader(bounds),
+                        child: Text(
+                          'ORDER HISTORY',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColors.seller100,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.seller200),
+              InkWell(
+                onTap: () {
+                  Provider.of<OrderController>(context, listen: false).fetchSellerOrders();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Refreshing history...', style: GoogleFonts.plusJakartaSans()),
+                      duration: const Duration(seconds: 1),
+                      backgroundColor: AppColors.seller800,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppColors.seller100,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.seller200),
+                  ),
+                  child: const Icon(Icons.refresh, size: 16, color: AppColors.seller600),
                 ),
-                child: const Icon(Icons.history, size: 16, color: AppColors.seller600),
               )
             ],
           ),

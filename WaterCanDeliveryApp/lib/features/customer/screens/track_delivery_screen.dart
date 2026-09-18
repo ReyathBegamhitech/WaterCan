@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../models/order_model.dart';
 import '../controllers/order_controller.dart';
+import 'payment_method_screen.dart';
 
 class TrackDeliveryScreen extends StatelessWidget {
   final String orderId;
@@ -81,7 +82,7 @@ class TrackDeliveryScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   
                   // 6. Action CTA
-                  _buildBuyAgainButton(),
+                  _buildBuyAgainButton(context, order),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -578,14 +579,27 @@ class TrackDeliveryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBuyAgainButton() {
+  Widget _buildBuyAgainButton(BuildContext context, OrderModel order) {
     return Column(
       children: [
         SizedBox(
           width: double.infinity,
           height: 52,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentMethodScreen(
+                    items: order.items,
+                    totalAmount: order.totalAmount,
+                    shopName: order.shopName ?? 'Blue Drop Water Co.',
+                    deliveryAddress: order.deliveryAddress,
+                    isFastDelivery: order.isFastDelivery,
+                  ),
+                ),
+              );
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryContainer,
               foregroundColor: AppColors.onPrimary,

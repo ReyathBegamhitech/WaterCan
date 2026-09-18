@@ -518,16 +518,18 @@ class _UpiPaymentSheetState extends State<UpiPaymentSheet> {
   Widget _buildAppTile(UpiAppInfo app) {
     final isSelected = _isProcessing && _processingApp == app.name;
 
-    return InkWell(
-      onTap: _isProcessing ? null : () => _handleAppSelected(app),
+    return Material(
+      color: AppColors.surfaceContainerLowest,
       borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected
+      child: InkWell(
+        onTap: _isProcessing ? null : () => _handleAppSelected(app),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected
                 ? app.brandColor
                 : AppColors.outlineVariant.withOpacity(0.4),
             width: isSelected ? 1.8 : 1.0,
@@ -605,6 +607,7 @@ class _UpiPaymentSheetState extends State<UpiPaymentSheet> {
                 color: AppColors.outline,
               ),
           ],
+        ),
         ),
       ),
     );

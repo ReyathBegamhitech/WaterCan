@@ -5,7 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../controllers/user_controller.dart';
 import '../controllers/order_controller.dart';
 import 'my_orders_screen.dart';
-import 'product_detail_screen.dart';
+import 'order_configuration_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../auth/screens/login_screen.dart';
@@ -29,17 +29,10 @@ class BuyerDashboardScreen extends StatefulWidget {
 
 class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  String _selectedLocation = 'All';
-  String _sortBy = 'default';
-
-  bool get _isFilterActive => _selectedLocation != 'All' || _sortBy != 'default';
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -502,335 +495,79 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     });
   }
 
-  final List<Map<String, String>> shops = [
-    {
-      'name': 'Aqua Pure SpringsP',
-      'location': 'Sector 4, Bellandur',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuAet-1rb_NdGWMMjB0XFPCWZs2tPo8xJNywp8bDviNbrW1eTNTvTqz1DncuC9UeqWDgVcJ1bThd1934sHn2W06qu1I66hWvCwXinOF2P3b2k16ZaytIs71YkQtu7D4MJs1ziN9RhomXmlwrD-nEHxfXf1ewFzMWe_VWURXG5vlGv80c5UgH4nHuLubO2b4VRABwgmNL1Z5VrnOJzHgj6sihTjjWy1lWQw_qw8ykVRG5Pw23NdZ83OOh'
-    },
-    {
-      'name': 'Blue Drop Water Co.',
-      'location': 'Outer Ring Road, Bengaluru',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuAuCRqyDtGstt5_ULqIahq4qNxrL5ss9B-ZiYN2PZdLNT0fy9ldRjHJuBELLd12X4TMbRmc1yx1oD1jt8WtNwW_qyenU_AylmuWCDEH5M27RBLtCK34ssvaW0XEIlMvFf6lRjBwhWGKzIu3uMz1mvxsGbR5vXuqGgygRU3kSeIYmlHRM8yFn0ubjfRtEjll0BCrv1DHND-FIowU0j08cVM2m6pqbgAlCQ75ImQhZK_Q4IeygqDLZP0l'
-    },
-    {
-      'name': 'Pristine Waters Hub',
-      'location': 'Koramangala 5th Block',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuCBFduyAMEg9R71t9fPWde_lFIVuSEwfZ-DWelEVDYAH73UI8NB6e7yQpQHK25hgg5WAaDPkMcHl4Z50kqgZG4H4S6bOUX1JR-cRiG_KaKklnbzm_j3nPah-4D_vCRnsITR1tdQsId2-qwjDux3JHzZOPCv-ee8-64XCWtPV7vP6gczGZGJKAeyQrIX4QRsWmD0WdHJCbGozLw8F25P3fuJChH6D86xJ_PjXUsbFJZKYyqMLaIpWPml'
-    },
-    {
-      'name': 'Himalayan Stream Plant',
-      'location': 'HSR Layout, Sector 2',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxOqHs9vWA_K9QGqA62ze_SpTAU2MBNSmxncRe1FhEpwsZmacCz_LvhmujKVR0cEYgOVJWs0Zd62wyoeFhGVSSUmQbO18xdMkrvqEdH8q85419DX9ButZkHnQRwY1Smnyzx7FMWIRpVvBSaCxAsNxQZS517bMdghT4vYu2oQkVFZt2BrCWPV0irM8_p0vCtqsoUKelVF_cTowIIQfnixPkg5M2Peb_dr9RM3S7JGOK6YkPrffkEHFo'
-    },
-    {
-      'name': 'Crystal Clear Supplies',
-      'location': 'Marathahalli Main Rd',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuAet-1rb_NdGWMMjB0XFPCWZs2tPo8xJNywp8bDviNbrW1eTNTvTqz1DncuC9UeqWDgVcJ1bThd1934sHn2W06qu1I66hWvCwXinOF2P3b2k16ZaytIs71YkQtu7D4MJs1ziN9RhomXmlwrD-nEHxfXf1ewFzMWe_VWURXG5vlGv80c5UgH4nHuLubO2b4VRABwgmNL1Z5VrnOJzHgj6sihTjjWy1lWQw_qw8ykVRG5Pw23NdZ83OOh'
-    },
-    {
-      'name': 'Oasis Water Depot',
-      'location': 'Whitefield ITPL Road',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuAuCRqyDtGstt5_ULqIahq4qNxrL5ss9B-ZiYN2PZdLNT0fy9ldRjHJuBELLd12X4TMbRmc1yx1oD1jt8WtNwW_qyenU_AylmuWCDEH5M27RBLtCK34ssvaW0XEIlMvFf6lRjBwhWGKzIu3uMz1mvxsGbR5vXuqGgygRU3kSeIYmlHRM8yFn0ubjfRtEjll0BCrv1DHND-FIowU0j08cVM2m6pqbgAlCQ75ImQhZK_Q4IeygqDLZP0l'
-    },
-    {
-      'name': 'Glacier Peak Drops',
-      'location': 'Indiranagar 100ft Road',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuCBFduyAMEg9R71t9fPWde_lFIVuSEwfZ-DWelEVDYAH73UI8NB6e7yQpQHK25hgg5WAaDPkMcHl4Z50kqgZG4H4S6bOUX1JR-cRiG_KaKklnbzm_j3nPah-4D_vCRnsITR1tdQsId2-qwjDux3JHzZOPCv-ee8-64XCWtPV7vP6gczGZGJKAeyQrIX4QRsWmD0WdHJCbGozLw8F25P3fuJChH6D86xJ_PjXUsbFJZKYyqMLaIpWPml'
-    },
-    {
-      'name': 'Nectar Can Deliveries',
-      'location': 'BTM Layout, 2nd Stage',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxOqHs9vWA_K9QGqA62ze_SpTAU2MBNSmxncRe1FhEpwsZmacCz_LvhmujKVR0cEYgOVJWs0Zd62wyoeFhGVSSUmQbO18xdMkrvqEdH8q85419DX9ButZkHnQRwY1Smnyzx7FMWIRpVvBSaCxAsNxQZS517bMdghT4vYu2oQkVFZt2BrCWPV0irM8_p0vCtqsoUKelVF_cTowIIQfnixPkg5M2Peb_dr9RM3S7JGOK6YkPrffkEHFo'
-    },
-    {
-      'name': 'Springs Direct',
-      'location': 'Electronic City Phase 1',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuAet-1rb_NdGWMMjB0XFPCWZs2tPo8xJNywp8bDviNbrW1eTNTvTqz1DncuC9UeqWDgVcJ1bThd1934sHn2W06qu1I66hWvCwXinOF2P3b2k16ZaytIs71YkQtu7D4MJs1ziN9RhomXmlwrD-nEHxfXf1ewFzMWe_VWURXG5vlGv80c5UgH4nHuLubO2b4VRABwgmNL1Z5VrnOJzHgj6sihTjjWy1lWQw_qw8ykVRG5Pw23NdZ83OOh'
-    },
-    {
-      'name': 'River Source Co.',
-      'location': 'Jayanagar 4th Block',
-      'image': 'https://lh3.googleusercontent.com/aida-public/AB6AXuAuCRqyDtGstt5_ULqIahq4qNxrL5ss9B-ZiYN2PZdLNT0fy9ldRjHJuBELLd12X4TMbRmc1yx1oD1jt8WtNwW_qyenU_AylmuWCDEH5M27RBLtCK34ssvaW0XEIlMvFf6lRjBwhWGKzIu3uMz1mvxsGbR5vXuqGgygRU3kSeIYmlHRM8yFn0ubjfRtEjll0BCrv1DHND-FIowU0j08cVM2m6pqbgAlCQ75ImQhZK_Q4IeygqDLZP0l'
-    },
-  ];
 
-  List<Map<String, String>> get _filteredShops {
-    List<Map<String, String>> list = List.from(shops);
-
-    // 1. Filter by location
-    if (_selectedLocation != 'All') {
-      list = list.where((shop) {
-        final loc = (shop['location'] ?? '').toLowerCase();
-        return loc.contains(_selectedLocation.toLowerCase());
-      }).toList();
-    }
-
-    // 2. Filter by search query
-    if (_searchQuery.trim().isNotEmpty) {
-      final query = _searchQuery.trim().toLowerCase();
-      list = list.where((shop) {
-        final name = (shop['name'] ?? '').toLowerCase();
-        final loc = (shop['location'] ?? '').toLowerCase();
-        return name.contains(query) || loc.contains(query);
-      }).toList();
-    }
-
-    // 3. Sort
-    if (_sortBy == 'name_asc') {
-      list.sort((a, b) => (a['name'] ?? '').toLowerCase().compareTo((b['name'] ?? '').toLowerCase()));
-    } else if (_sortBy == 'name_desc') {
-      list.sort((a, b) => (b['name'] ?? '').toLowerCase().compareTo((a['name'] ?? '').toLowerCase()));
-    }
-
-    return list;
-  }
-
-  void _showFilterSheet() {
-    String tempLocation = _selectedLocation;
-    String tempSort = _sortBy;
-
-    const List<String> locations = [
-      'All',
-      'Bellandur',
-      'Outer Ring Road',
-      'Koramangala',
-      'HSR Layout',
-      'Marathahalli',
-      'Whitefield',
-      'Indiranagar',
-      'BTM Layout',
-      'Electronic City',
-      'Jayanagar',
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (modalContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Container(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-                left: 20,
-                right: 20,
-                top: 20,
+  Widget _buildPricingCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String price,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.6)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 24),
               ),
-              decoration: const BoxDecoration(
-                color: AppColors.surfaceContainerLowest,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              const SizedBox(width: 12),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.outlineVariant.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.tune, color: AppColors.primary, size: 20),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Filters & Sort',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setSheetState(() {
-                            tempLocation = 'All';
-                            tempSort = 'default';
-                          });
-                        },
-                        child: Text(
-                          'Reset All',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
                   Text(
-                    'SORT BY',
+                    title,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.onSurfaceVariant,
-                      letterSpacing: 0.8,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _buildSortChip(
-                        label: 'Recommended',
-                        icon: Icons.star_outline,
-                        isSelected: tempSort == 'default',
-                        onTap: () => setSheetState(() => tempSort = 'default'),
-                      ),
-                      _buildSortChip(
-                        label: 'Name (A to Z)',
-                        icon: Icons.arrow_downward,
-                        isSelected: tempSort == 'name_asc',
-                        onTap: () => setSheetState(() => tempSort = 'name_asc'),
-                      ),
-                      _buildSortChip(
-                        label: 'Name (Z to A)',
-                        icon: Icons.arrow_upward,
-                        isSelected: tempSort == 'name_desc',
-                        onTap: () => setSheetState(() => tempSort = 'name_desc'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
                   Text(
-                    'FILTER BY LOCATION',
+                    subtitle,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
                       color: AppColors.onSurfaceVariant,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 160),
-                    child: SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: locations.map((loc) {
-                          final isSelected = tempLocation == loc;
-                          return ChoiceChip(
-                            label: Text(loc),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setSheetState(() {
-                                tempLocation = selected ? loc : 'All';
-                              });
-                            },
-                            labelStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? AppColors.onPrimary : AppColors.onSurface,
-                            ),
-                            selectedColor: AppColors.primary,
-                            backgroundColor: AppColors.surfaceContainerLow,
-                            side: BorderSide(
-                              color: isSelected ? AppColors.primary : AppColors.outlineVariant.withOpacity(0.5),
-                            ),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            showCheckmark: false,
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedLocation = tempLocation;
-                          _sortBy = tempSort;
-                        });
-                        Navigator.pop(modalContext);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        'Apply Filters',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
                     ),
                   ),
                 ],
               ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildSortChip({
-    required String label,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.outlineVariant.withOpacity(0.5),
+            ],
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? AppColors.onPrimary : AppColors.onSurface,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                price,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.priceColor,
+                ),
               ),
-            ),
-          ],
-        ),
+              Text(
+                'per can',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -839,7 +576,6 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   Widget build(BuildContext context) {
     return Consumer<UserController>(
       builder: (context, userCtrl, _) {
-        final finalShops = _filteredShops;
         final displayName = userCtrl.customerName.isNotEmpty
             ? userCtrl.customerName
             : (widget.customerName?.isNotEmpty == true ? widget.customerName! : 'User');
@@ -857,7 +593,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
               elevation: 1,
               shadowColor: Colors.black.withOpacity(0.1),
               titleSpacing: 16,
-              leadingWidth: 150, // Increased to prevent overflow
+              leadingWidth: 150,
               leading: Padding(
                 padding: const EdgeInsets.only(left: 16.0, top: 12, bottom: 12),
                 child: GestureDetector(
@@ -866,9 +602,9 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerHigh, // Darker background to look more like a button
+                      color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)), // Added subtle border
+                      border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
                     ),
                     child: Row(
                       children: [
@@ -907,7 +643,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(right: 16.0),
-                  child: InkWell(
+                  child: GestureDetector(
                     onTap: () => _showProfileSheet(userCtrl),
                     child: CircleAvatar(
                       backgroundColor: AppColors.primary,
@@ -928,186 +664,14 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
               ],
             ),
           ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Search Bar
-            Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.search, color: AppColors.onSurfaceVariant, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (val) {
-                        setState(() {
-                          _searchQuery = val;
-                        });
-                      },
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'Search by shop name or location...',
-                        hintStyle: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          color: AppColors.onSurfaceVariant,
-                        ),
-                        border: InputBorder.none,
-                        isDense: true,
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, size: 16, color: AppColors.onSurfaceVariant),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() {
-                                    _searchQuery = '';
-                                  });
-                                },
-                              )
-                            : null,
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: _showFilterSheet,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: _isFilterActive
-                                ? AppColors.primary.withOpacity(0.12)
-                                : Colors.transparent,
-                            shape: BoxShape.circle,
-                            border: _isFilterActive
-                                ? Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.5)
-                                : null,
-                          ),
-                          child: Icon(
-                            Icons.tune,
-                            color: _isFilterActive ? AppColors.primary : AppColors.onSurfaceVariant,
-                            size: 20,
-                          ),
-                        ),
-                        if (_isFilterActive)
-                          Positioned(
-                            top: 2,
-                            right: 2,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Active Filter Tags
-            if (_isFilterActive || _searchQuery.isNotEmpty) ...[
-              const SizedBox(height: 10),
+          body: Stack(
+            children: [
               SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+                controller: _scrollController,
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 120.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_selectedLocation != 'All')
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: InputChip(
-                          avatar: const Icon(Icons.location_on, size: 14, color: AppColors.primary),
-                          label: Text(_selectedLocation, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600)),
-                          onDeleted: () => setState(() => _selectedLocation = 'All'),
-                          deleteIconColor: AppColors.primary,
-                          backgroundColor: AppColors.primary.withOpacity(0.08),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
-                        ),
-                      ),
-                    if (_sortBy != 'default')
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: InputChip(
-                          avatar: const Icon(Icons.sort, size: 14, color: AppColors.primary),
-                          label: Text(
-                            _sortBy == 'name_asc' ? 'Name: A-Z' : 'Name: Z-A',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600),
-                          ),
-                          onDeleted: () => setState(() => _sortBy = 'default'),
-                          deleteIconColor: AppColors.primary,
-                          backgroundColor: AppColors.primary.withOpacity(0.08),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
-                        ),
-                      ),
-                    if (_searchQuery.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: InputChip(
-                          avatar: const Icon(Icons.search, size: 14, color: AppColors.primary),
-                          label: Text('Search: "$_searchQuery"', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600)),
-                          onDeleted: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                          deleteIconColor: AppColors.primary,
-                          backgroundColor: AppColors.primary.withOpacity(0.08),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
-                        ),
-                      ),
-                    TextButton(
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                          _selectedLocation = 'All';
-                          _sortBy = 'default';
-                        });
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'Clear all',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
-
             // Delivering To Card
             Container(
               padding: const EdgeInsets.all(20),
@@ -1148,7 +712,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            InkWell(
+                            GestureDetector(
                               onTap: () {
                                 final TextEditingController doorNoCtrl = TextEditingController(
                                   text: userCtrl.doorNo,
@@ -1264,7 +828,6 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                   ),
                                 );
                               },
-                              borderRadius: BorderRadius.circular(6),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
@@ -1324,277 +887,284 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Available Shops Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(3),
+                    const SizedBox(height: 24),
+                    // Product Image
+                    Container(
+                      width: double.infinity,
+                      height: 288,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          'https://lh3.googleusercontent.com/aida-public/AB6AXuB6PE3NGNhdEAaS7qpzHWGvc9tQOLb7TuJwM2aFU_PYLOVBXaab7YULTJSvmGNiWlIVIKNTlYSKuc2C_hYtt3U_owMwXZoifPA_JZGHkSoV4wmusYnTqbrp9S7ORF-a041ZibcksBBicAbgJF2sVmb62kRqQN2hu10bCFbF5o6baAq07a7yTGOVGSv8cfvD3uJqxErfr3UO8TyH0kLW12Lq2FOrht4n8CHoVUe7gx5UENJmzg9Xn0FF',
+                          fit: BoxFit.cover,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Available Shops (${finalShops.length})',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.onSurface,
-                          letterSpacing: -0.5,
-                        ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Primary Headline (Vendor info)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Aqua Pure Springs Hub',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.onSurface,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.storefront_outlined, color: AppColors.primary, size: 18),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'Sector 4, Bellandur, Bengaluru - 560103',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14,
+                                    color: AppColors.onSurfaceVariant,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Litre & Pricing Section
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Litre & Pricing',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.onSurface,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildPricingCard(
+                            icon: Icons.water_drop,
+                            title: '25 Litre Can',
+                            subtitle: 'Standard household & office refill',
+                            price: '₹50',
+                          ),
+                          _buildPricingCard(
+                            icon: Icons.water_drop_outlined,
+                            title: '15 Litre Can',
+                            subtitle: 'Compact medium capacity',
+                            price: '₹35',
+                          ),
+                          _buildPricingCard(
+                            icon: Icons.local_drink,
+                            title: '10 Litre Can',
+                            subtitle: 'Small portable daily can',
+                            price: '₹25',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Sticky Bottom Bar
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 24),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLowest.withOpacity(0.95),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, -4),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 14.0),
-                    child: Text(
-                      'Verified water suppliers near you',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        color: AppColors.onSurfaceVariant,
+                  child: SafeArea(
+                    child: Center(
+                      child: _GlowingBookButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OrderConfigurationScreen(
+                                shop: const {
+                                  'id': '1',
+                                  'name': 'Aqua Pure Springs Hub',
+                                  'location': 'Sector 4, Bellandur, Bengaluru - 560103',
+                                },
+                                deliveryAddress: userCtrl.fullAddress.isNotEmpty && userCtrl.fullAddress != 'No address provided' 
+                                    ? userCtrl.fullAddress 
+                                    : UserController.defaultFullAddress,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Shop Grid with 3D Scroll Effect or Empty State
-            if (finalShops.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-                margin: const EdgeInsets.only(top: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLowest,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
                 ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color: AppColors.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.search_off, size: 40, color: AppColors.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No shops found',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'No suppliers match your search or filter criteria.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                          _selectedLocation = 'All';
-                          _sortBy = 'default';
-                        });
-                      },
-                      icon: const Icon(Icons.refresh, size: 16),
-                      label: const Text('Reset Filters'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.onPrimary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.75, // Adjust based on card height
-                ),
-                itemCount: finalShops.length,
-                itemBuilder: (context, index) {
-                  final shop = finalShops[index];
-                
-                return AnimatedBuilder(
-                  animation: _scrollController,
-                  builder: (context, child) {
-                    double scale = 1.0;
-                    double fadeLevel = 0.0;
-                    
-                    if (_scrollController.hasClients) {
-                      double cardTop = 280.0 + ((index ~/ 2) * 250.0);
-                      double screenCenter = _scrollController.offset + (MediaQuery.of(context).size.height / 2);
-                      double cardCenter = cardTop + 125.0;
-                      
-                      double distanceFromCenter = (screenCenter - cardCenter).abs();
-                      
-                      // Create a 'safe zone' in the middle of the screen where cards are 100% visible
-                      // This ensures the last row is visible even if it can't reach the exact pixel center
-                      double safeZone = 150.0; 
-                      double effectiveDistance = (distanceFromCenter - safeZone).clamp(0.0, 1000.0);
-                      
-                      // Smoother scale (down to 0.8)
-                      scale = (1 - (effectiveDistance / 800)).clamp(0.8, 1.0);
-                      
-                      // Fade level for opacity and fold
-                      fadeLevel = (effectiveDistance / 300).clamp(0.0, 1.0);
-                      
-                      // 3D Matrix Transform for fold and slide
-                      final double rotationDirection = cardCenter > screenCenter ? 1.0 : -1.0;
-                      final Matrix4 matrix = Matrix4.identity()
-                        ..setEntry(3, 2, 0.001) // Perspective
-                        ..translate(0.0, fadeLevel * 60.0 * rotationDirection, 0.0) // Slide outwards (parallax)
-                        ..rotateX(fadeLevel * 0.4 * rotationDirection) // 3D Fold back
-                        ..scale(scale, scale, 1.0);
-
-                      return Transform(
-                        transform: matrix,
-                        alignment: FractionalOffset.center,
-                        child: Opacity(
-                          // Clean fade into the background without dark overlays
-                          opacity: (1.0 - (fadeLevel * 1.2)).clamp(0.0, 1.0),
-                          child: child,
-                        ),
-                      );
-                    }
-
-                    return child!;
-                  },
-                  child: _buildShopCard(context, index, shop),
-                );
-              },
-            ),
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
-    );
-      },
-    );
-  }
-
-  Widget _buildShopCard(BuildContext context, int index, Map<String, String> shop) {
-    final card = Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  shop['image']!,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      shop['name']!,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.onSurface,
-                        height: 1.2,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      shop['location']!,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_forward, color: AppColors.onPrimary, size: 18),
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
+  }
+}
 
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(shop: shop),
+class _GlowingBookButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  const _GlowingBookButton({required this.onPressed});
+
+  @override
+  State<_GlowingBookButton> createState() => _GlowingBookButtonState();
+}
+
+class _GlowingBookButtonState extends State<_GlowingBookButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
+          width: 190,
+          height: 48,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(100),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.4),
+                blurRadius: 12,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: Stack(
+              children: [
+                SizedBox.expand(
+                  child: ElevatedButton(
+                    onPressed: widget.onPressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.onPrimary,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.shopping_bag_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'BOOK NOW',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment(-2.0 + (_controller.value * 4), 0),
+                          end: Alignment(-1.0 + (_controller.value * 4), 0),
+                          colors: [
+                            Colors.white.withOpacity(0.0),
+                            Colors.white.withOpacity(0.5),
+                            Colors.white.withOpacity(0.0),
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
-      borderRadius: BorderRadius.circular(12),
-      child: card,
     );
   }
 }

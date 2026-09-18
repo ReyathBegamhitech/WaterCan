@@ -1,12 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../customer/controllers/order_controller.dart';
+import '../../customer/models/order_model.dart';
 
-class SellerAnalyticsScreen extends StatelessWidget {
+class SellerAnalyticsScreen extends StatefulWidget {
   const SellerAnalyticsScreen({super.key});
 
   @override
+  State<SellerAnalyticsScreen> createState() => _SellerAnalyticsScreenState();
+}
+
+class _SellerAnalyticsScreenState extends State<SellerAnalyticsScreen> {
+  DateTime _selectedDate = DateTime.now();
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.seller600,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final orderCtrl = Provider.of<OrderController>(context);
+    final now = DateTime.now();
+    
+    final todayOrders = orderCtrl.orders.where((o) => 
+      o.timestamp.year == now.year && 
+      o.timestamp.month == now.month && 
+      o.timestamp.day == now.day
+    ).toList();
+    
+    final todayTotal = todayOrders.length;
+    final todayDelivered = todayOrders.where((o) => o.status == OrderStatus.delivered).length;
+    final todayPending = todayOrders.where((o) => o.status != OrderStatus.delivered && o.status != OrderStatus.cancelled).length;
+    
+    final monthlyOrders = orderCtrl.orders.where((o) => 
+      o.timestamp.year == now.year && 
+      o.timestamp.month == now.month
+    ).length;
+
+    final selectedDateOrders = orderCtrl.orders.where((o) => 
+      o.timestamp.year == _selectedDate.year && 
+      o.timestamp.month == _selectedDate.month && 
+      o.timestamp.day == _selectedDate.day
+    ).toList();
+
+    double codIncome = 0;
+    double upiIncome = 0;
+    for (var order in selectedDateOrders) {
+      if (order.status != OrderStatus.cancelled) {
+        final pm = order.paymentMethod.toLowerCase();
+        if (pm.contains('cod') || pm.contains('cash')) codIncome += order.totalAmount;
+        if (pm.contains('upi') || pm.contains('online')) upiIncome += order.totalAmount;
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7ED),
       body: SafeArea(
@@ -21,19 +91,44 @@ class SellerAnalyticsScreen extends StatelessWidget {
                   children: [
                     _buildSectionHeader('Today\'s Orders', 'Live Count'),
                     const SizedBox(height: 12),
-                    _buildTodayTotalCard(),
+                    _buildTodayTotalCard(todayTotal),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Expanded(child: _buildCompletedCard()),
+                        Expanded(child: _buildCompletedCard(todayDelivered)),
                         const SizedBox(width: 12),
-                        Expanded(child: _buildPendingCard()),
+                        Expanded(child: _buildPendingCard(todayPending)),
                       ],
                     ),
                     const SizedBox(height: 24),
                     _buildSectionHeader('Monthly Orders', 'Current Month', badgeColor: AppColors.seller700, badgeBg: AppColors.seller100),
                     const SizedBox(height: 12),
-                    _buildMonthlyOrdersCard(),
+                    _buildMonthlyOrdersCard(monthlyOrders),
+                    const SizedBox(height: 24),
+                    // Divider
+                    Container(
+                      height: 4,
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.black87, Colors.black54],
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(2)),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSectionHeader('Income by Date', 'Track Revenue', badgeColor: AppColors.seller700, badgeBg: AppColors.seller100),
+                    const SizedBox(height: 12),
+                    _buildDateSelector(),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: _buildIncomeCard('COD', codIncome, AppColors.seller600, AppColors.seller100, Icons.money)),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildIncomeCard('UPI', upiIncome, Colors.blue.shade700, Colors.blue.shade50, Icons.qr_code)),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -127,7 +222,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTodayTotalCard() {
+  Widget _buildTodayTotalCard(int total) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -168,7 +263,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
                   children: [
                     Container(width: 6, height: 6, decoration: BoxDecoration(color: Colors.green.shade500, shape: BoxShape.circle)),
                     const SizedBox(width: 4),
-                    Text('+2 new', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green.shade600)),
+                    Text('Live', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green.shade600)),
                   ],
                 ),
               )
@@ -179,7 +274,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('5', style: GoogleFonts.plusJakartaSans(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.grey.shade900, letterSpacing: -1.0, height: 1.0)),
+              Text('$total', style: GoogleFonts.plusJakartaSans(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.grey.shade900, letterSpacing: -1.0, height: 1.0)),
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text('Total received today', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
@@ -191,7 +286,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCompletedCard() {
+  Widget _buildCompletedCard(int count) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -224,7 +319,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Text('1', style: GoogleFonts.plusJakartaSans(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.grey.shade900, letterSpacing: -1.0, height: 1.0)),
+          Text('$count', style: GoogleFonts.plusJakartaSans(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.grey.shade900, letterSpacing: -1.0, height: 1.0)),
           const SizedBox(height: 4),
           Text('COMPLETED', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green.shade800, letterSpacing: 0.5)),
           const SizedBox(height: 2),
@@ -234,7 +329,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPendingCard() {
+  Widget _buildPendingCard(int count) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -267,7 +362,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Text('4', style: GoogleFonts.plusJakartaSans(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.grey.shade900, letterSpacing: -1.0, height: 1.0)),
+          Text('$count', style: GoogleFonts.plusJakartaSans(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.grey.shade900, letterSpacing: -1.0, height: 1.0)),
           const SizedBox(height: 4),
           Text('PENDING', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.amber.shade800, letterSpacing: 0.5)),
           const SizedBox(height: 2),
@@ -277,7 +372,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMonthlyOrdersCard() {
+  Widget _buildMonthlyOrdersCard(int count) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -334,7 +429,7 @@ class SellerAnalyticsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text('42', style: GoogleFonts.plusJakartaSans(fontSize: 36, fontWeight: FontWeight.w900, color: AppColors.seller600, letterSpacing: -1.0, height: 1.0)),
+                    Text('$count', style: GoogleFonts.plusJakartaSans(fontSize: 36, fontWeight: FontWeight.w900, color: AppColors.seller600, letterSpacing: -1.0, height: 1.0)),
                     const SizedBox(width: 6),
                     Text('orders total', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade500)),
                   ],
@@ -357,6 +452,91 @@ class SellerAnalyticsScreen extends StatelessWidget {
               ],
             ),
           )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateSelector() {
+    return InkWell(
+      onTap: _pickDate,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: AppColors.seller200),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.calendar_today, size: 18, color: AppColors.seller600),
+                const SizedBox(width: 12),
+                Text(
+                  '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ],
+            ),
+            Icon(Icons.arrow_drop_down, color: Colors.grey.shade600),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIncomeCard(String title, double amount, Color primaryColor, Color bgColor, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: bgColor.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primaryColor.withOpacity(0.5), width: 1.5),
+        boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.15), blurRadius: 12, spreadRadius: 1)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.2),
+                  border: Border.all(color: primaryColor.withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 16, color: primaryColor),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(color: primaryColor.withOpacity(0.15), borderRadius: BorderRadius.circular(4)),
+                child: Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, color: primaryColor, letterSpacing: 0.5)),
+              )
+            ],
+          ),
+          const SizedBox(height: 16),
+          TweenAnimationBuilder<double>(
+            key: ValueKey(amount),
+            tween: Tween<double>(begin: 0, end: amount),
+            duration: const Duration(milliseconds: 1500),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Text(
+                '₹${value.toStringAsFixed(amount.truncateToDouble() == amount ? 0 : 2)}',
+                style: GoogleFonts.plusJakartaSans(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.grey.shade900, letterSpacing: -0.5, height: 1.0),
+              );
+            },
+          ),
         ],
       ),
     );
