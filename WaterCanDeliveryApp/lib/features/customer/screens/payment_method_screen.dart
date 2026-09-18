@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../models/order_model.dart';
+import '../models/product_model.dart';
 import '../controllers/order_controller.dart';
 import '../controllers/user_controller.dart';
 import '../widgets/upi_payment_sheet.dart';
@@ -29,7 +30,7 @@ class PaymentMethodScreen extends StatefulWidget {
 }
 
 class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
-  String _paymentMethod = 'upi';
+  String? _paymentMethod;
   bool _isProcessing = false;
 
   @override
@@ -61,7 +62,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 120),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -258,7 +259,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _isProcessing ? null : () async {
+                      onPressed: (_isProcessing || _paymentMethod == null) ? null : () async {
                         setState(() {
                           _isProcessing = true;
                         });
@@ -404,7 +405,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                         : Text(
                             _paymentMethod == 'upi' 
                                 ? 'PAY ₹${widget.totalAmount.toInt()} & PLACE ORDER' 
-                                : 'PLACE ORDER',
+                                : (_paymentMethod == 'cod' ? 'PLACE ORDER' : 'SELECT PAYMENT METHOD'),
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
