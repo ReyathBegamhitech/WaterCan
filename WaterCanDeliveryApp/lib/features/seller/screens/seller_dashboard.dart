@@ -21,6 +21,9 @@ class SellerDashboardScreen extends StatefulWidget {
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   String _selectedFilter = 'All';
+  int _previousOrderCount = -1;
+  bool _showNewOrderBanner = false;
+  OrderController? _orderCtrl;
 
   @override
   void initState() {
@@ -30,13 +33,36 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
       duration: const Duration(seconds: 3),
     )..repeat();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OrderController>(context, listen: false).startPollingSellerOrders();
+      _orderCtrl = Provider.of<OrderController>(context, listen: false);
+      _previousOrderCount = _orderCtrl!.activeOrders.length;
+      _orderCtrl!.addListener(_onOrderUpdate);
+      _orderCtrl!.startPollingSellerOrders();
     });
+  }
+
+  void _onOrderUpdate() {
+    if (!mounted) return;
+    if (_orderCtrl != null) {
+      if (_previousOrderCount != -1 && _orderCtrl!.activeOrders.length > _previousOrderCount) {
+        setState(() {
+          _showNewOrderBanner = true;
+        });
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            setState(() {
+              _showNewOrderBanner = false;
+            });
+          }
+        });
+      }
+      _previousOrderCount = _orderCtrl!.activeOrders.length;
+    }
   }
 
   @override
   void dispose() {
     _shimmerController.dispose();
+    _orderCtrl?.removeListener(_onOrderUpdate);
     super.dispose();
   }
 
@@ -62,6 +88,21 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
             child: Column(
               children: [
                 _buildTopNav(),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: _showNewOrderBanner ? 40 : 0,
+                  width: double.infinity,
+                  color: AppColors.primary,
+                  alignment: Alignment.center,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: _showNewOrderBanner ? 1.0 : 0.0,
+                    child: Text(
+                      '🔔 New Order Received!', 
+                      style: GoogleFonts.plusJakartaSans(color: AppColors.onPrimary, fontWeight: FontWeight.bold, fontSize: 14)
+                    ),
+                  ),
+                ),
                 _buildHeader(),
                 _buildFilterRow(activeOrders.length),
                 Expanded(
