@@ -101,7 +101,7 @@ async function dispatchRealSms(phone: string, otp: string): Promise<{ sent: bool
 
 // Endpoint to send real-time OTP to user's phone number
 router.post('/send-otp', async (req: Request, res: Response): Promise<void> => {
-  const { phone } = req.body;
+  const { phone, isRegistering } = req.body;
 
   if (!phone || typeof phone !== 'string') {
     res.status(400).json({ success: false, message: 'Please provide a valid phone number' });
@@ -112,6 +112,14 @@ router.post('/send-otp', async (req: Request, res: Response): Promise<void> => {
   if (cleanPhone.length !== 10) {
     res.status(400).json({ success: false, message: 'Please provide a valid 10-digit phone number' });
     return;
+  }
+
+  if (isRegistering) {
+    const userResult = await pool.query('SELECT * FROM users WHERE phone_number = $1', [cleanPhone]);
+    if (userResult.rows.length > 0) {
+      res.status(409).json({ success: false, message: 'Phone number is already registered. Please login.' });
+      return;
+    }
   }
 
   // Generate 4-digit OTP

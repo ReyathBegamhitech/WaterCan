@@ -134,7 +134,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final response = await http.post(
         Uri.parse(ApiConstants.sendOtp),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'phone': phone}),
+        body: jsonEncode({
+          'phone': phone,
+          'isRegistering': true,
+        }),
       );
 
       final data = jsonDecode(response.body);
