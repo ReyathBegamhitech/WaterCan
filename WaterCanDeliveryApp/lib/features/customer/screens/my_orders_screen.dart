@@ -6,6 +6,7 @@ import '../models/order_model.dart';
 import '../controllers/order_controller.dart';
 import '../controllers/user_controller.dart';
 import 'track_delivery_screen.dart';
+import 'payment_method_screen.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -293,7 +294,27 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
           // no actions
         } else if (order.status == OrderStatus.delivered) {
           actions.add(_buildActionButton('View Receipt', Icons.receipt_long, AppColors.surfaceContainer, AppColors.onSurface, false));
-          actions.add(_buildActionButton('Reorder', Icons.replay, AppColors.primaryContainer, AppColors.onPrimary, false));
+          actions.add(_buildActionButton(
+            'Reorder', 
+            Icons.replay, 
+            AppColors.primaryContainer, 
+            AppColors.onPrimary, 
+            false,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentMethodScreen(
+                    items: order.items,
+                    totalAmount: order.totalAmount,
+                    shopName: order.shopName ?? 'Water Can Shop',
+                    deliveryAddress: order.deliveryAddress ?? '',
+                    isFastDelivery: order.isFastDelivery,
+                  ),
+                ),
+              );
+            }
+          ));
         } else {
           if (order.status == OrderStatus.placed || order.status == OrderStatus.accepted) {
              actions.add(_buildActionButton(
