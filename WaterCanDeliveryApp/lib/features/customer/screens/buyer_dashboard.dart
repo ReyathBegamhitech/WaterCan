@@ -73,47 +73,21 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: AppColors.primaryContainer,
-                        child: Text(
-                          userCtrl.customerName.trim().isNotEmpty
-                              ? userCtrl.customerName.trim()[0].toUpperCase()
-                              : 'U',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 34,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
+                  CircleAvatar(
+                    radius: 42,
+                    backgroundColor: const Color(0xFFE0F2FE), // Light sky blue
+                    child: Text(
+                      userCtrl.customerName.trim().isNotEmpty
+                          ? userCtrl.customerName.trim()[0].toUpperCase()
+                          : 'U',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF0284C7), // Dark sky blue
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          setModalState(() {
-                            isEditingName = !isEditingName;
-                            nameController.text = userCtrl.customerName;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: Icon(
-                            isEditingName ? Icons.close : Icons.edit,
-                            size: 14,
-                            color: AppColors.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   if (isEditingName) ...[
                     Row(
                       children: [
