@@ -35,7 +35,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _doorNoController = TextEditingController();
+  final TextEditingController _streetController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _pincodeController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController(text: '');
@@ -82,7 +85,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _countdownTimer?.cancel();
     _customerNameController.dispose();
     _emailController.dispose();
-    _addressController.dispose();
+    _doorNoController.dispose();
+    _streetController.dispose();
+    _cityController.dispose();
+    _pincodeController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _phoneController.dispose();
@@ -297,7 +303,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     if (_customerNameController.text.isEmpty ||
         _phoneController.text.isEmpty ||
-        _addressController.text.isEmpty ||
+        _doorNoController.text.isEmpty ||
+        _streetController.text.isEmpty ||
+        _cityController.text.isEmpty ||
+        _pincodeController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields.')));
       return;
@@ -340,7 +349,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'phone': _phoneController.text,
           'whatsapp': _whatsappController.text,
           'email': _emailController.text.isEmpty ? null : _emailController.text,
-          'address': _addressController.text,
+          'doorNo': _doorNoController.text,
+          'street': _streetController.text,
+          'city': _cityController.text,
+          'pincode': _pincodeController.text,
           'password': _passwordController.text,
         }),
       );
@@ -351,13 +363,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (response.statusCode == 201) {
         final name = _customerNameController.text.trim();
         final phone = _phoneController.text.trim();
-        final address = _addressController.text.trim();
+        final doorNo = _doorNoController.text.trim();
+        final street = _streetController.text.trim();
+        final city = _cityController.text.trim();
+        final pincode = _pincodeController.text.trim();
         final email = _emailController.text.trim();
 
         await Provider.of<UserController>(context, listen: false).setUser(
           name: name,
           phone: phone,
-          address: address,
+          doorNo: doorNo,
+          street: street,
+          city: city,
+          pincode: pincode,
           email: email,
         );
 
@@ -366,7 +384,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BuyerDashboardScreen(
           customerName: name,
           phone: phone,
-          address: address,
         )));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Registration failed.')));
@@ -885,12 +902,56 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 20),
 
-              // 8. Address
-              CustomTextField(
-                label: 'Address *',
-                hintText: 'Enter Complete Address',
-                maxLines: 3,
-                controller: _addressController,
+              // 8. Delivery Address
+              Text(
+                'Delivery Address *',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onSurface,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: CustomTextField(
+                      label: 'Door No *',
+                      hintText: 'Flat / Door',
+                      controller: _doorNoController,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: CustomTextField(
+                      label: 'Street *',
+                      hintText: 'Street Name',
+                      controller: _streetController,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                      label: 'City *',
+                      hintText: 'City / Area',
+                      controller: _cityController,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: CustomTextField(
+                      label: 'Pincode *',
+                      hintText: '6 Digit PIN',
+                      controller: _pincodeController,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
 

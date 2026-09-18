@@ -1,43 +1,42 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import '../../../core/constants/api_constants.dart';
 
 class UserController extends ChangeNotifier {
   static const String _keyName = 'user_name';
   static const String _keyPhone = 'user_phone';
-  static const String _keyAddress1 = 'user_address_1';
-  static const String _keyAddress2 = 'user_address_2';
+  static const String _keyDoorNo = 'user_door_no';
+  static const String _keyStreet = 'user_street';
+  static const String _keyCity = 'user_city';
+  static const String _keyPincode = 'user_pincode';
   static const String _keyEmail = 'user_email';
   static const String _keyIsLoggedIn = 'user_is_logged_in';
 
+  static const String defaultFullAddress = '';
+
   String _customerName = 'User';
   String _phone = '';
-  String _addressLine1 = '';
-  String _addressLine2 = '';
+  String _doorNo = '';
+  String _street = '';
+  String _city = '';
+  String _pincode = '';
   String _email = '';
   bool _isLoggedIn = false;
 
-  static const String defaultAddressLine1 = '';
-  static const String defaultAddressLine2 = '';
-  static const String defaultFullAddress = '';
-
   String get customerName => _customerName;
   String get phone => _phone;
-  String get addressLine1 => _addressLine1;
-  String get addressLine2 => _addressLine2;
+  String get doorNo => _doorNo;
+  String get street => _street;
+  String get city => _city;
+  String get pincode => _pincode;
   String get email => _email;
   bool get isLoggedIn => _isLoggedIn;
 
   String get fullAddress {
-    if (_addressLine1.isEmpty && _addressLine2.isEmpty) {
-      return '';
-    }
-    if (_addressLine2.isEmpty) {
-      return _addressLine1;
-    }
-    if (_addressLine1.isEmpty) {
-      return _addressLine2;
-    }
-    return '$_addressLine1, $_addressLine2';
+    final parts = [_doorNo, _street, _city, _pincode].where((p) => p.isNotEmpty).toList();
+    return parts.join(', ');
   }
 
   /// Returns the effective address for dashboard and order display
@@ -51,8 +50,10 @@ class UserController extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       _customerName = prefs.getString(_keyName) ?? _customerName;
       _phone = prefs.getString(_keyPhone) ?? _phone;
-      _addressLine1 = prefs.getString(_keyAddress1) ?? _addressLine1;
-      _addressLine2 = prefs.getString(_keyAddress2) ?? _addressLine2;
+      _doorNo = prefs.getString(_keyDoorNo) ?? _doorNo;
+      _street = prefs.getString(_keyStreet) ?? _street;
+      _city = prefs.getString(_keyCity) ?? _city;
+      _pincode = prefs.getString(_keyPincode) ?? _pincode;
       _email = prefs.getString(_keyEmail) ?? _email;
       _isLoggedIn = prefs.getBool(_keyIsLoggedIn) ?? false;
       notifyListeners();
@@ -65,17 +66,25 @@ class UserController extends ChangeNotifier {
   Future<void> setUser({
     required String name,
     required String phone,
-    String address = '',
-    String addressLine2 = '',
+    String doorNo = '',
+    String street = '',
+    String city = '',
+    String pincode = '',
     String email = '',
   }) async {
     _customerName = name.trim().isNotEmpty ? name.trim() : 'User';
     _phone = phone.trim();
-    if (address.isNotEmpty || _addressLine1.isEmpty) {
-      _addressLine1 = address.trim();
+    if (doorNo.isNotEmpty || _doorNo.isEmpty) {
+      _doorNo = doorNo.trim();
     }
-    if (addressLine2.isNotEmpty) {
-      _addressLine2 = addressLine2.trim();
+    if (street.isNotEmpty) {
+      _street = street.trim();
+    }
+    if (city.isNotEmpty) {
+      _city = city.trim();
+    }
+    if (pincode.isNotEmpty) {
+      _pincode = pincode.trim();
     }
     if (email.isNotEmpty) {
       _email = email.trim();
@@ -87,8 +96,10 @@ class UserController extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keyName, _customerName);
       await prefs.setString(_keyPhone, _phone);
-      await prefs.setString(_keyAddress1, _addressLine1);
-      await prefs.setString(_keyAddress2, _addressLine2);
+      await prefs.setString(_keyDoorNo, _doorNo);
+      await prefs.setString(_keyStreet, _street);
+      await prefs.setString(_keyCity, _city);
+      await prefs.setString(_keyPincode, _pincode);
       await prefs.setString(_keyEmail, _email);
       await prefs.setBool(_keyIsLoggedIn, true);
     } catch (e) {
@@ -111,19 +122,42 @@ class UserController extends ChangeNotifier {
 
   /// Update delivery address
   Future<void> updateAddress({
-    required String addressLine1,
-    String addressLine2 = '',
+    required String doorNo,
+    required String street,
+    required String city,
+    required String pincode,
   }) async {
-    _addressLine1 = addressLine1.trim();
-    _addressLine2 = addressLine2.trim();
+    _doorNo = doorNo.trim();
+    _street = street.trim();
+    _city = city.trim();
+    _pincode = pincode.trim();
     notifyListeners();
 
     try {
+      // API call to update address in DB
+      final response = await http.put(
+        Uri.parse(ApiConstants.updateAddress),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phone': _phone,
+          'doorNo': _doorNo,
+          'street': _street,
+          'city': _city,
+          'pincode': _pincode,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        debugPrint('Failed to update address in DB: ${response.body}');
+      }
+
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyAddress1, _addressLine1);
-      await prefs.setString(_keyAddress2, _addressLine2);
+      await prefs.setString(_keyDoorNo, _doorNo);
+      await prefs.setString(_keyStreet, _street);
+      await prefs.setString(_keyCity, _city);
+      await prefs.setString(_keyPincode, _pincode);
     } catch (e) {
-      debugPrint('Error updating address in prefs: $e');
+      debugPrint('Error updating address in prefs/DB: $e');
     }
   }
 
@@ -144,8 +178,10 @@ class UserController extends ChangeNotifier {
   Future<void> clear() async {
     _customerName = 'User';
     _phone = '';
-    _addressLine1 = '';
-    _addressLine2 = '';
+    _doorNo = '';
+    _street = '';
+    _city = '';
+    _pincode = '';
     _email = '';
     _isLoggedIn = false;
     notifyListeners();
@@ -154,8 +190,10 @@ class UserController extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_keyName);
       await prefs.remove(_keyPhone);
-      await prefs.remove(_keyAddress1);
-      await prefs.remove(_keyAddress2);
+      await prefs.remove(_keyDoorNo);
+      await prefs.remove(_keyStreet);
+      await prefs.remove(_keyCity);
+      await prefs.remove(_keyPincode);
       await prefs.remove(_keyEmail);
       await prefs.setBool(_keyIsLoggedIn, false);
     } catch (e) {

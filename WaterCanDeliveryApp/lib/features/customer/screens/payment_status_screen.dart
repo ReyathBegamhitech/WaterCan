@@ -515,7 +515,7 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> with SingleTi
                           MaterialPageRoute(
                             builder: (context) => BuyerDashboardScreen(
                               customerName: userCtrl.customerName,
-                              address: userCtrl.addressLine1,
+                              address: userCtrl.doorNo,
                               phone: userCtrl.phone,
                             ),
                           ),

@@ -43,23 +43,25 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   void _showEditAddressModal(BuildContext context) {
     final userCtrl = Provider.of<UserController>(context, listen: false);
-    final defaultL1 = userCtrl.addressLine1;
-    final defaultL2 = userCtrl.addressLine2;
+    final defaultFull = userCtrl.fullAddress;
 
-    // Split the current address if possible, or just use it as line 1
-    String currentL1 = _currentDeliveryAddress;
-    String currentL2 = '';
-    if (_currentDeliveryAddress.contains(', ')) {
-      final parts = _currentDeliveryAddress.split(', ');
-      currentL1 = parts[0];
-      currentL2 = parts.length > 1 ? parts.sublist(1).join(', ') : '';
-    } else if (currentL1 == UserController.defaultFullAddress) {
-      currentL1 = defaultL1;
-      currentL2 = defaultL2;
+    String currentDoor = userCtrl.doorNo;
+    String currentStreet = userCtrl.street;
+    String currentCity = userCtrl.city;
+    String currentPincode = userCtrl.pincode;
+
+    if (_currentDeliveryAddress != defaultFull && _currentDeliveryAddress.isNotEmpty) {
+      // If the address was customized, just put it all in street for now
+      currentDoor = '';
+      currentStreet = _currentDeliveryAddress;
+      currentCity = '';
+      currentPincode = '';
     }
 
-    final line1Ctrl = TextEditingController(text: currentL1);
-    final line2Ctrl = TextEditingController(text: currentL2);
+    final doorNoCtrl = TextEditingController(text: currentDoor);
+    final streetCtrl = TextEditingController(text: currentStreet);
+    final cityCtrl = TextEditingController(text: currentCity);
+    final pincodeCtrl = TextEditingController(text: currentPincode);
     bool saveAsDefault = false;
 
     showModalBottomSheet(
@@ -112,24 +114,58 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: line1Ctrl,
-                    decoration: InputDecoration(
-                      labelText: 'Flat / House No. / Building / Apartment',
-                      labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      prefixIcon: const Icon(Icons.home_outlined, size: 20),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: TextField(
+                          controller: doorNoCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Door No',
+                            labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          controller: streetCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Street',
+                            labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  TextField(
-                    controller: line2Ctrl,
-                    decoration: InputDecoration(
-                      labelText: 'Street / Area / Landmark / Pincode',
-                      labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      prefixIcon: const Icon(Icons.location_on_outlined, size: 20),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: cityCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'City',
+                            labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: pincodeCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Pincode',
+                            labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   InkWell(
@@ -189,9 +225,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            final l1 = line1Ctrl.text.trim();
-                            final l2 = line2Ctrl.text.trim();
-                            if (l1.isEmpty && l2.isEmpty) {
+                            final doorNo = doorNoCtrl.text.trim();
+                            final street = streetCtrl.text.trim();
+                            final city = cityCtrl.text.trim();
+                            final pincode = pincodeCtrl.text.trim();
+                            
+                            final fullStr = [doorNo, street, city, pincode].where((p) => p.isNotEmpty).join(', ');
+
+                            if (fullStr.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Please enter an address')),
                               );
@@ -200,19 +241,16 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
                             if (saveAsDefault) {
                               await userCtrl.updateAddress(
-                                addressLine1: l1,
-                                addressLine2: l2,
+                                doorNo: doorNo,
+                                street: street,
+                                city: city,
+                                pincode: pincode,
                               );
                             }
                             
                             setState(() {
-                              if (l1.isEmpty) {
-                                _currentDeliveryAddress = l2;
-                              } else if (l2.isEmpty) {
-                                _currentDeliveryAddress = l1;
-                              } else {
-                                _currentDeliveryAddress = '$l1, $l2';
-                              }
+                              _currentDeliveryAddress = fullStr;
+                              _isAddressConfirmed = true;
                             });
 
                             if (sheetContext.mounted) {
@@ -684,7 +722,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                                           MaterialPageRoute(
                                             builder: (context) => BuyerDashboardScreen(
                                               customerName: userCtrl.customerName,
-                                              address: userCtrl.addressLine1,
+                                              address: userCtrl.fullAddress,
                                               phone: userCtrl.phone,
                                             ),
                                           ),

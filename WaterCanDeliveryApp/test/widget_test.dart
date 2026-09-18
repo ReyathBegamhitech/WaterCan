@@ -17,8 +17,8 @@ void main() {
       final controller = UserController();
       expect(controller.customerName, 'User');
       expect(controller.phone, '');
-      expect(controller.addressLine1, '');
-      expect(controller.addressLine2, '');
+      expect(controller.doorNo, '');
+      expect(controller.street, '');
       expect(controller.fullAddress, '');
     });
 
@@ -27,15 +27,17 @@ void main() {
       await controller.setUser(
         name: 'John Doe',
         phone: '9876543210',
-        address: '123 Water Street',
-        addressLine2: 'Bengaluru, 560001',
+        doorNo: '123',
+        street: 'Water Street',
+        city: 'Bengaluru',
+        pincode: '560001',
       );
 
       expect(controller.customerName, 'John Doe');
       expect(controller.phone, '9876543210');
-      expect(controller.addressLine1, '123 Water Street');
-      expect(controller.addressLine2, 'Bengaluru, 560001');
-      expect(controller.fullAddress, '123 Water Street, Bengaluru, 560001');
+      expect(controller.doorNo, '123');
+      expect(controller.street, 'Water Street');
+      expect(controller.fullAddress, '123, Water Street, Bengaluru, 560001');
       expect(controller.isLoggedIn, true);
     });
 
@@ -44,7 +46,7 @@ void main() {
       await controller.setUser(
         name: 'Alice',
         phone: '1111111111',
-        address: 'Old Address',
+        doorNo: 'Old Door',
       );
 
       await controller.updatePhone('9999999999');
@@ -52,11 +54,13 @@ void main() {
       expect(controller.customerName, 'Alice');
 
       await controller.updateAddress(
-        addressLine1: 'New Flat 401',
-        addressLine2: 'Indiranagar',
+        doorNo: 'New Flat 401',
+        street: 'Indiranagar',
+        city: 'BLR',
+        pincode: '560038',
       );
-      expect(controller.addressLine1, 'New Flat 401');
-      expect(controller.addressLine2, 'Indiranagar');
+      expect(controller.doorNo, 'New Flat 401');
+      expect(controller.street, 'Indiranagar');
       expect(controller.phone, '9999999999');
       expect(controller.customerName, 'Alice');
     });
@@ -66,7 +70,7 @@ void main() {
       await controller.setUser(
         name: 'Alice',
         phone: '1111111111',
-        address: 'Old Address',
+        doorNo: 'Old Address',
       );
 
       await controller.updateName('Alice Smith');
@@ -84,8 +88,8 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'user_name': 'Saved User',
         'user_phone': '8888888888',
-        'user_address_1': 'Saved House 12',
-        'user_address_2': 'Koramangala',
+        'user_door_no': 'Saved House 12',
+        'user_street': 'Koramangala',
         'user_is_logged_in': true,
       });
 
@@ -94,8 +98,8 @@ void main() {
 
       expect(controller.customerName, 'Saved User');
       expect(controller.phone, '8888888888');
-      expect(controller.addressLine1, 'Saved House 12');
-      expect(controller.addressLine2, 'Koramangala');
+      expect(controller.doorNo, 'Saved House 12');
+      expect(controller.street, 'Koramangala');
       expect(controller.isLoggedIn, true);
     });
 
@@ -104,15 +108,15 @@ void main() {
       await controller.setUser(
         name: 'Temp User',
         phone: '1234567890',
-        address: 'Temp Address',
+        doorNo: 'Temp Address',
       );
 
       await controller.clear();
 
       expect(controller.customerName, 'User');
       expect(controller.phone, '');
-      expect(controller.addressLine1, '');
-      expect(controller.addressLine2, '');
+      expect(controller.doorNo, '');
+      expect(controller.street, '');
       expect(controller.isLoggedIn, false);
     });
 
@@ -121,8 +125,9 @@ void main() {
       await controller.setUser(
         name: 'Jane Doe',
         phone: '9876543210',
-        address: 'Permanent Flat 101',
-        addressLine2: 'HSR Layout, Bengaluru',
+        doorNo: 'Permanent Flat 101',
+        street: 'HSR Layout',
+        city: 'Bengaluru',
       );
 
       expect(controller.fullAddress, 'Permanent Flat 101, HSR Layout, Bengaluru');

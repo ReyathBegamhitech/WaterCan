@@ -491,10 +491,12 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       if (userCtrl.phone.isEmpty && widget.phone != null && widget.phone!.isNotEmpty) {
         userCtrl.updatePhone(widget.phone!);
       }
-      if (userCtrl.addressLine1.isEmpty && widget.address != null && widget.address!.isNotEmpty) {
+      if (userCtrl.doorNo.isEmpty && widget.address != null && widget.address!.isNotEmpty) {
         userCtrl.updateAddress(
-          addressLine1: widget.address!,
-          addressLine2: '',
+          doorNo: widget.address!,
+          street: '',
+          city: '',
+          pincode: '',
         );
       }
     });
@@ -841,8 +843,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         final displayName = userCtrl.customerName.isNotEmpty
             ? userCtrl.customerName
             : (widget.customerName?.isNotEmpty == true ? widget.customerName! : 'User');
-        final givenAddress = userCtrl.addressLine1.isNotEmpty
-            ? userCtrl.addressLine1
+        final givenAddress = userCtrl.fullAddress.isNotEmpty
+            ? userCtrl.fullAddress
             : (widget.address?.isNotEmpty == true ? widget.address! : '');
         final displayAddress = givenAddress.isNotEmpty ? givenAddress : 'No address provided';
 
@@ -1148,11 +1150,17 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                             ),
                             InkWell(
                               onTap: () {
-                                final TextEditingController line1Ctrl = TextEditingController(
-                                  text: userCtrl.addressLine1,
+                                final TextEditingController doorNoCtrl = TextEditingController(
+                                  text: userCtrl.doorNo,
                                 );
-                                final TextEditingController line2Ctrl = TextEditingController(
-                                  text: userCtrl.addressLine2,
+                                final TextEditingController streetCtrl = TextEditingController(
+                                  text: userCtrl.street,
+                                );
+                                final TextEditingController cityCtrl = TextEditingController(
+                                  text: userCtrl.city,
+                                );
+                                final TextEditingController pincodeCtrl = TextEditingController(
+                                  text: userCtrl.pincode,
                                 );
                                 showModalBottomSheet(
                                   context: context,
@@ -1172,20 +1180,54 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                       children: [
                                         Text('Edit Delivery Address', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
                                         const SizedBox(height: 16),
-                                        TextField(
-                                          controller: line1Ctrl,
-                                          decoration: InputDecoration(
-                                            labelText: 'Address Line 1',
-                                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                          ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: TextField(
+                                                controller: doorNoCtrl,
+                                                decoration: InputDecoration(
+                                                  labelText: 'Door No',
+                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              flex: 2,
+                                              child: TextField(
+                                                controller: streetCtrl,
+                                                decoration: InputDecoration(
+                                                  labelText: 'Street',
+                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         const SizedBox(height: 12),
-                                        TextField(
-                                          controller: line2Ctrl,
-                                          decoration: InputDecoration(
-                                            labelText: 'Address Line 2 (City, Pincode)',
-                                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                          ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextField(
+                                                controller: cityCtrl,
+                                                decoration: InputDecoration(
+                                                  labelText: 'City',
+                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: TextField(
+                                                controller: pincodeCtrl,
+                                                decoration: InputDecoration(
+                                                  labelText: 'Pincode',
+                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         const SizedBox(height: 20),
                                         SizedBox(
@@ -1193,8 +1235,10 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                           child: ElevatedButton(
                                             onPressed: () async {
                                               await userCtrl.updateAddress(
-                                                addressLine1: line1Ctrl.text,
-                                                addressLine2: line2Ctrl.text,
+                                                doorNo: doorNoCtrl.text,
+                                                street: streetCtrl.text,
+                                                city: cityCtrl.text,
+                                                pincode: pincodeCtrl.text,
                                               );
                                               if (modalContext.mounted) {
                                                 Navigator.pop(modalContext);

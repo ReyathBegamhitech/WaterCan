@@ -198,9 +198,9 @@ router.post('/verify-otp', async (req: Request, res: Response): Promise<void> =>
 });
 
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
-  const { customerName, phone, whatsapp, email, address, password } = req.body;
+  const { customerName, phone, whatsapp, email, doorNo, street, city, pincode, password } = req.body;
 
-  if (!customerName || !phone || !address || !password) {
+  if (!customerName || !phone || !doorNo || !street || !city || !pincode || !password) {
     res.status(400).json({ success: false, message: 'Missing required fields' });
     return;
   }
@@ -241,9 +241,9 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     // 4. Insert into addresses table
     await client.query(
-      `INSERT INTO addresses (user_id, address_line_1, city, pincode, is_default)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [userId, address, 'Unknown', '000000', true] // Assuming City/Pincode aren't captured yet
+      `INSERT INTO addresses (user_id, door_no, street, city, pincode, is_default)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [userId, doorNo, street, city, pincode, true]
     );
 
     await client.query('COMMIT'); // Complete transaction
@@ -288,8 +288,8 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const addressResult = await pool.query('SELECT address_line_1 FROM addresses WHERE user_id = $1 LIMIT 1', [user.id]);
-    const address = addressResult.rows.length > 0 ? addressResult.rows[0].address_line_1 : '';
+    const addressResult = await pool.query('SELECT door_no, street, city, pincode FROM addresses WHERE user_id = $1 LIMIT 1', [user.id]);
+    const addressData = addressResult.rows.length > 0 ? addressResult.rows[0] : null;
 
     res.status(200).json({
       success: true,
@@ -298,7 +298,10 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         id: user.id,
         fullName: user.full_name,
         phone: phone,
-        address: address,
+        doorNo: addressData?.door_no || '',
+        street: addressData?.street || '',
+        city: addressData?.city || '',
+        pincode: addressData?.pincode || '',
       }
     });
   } catch (error) {
@@ -335,6 +338,44 @@ router.put('/phone', async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({ success: true, message: 'Phone number updated successfully' });
   } catch (error) {
     console.error('Update phone error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+router.put('/address', async (req: Request, res: Response): Promise<void> => {
+  const { phone, doorNo, street, city, pincode } = req.body;
+
+  if (!phone || !doorNo || !street || !city || !pincode) {
+    res.status(400).json({ success: false, message: 'Missing required fields' });
+    return;
+  }
+
+  try {
+    const userResult = await pool.query('SELECT id FROM users WHERE phone_number = $1', [phone]);
+    if (userResult.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+
+    const userId = userResult.rows[0].id;
+
+    // Check if address exists
+    const addressResult = await pool.query('SELECT id FROM addresses WHERE user_id = $1', [userId]);
+    if (addressResult.rows.length === 0) {
+      await pool.query(
+        `INSERT INTO addresses (user_id, door_no, street, city, pincode, is_default) VALUES ($1, $2, $3, $4, $5, $6)`,
+        [userId, doorNo, street, city, pincode, true]
+      );
+    } else {
+      await pool.query(
+        `UPDATE addresses SET door_no = $1, street = $2, city = $3, pincode = $4 WHERE user_id = $5`,
+        [doorNo, street, city, pincode, userId]
+      );
+    }
+
+    res.status(200).json({ success: true, message: 'Address updated successfully' });
+  } catch (error) {
+    console.error('Update address error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
