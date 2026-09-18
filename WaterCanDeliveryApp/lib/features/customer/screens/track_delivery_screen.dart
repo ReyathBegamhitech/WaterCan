@@ -347,9 +347,8 @@ class TrackDeliveryScreen extends StatelessWidget {
     // Determine which step is currently active
     int currentStep = 1;
     if (order.status == OrderStatus.accepted) currentStep = 2;
-    if (order.status == OrderStatus.preparing) currentStep = 3;
-    if (order.status == OrderStatus.outForDelivery) currentStep = 4;
-    if (order.status == OrderStatus.delivered) currentStep = 5;
+    if (order.status == OrderStatus.outForDelivery) currentStep = 3;
+    if (order.status == OrderStatus.delivered) currentStep = 4;
     
     return Container(
       decoration: BoxDecoration(
@@ -395,15 +394,7 @@ class TrackDeliveryScreen extends StatelessWidget {
             lineColor: currentStep > 2 ? AppColors.secondary : AppColors.surfaceContainerHigh,
             showLine: true,
           ),
-          _buildMilestoneStep(
-            title: 'Preparing',
-            time: 'Pending',
-            desc: 'Bottles sanitized & RO seal passed',
-            isDone: currentStep > 3,
-            isActive: currentStep == 3,
-            lineColor: currentStep > 3 ? AppColors.primaryContainer : AppColors.surfaceContainerHigh,
-            showLine: true,
-          ),
+
           _buildMilestoneStep(
             title: 'Out for Delivery',
             time: 'Pending',
@@ -417,8 +408,8 @@ class TrackDeliveryScreen extends StatelessWidget {
             title: 'Delivered',
             time: 'Pending',
             desc: 'Handover & digital empty can verification',
-            isDone: currentStep == 5,
-            isActive: currentStep == 5,
+            isDone: currentStep == 4,
+            isActive: currentStep == 4,
             lineColor: Colors.transparent,
             showLine: false,
           ),

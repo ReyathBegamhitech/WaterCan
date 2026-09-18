@@ -29,11 +29,6 @@ class _SellerOrderStatusScreenState extends State<SellerOrderStatusScreen> {
     {
       'title': 'Accepted',
       'desc': 'Order accepted by seller',
-    },
-    {
-      'title': 'Preparing',
-      'desc': 'Cleaning & filling 20L cans',
-    },
     {
       'title': 'Out for Delivery',
       'desc': 'Dispatched with delivery agent',
@@ -97,7 +92,6 @@ class _SellerOrderStatusScreenState extends State<SellerOrderStatusScreen> {
     switch (_selectedStatus) {
       case 'Placed': tempOrder.status = OrderStatus.placed; break;
       case 'Accepted': tempOrder.status = OrderStatus.accepted; break;
-      case 'Preparing': tempOrder.status = OrderStatus.preparing; break;
       case 'Out for Delivery': tempOrder.status = OrderStatus.outForDelivery; break;
       case 'Delivered': tempOrder.status = OrderStatus.delivered; break;
       case 'Cancelled': tempOrder.status = OrderStatus.cancelled; break;

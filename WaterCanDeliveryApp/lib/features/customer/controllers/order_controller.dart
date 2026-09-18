@@ -144,7 +144,6 @@ class OrderController extends ChangeNotifier {
       final s = statusStr.toLowerCase();
       if (s.contains('place')) status = OrderStatus.placed;
       else if (s.contains('accept')) status = OrderStatus.accepted;
-      else if (s.contains('prep')) status = OrderStatus.preparing;
       else if (s.contains('out') || (s.contains('deliver') && !s.contains('delivered'))) status = OrderStatus.outForDelivery;
       else if (s == 'delivered') status = OrderStatus.delivered;
       else if (s.contains('cancel')) status = OrderStatus.cancelled;
@@ -271,7 +270,6 @@ class OrderController extends ChangeNotifier {
     switch (newStatus) {
       case OrderStatus.placed: statusStr = 'Placed'; break;
       case OrderStatus.accepted: statusStr = 'Accepted'; break;
-      case OrderStatus.preparing: statusStr = 'Preparing'; break;
       case OrderStatus.outForDelivery: statusStr = 'Out for Delivery'; break;
       case OrderStatus.delivered: statusStr = 'Delivered'; break;
       case OrderStatus.cancelled: statusStr = 'Cancelled'; break;
@@ -288,7 +286,6 @@ class OrderController extends ChangeNotifier {
       final s = statusString.toLowerCase().trim();
       if (s.contains('place')) _orders[index].status = OrderStatus.placed;
       else if (s.contains('accept')) _orders[index].status = OrderStatus.accepted;
-      else if (s.contains('prep')) _orders[index].status = OrderStatus.preparing;
       else if (s.contains('out') || (s.contains('deliver') && !s.contains('delivered'))) _orders[index].status = OrderStatus.outForDelivery;
       else if (s == 'delivered') _orders[index].status = OrderStatus.delivered;
       else if (s.contains('cancel')) _orders[index].status = OrderStatus.cancelled;

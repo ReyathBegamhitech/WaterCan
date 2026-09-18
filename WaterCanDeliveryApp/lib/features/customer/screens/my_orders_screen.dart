@@ -281,10 +281,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
           statusColor = AppColors.secondaryContainer;
           statusTextColor = AppColors.onSecondaryContainer;
           statusIcon = const Icon(Icons.check_circle, size: 16, color: AppColors.onSecondaryContainer);
-        } else if (order.status == OrderStatus.preparing) {
-          statusColor = AppColors.surfaceContainerHigh;
-          statusTextColor = AppColors.primary;
-          statusIcon = const _SpinningIcon(icon: Icons.sync);
+
         } else {
           statusColor = AppColors.secondaryContainer;
           statusTextColor = AppColors.onSecondaryContainer;
@@ -298,7 +295,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
           actions.add(_buildActionButton('View Receipt', Icons.receipt_long, AppColors.surfaceContainer, AppColors.onSurface, false));
           actions.add(_buildActionButton('Reorder', Icons.replay, AppColors.primaryContainer, AppColors.onPrimary, false));
         } else {
-          if (order.status == OrderStatus.placed || order.status == OrderStatus.accepted || order.status == OrderStatus.preparing) {
+          if (order.status == OrderStatus.placed || order.status == OrderStatus.accepted) {
              actions.add(_buildActionButton(
                'Cancel Order', 
                Icons.cancel, 

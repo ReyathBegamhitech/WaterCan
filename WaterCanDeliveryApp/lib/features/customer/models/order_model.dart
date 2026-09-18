@@ -3,7 +3,6 @@ import 'product_model.dart';
 enum OrderStatus {
   placed,
   accepted,
-  preparing,
   outForDelivery,
   delivered,
   cancelled
@@ -71,7 +70,6 @@ class OrderModel {
     switch (status) {
       case OrderStatus.placed: return 'Placed';
       case OrderStatus.accepted: return 'Accepted';
-      case OrderStatus.preparing: return 'Preparing';
       case OrderStatus.outForDelivery: return 'Out for Delivery';
       case OrderStatus.delivered: return 'Delivered';
       case OrderStatus.cancelled: return 'Cancelled';
@@ -131,7 +129,6 @@ class OrderModel {
     switch (status) {
       case OrderStatus.placed: return 'Order Placed';
       case OrderStatus.accepted: return 'Accepted';
-      case OrderStatus.preparing: return 'Preparing';
       case OrderStatus.outForDelivery: return 'Out for Delivery';
       case OrderStatus.delivered: return 'Delivered';
       case OrderStatus.cancelled: return 'Cancelled';
