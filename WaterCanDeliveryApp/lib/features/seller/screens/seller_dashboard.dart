@@ -20,7 +20,7 @@ class SellerDashboardScreen extends StatefulWidget {
 
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
-  String _searchQuery = '';
+  String _selectedFilter = 'All';
 
   @override
   void initState() {
@@ -45,12 +45,11 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
     return Consumer<OrderController>(
       builder: (context, orderCtrl, _) {
         final activeOrders = orderCtrl.activeOrders.where((o) {
-          if (_searchQuery.trim().isEmpty) return true;
-          final q = _searchQuery.toLowerCase().trim();
-          return (o.customerName?.toLowerCase().contains(q) ?? false) ||
-                 o.id.toLowerCase().contains(q) ||
-                 (o.customerPhone?.contains(q) ?? false) ||
-                 o.sellerStatusString.toLowerCase().contains(q);
+          if (_selectedFilter == 'All') return true;
+          if (_selectedFilter == 'COD') return o.paymentMethod.toLowerCase() == 'cod' || o.paymentMethod.toLowerCase().contains('cash on delivery');
+          if (_selectedFilter == 'UPI') return o.paymentMethod.toLowerCase().contains('upi');
+          if (_selectedFilter == 'FAST DELIVERY') return o.isFastDelivery;
+          return true;
         }).toList()..sort((a, b) {
           if (a.isFastDelivery && !b.isFastDelivery) return -1;
           if (!a.isFastDelivery && b.isFastDelivery) return 1;
@@ -112,7 +111,8 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                           itemBuilder: (context, index) {
                             final order = activeOrders[index];
                             final orderMap = order.toSellerOrderMap();
-                            return SellerOrderCard(
+                            
+                            Widget orderCard = SellerOrderCard(
                               order: order,
                               onTap: () {
                                 Navigator.push(
@@ -172,6 +172,30 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                                 );
                               },
                             );
+
+                            if (index > 0 && activeOrders[index - 1].isFastDelivery && !order.isFastDelivery) {
+                              return Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(child: Divider(color: Colors.grey.shade400, thickness: 1.5)),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                          child: Text('Standard Orders', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade600)),
+                                        ),
+                                        Expanded(child: Divider(color: Colors.grey.shade400, thickness: 1.5)),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  orderCard,
+                                ],
+                              );
+                            }
+
+                            return orderCard;
                           },
                         ),
                 ),
@@ -457,8 +481,8 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
             ),
           ),
           Container(
-            width: 140,
             height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: AppColors.seller200),
@@ -466,26 +490,29 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
             ),
             child: Row(
               children: [
+                const Icon(Icons.filter_list, size: 14, color: AppColors.seller600),
                 const SizedBox(width: 8),
-                Icon(Icons.search, size: 14, color: AppColors.seller600),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: TextField(
-                    onChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                      });
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedFilter,
+                    icon: const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.seller600),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.seller800),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedFilter = newValue;
+                        });
+                      }
                     },
-                    decoration: InputDecoration(
-                      hintText: 'Filter / Search...',
-                      hintStyle: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.grey.shade400, fontWeight: FontWeight.w500),
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    style: GoogleFonts.plusJakartaSans(fontSize: 12),
+                    items: <String>['All', 'COD', 'UPI', 'FAST DELIVERY']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
-                )
+                ),
               ],
             ),
           )
