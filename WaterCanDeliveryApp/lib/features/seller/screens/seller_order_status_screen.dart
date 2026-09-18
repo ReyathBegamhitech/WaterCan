@@ -29,6 +29,7 @@ class _SellerOrderStatusScreenState extends State<SellerOrderStatusScreen> {
     {
       'title': 'Accepted',
       'desc': 'Order accepted by seller',
+    },
     {
       'title': 'Out for Delivery',
       'desc': 'Dispatched with delivery agent',
