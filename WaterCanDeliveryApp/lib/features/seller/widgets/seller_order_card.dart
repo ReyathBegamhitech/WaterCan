@@ -24,6 +24,8 @@ class SellerOrderCard extends StatelessWidget {
         return Colors.blue.shade100;
       case 'Accepted':
         return AppColors.seller100;
+      case 'Out for Delivery':
+        return Colors.orange.shade100;
       case 'Delivered':
         return Colors.green.shade100;
       case 'Cancelled':
@@ -39,6 +41,8 @@ class SellerOrderCard extends StatelessWidget {
         return Colors.blue.shade800;
       case 'Accepted':
         return AppColors.seller800;
+      case 'Out for Delivery':
+        return Colors.orange.shade800;
       case 'Delivered':
         return Colors.green.shade800;
       case 'Cancelled':
@@ -54,6 +58,8 @@ class SellerOrderCard extends StatelessWidget {
         return Colors.blue.shade200;
       case 'Accepted':
         return AppColors.seller200;
+      case 'Out for Delivery':
+        return Colors.orange.shade200;
       case 'Delivered':
         return Colors.green.shade200;
       case 'Cancelled':
@@ -67,7 +73,8 @@ class SellerOrderCard extends StatelessWidget {
     switch (order.sellerStatusString) {
       case 'Placed': return 0;
       case 'Accepted': return 1;
-      case 'Delivered': return 2;
+      case 'Out for Delivery': return 2;
+      case 'Delivered': return 3;
       default: return 0;
     }
   }
@@ -411,7 +418,7 @@ class SellerOrderCard extends StatelessWidget {
 
   Widget _buildProgressStepper() {
     int currentStep = _getStatusStep();
-    List<String> steps = ['Placed', 'Accepted', 'Delivered'];
+    List<String> steps = ['Placed', 'Accepted', 'Out for Delivery', 'Delivered'];
 
     return Stack(
       children: [
