@@ -368,9 +368,12 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                         ),
                       ),
                       TextButton(
-                        onPressed: _isAddressConfirmed 
-                            ? () => setState(() => _isAddressConfirmed = false) 
-                            : () => _showEditAddressModal(context),
+                        onPressed: () {
+                          setState(() {
+                            _isAddressConfirmed = false;
+                          });
+                          _showEditAddressModal(context);
+                        },
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           minimumSize: Size.zero,
@@ -389,43 +392,49 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   ),
                 ),
                 
-                if (!_isAddressConfirmed) ...[
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _isAddressConfirmed = true;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.onPrimary,
-                        elevation: 4,
-                        shadowColor: AppColors.primary.withOpacity(0.4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'DELIVER TO THIS ADDRESS',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: _isAddressConfirmed ? null : () {
+                      setState(() {
+                        _isAddressConfirmed = true;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isAddressConfirmed ? const Color(0xFFDCFCE7) : AppColors.primary,
+                      foregroundColor: _isAddressConfirmed ? const Color(0xFF16A34A) : AppColors.onPrimary,
+                      elevation: _isAddressConfirmed ? 0 : 4,
+                      shadowColor: AppColors.primary.withOpacity(0.4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (_isAddressConfirmed) ...[
+                          const Icon(Icons.check_circle, size: 20, color: Color(0xFF16A34A)),
+                          const SizedBox(width: 8),
+                        ],
+                        Text(
+                          _isAddressConfirmed ? 'CONFIRMED' : 'CONFIRM ADDRESS',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
 
-                if (_isAddressConfirmed) ...[
-                  const SizedBox(height: 24),
-                  
-                  Text(
-                    'SELECT PAYMENT METHOD',
+                const SizedBox(height: 24),
+                
+                Text(
+                  'SELECT PAYMENT METHOD',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -557,20 +566,16 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                     ),
                   ),
                 ),
-                ],
               ],
             ),
           ),
           
           // Sticky Bottom Action Area
-          
-          // Sticky Bottom Action Area - Only show if address is confirmed
-          if (_isAddressConfirmed)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
               padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 24),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLowest,
@@ -582,7 +587,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: (_isProcessing || _paymentMethod == null) ? null : () async {
+                      onPressed: (_isProcessing || _paymentMethod == null || !_isAddressConfirmed) ? null : () async {
                         setState(() {
                           _isProcessing = true;
                         });
