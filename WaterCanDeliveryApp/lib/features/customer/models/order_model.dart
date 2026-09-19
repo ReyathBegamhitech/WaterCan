@@ -17,6 +17,8 @@ class OrderModel {
   OrderStatus status;
   final String? shopName;
   final String deliveryAddress;
+  final double? latitude;
+  final double? longitude;
   final String? customerName;
   final String? customerPhone;
   final bool isFastDelivery;
@@ -30,6 +32,8 @@ class OrderModel {
     this.status = OrderStatus.placed,
     this.shopName,
     this.deliveryAddress = '',
+    this.latitude,
+    this.longitude,
     this.customerName,
     this.customerPhone,
     this.isFastDelivery = false,
@@ -44,6 +48,8 @@ class OrderModel {
         'status': status.index,
         'shopName': shopName,
         'deliveryAddress': deliveryAddress,
+        'latitude': latitude,
+        'longitude': longitude,
         'customerName': customerName,
         'customerPhone': customerPhone,
         'is_fast_delivery': isFastDelivery,
@@ -58,6 +64,8 @@ class OrderModel {
         status: OrderStatus.values[json['status'] ?? 0],
         shopName: json['shopName'],
         deliveryAddress: json['deliveryAddress'] ?? '',
+        latitude: json['latitude']?.toDouble(),
+        longitude: json['longitude']?.toDouble(),
         customerName: json['customerName'] ?? json['buyer_name'],
         customerPhone: json['customerPhone'] ?? json['buyer_phone'],
         isFastDelivery: json['is_fast_delivery'] ?? json['isFastDelivery'] ?? false,
@@ -86,6 +94,8 @@ class OrderModel {
       'quantity': totalQuantity > 0 ? totalQuantity : 1,
       'pricePerCan': pricePerUnit.round(),
       'deliveryAddress': deliveryAddress,
+      'latitude': latitude,
+      'longitude': longitude,
       'rawId': id,
     };
   }
@@ -99,6 +109,8 @@ class OrderModel {
       'buyerPhone': customerPhone?.isNotEmpty == true ? customerPhone! : 'Not provided',
       'amount': totalAmount.round(),
       'address': deliveryAddress.isNotEmpty ? deliveryAddress : 'No address provided',
+      'latitude': latitude,
+      'longitude': longitude,
       'isFastDelivery': isFastDelivery,
       'rawId': id,
     };

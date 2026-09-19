@@ -6,8 +6,12 @@ import '../models/order_model.dart';
 import '../models/product_model.dart';
 import '../controllers/order_controller.dart';
 import '../controllers/user_controller.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../widgets/upi_payment_sheet.dart';
 import 'buyer_dashboard.dart';
+import 'map_selection_screen.dart';
 
 class PaymentMethodScreen extends StatefulWidget {
   final List<CartItem> items;
@@ -34,11 +38,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   bool _isProcessing = false;
   bool _isAddressConfirmed = false;
   late String _currentDeliveryAddress;
+  double? _selectedLatitude;
+  double? _selectedLongitude;
 
   @override
   void initState() {
     super.initState();
     _currentDeliveryAddress = widget.deliveryAddress;
+    // We try to get initial lat/lng from user profile if it matches the default address
   }
 
   void _showEditAddressModal(BuildContext context) {
@@ -49,9 +56,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     String currentStreet = userCtrl.street;
     String currentCity = userCtrl.city;
     String currentPincode = userCtrl.pincode;
+    
+    // Set initially to whatever is known
+    if (_selectedLatitude == null && _currentDeliveryAddress == defaultFull) {
+      _selectedLatitude = userCtrl.latitude;
+      _selectedLongitude = userCtrl.longitude;
+    }
 
     if (_currentDeliveryAddress != defaultFull && _currentDeliveryAddress.isNotEmpty) {
-      // If the address was customized, just put it all in street for now
       currentDoor = '';
       currentStreet = _currentDeliveryAddress;
       currentCity = '';
@@ -63,6 +75,99 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     final cityCtrl = TextEditingController(text: currentCity);
     final pincodeCtrl = TextEditingController(text: currentPincode);
     bool saveAsDefault = false;
+    
+    double? tempLat = _selectedLatitude;
+    double? tempLng = _selectedLongitude;
+    bool _isFetchingLocation = false;
+
+    Future<void> _handleCurrentLocation(StateSetter setModalState) async {
+      setModalState(() {
+        _isFetchingLocation = true;
+      });
+      try {
+        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location services are disabled. Please enable GPS.')),
+            );
+          }
+          await Geolocator.openLocationSettings();
+          return;
+        }
+
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+          if (permission == LocationPermission.denied) return;
+        }
+        if (permission == LocationPermission.deniedForever) return;
+
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+        final url = Uri.parse(
+            'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${position.latitude}&lon=${position.longitude}');
+        final response = await http.get(url, headers: {
+          'User-Agent': 'WaterCanDeliveryApp/1.0',
+        });
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['address'] != null || data['display_name'] != null) {
+            final address = data['address'] ?? {};
+            
+            final road = address['road'] ?? address['street'] ?? '';
+            final suburb = address['suburb'] ?? address['neighbourhood'] ?? '';
+            final city = address['city'] ?? address['town'] ?? address['village'] ?? '';
+            final state = address['state'] ?? '';
+            final postcode = address['postcode'] ?? '';
+
+            setModalState(() {
+              doorNoCtrl.text = address['house_number'] ?? '';
+              streetCtrl.text = [road, suburb].where((e) => e.isNotEmpty).join(', ');
+              if (streetCtrl.text.isEmpty) streetCtrl.text = data['display_name'] ?? '';
+              cityCtrl.text = [city, state].where((e) => e.isNotEmpty).join(', ');
+              pincodeCtrl.text = postcode;
+              tempLat = position.latitude;
+              tempLng = position.longitude;
+            });
+          }
+        }
+      } catch (e) {
+        debugPrint('Error getting location: $e');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
+        }
+      } finally {
+        setModalState(() {
+          _isFetchingLocation = false;
+        });
+      }
+    }
+
+    Future<void> _handleMapSelection(StateSetter setModalState, BuildContext sheetContext) async {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MapSelectionScreen(
+            initialLat: tempLat,
+            initialLng: tempLng,
+          ),
+        ),
+      );
+
+      if (result != null && result is Map<String, dynamic>) {
+        setModalState(() {
+          tempLat = result['latitude'];
+          tempLng = result['longitude'];
+          doorNoCtrl.text = result['doorNo'] ?? '';
+          streetCtrl.text = result['street'] ?? '';
+          cityCtrl.text = result['city'] ?? '';
+          pincodeCtrl.text = result['pincode'] ?? '';
+        });
+      }
+    }
 
     showModalBottomSheet(
       context: context,
@@ -98,20 +203,67 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Edit Delivery Address',
+                    'Select Delivery Address',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Update delivery destination for your water cans',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      color: AppColors.onSurfaceVariant,
-                    ),
+                  const SizedBox(height: 16),
+                  
+                  // Location Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _isFetchingLocation ? null : () => _handleCurrentLocation(setModalState),
+                          icon: _isFetchingLocation 
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.my_location, size: 18),
+                          label: Text(
+                            _isFetchingLocation ? 'Locating...' : 'Current Location',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondaryContainer,
+                            foregroundColor: AppColors.secondary,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _handleMapSelection(setModalState, sheetContext),
+                          icon: const Icon(Icons.map, size: 18),
+                          label: Text(
+                            'Pin on Map',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondaryContainer,
+                            foregroundColor: AppColors.secondary,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text('OR ENTER MANUALLY', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: AppColors.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -245,11 +397,15 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                                 street: street,
                                 city: city,
                                 pincode: pincode,
+                                latitude: tempLat,
+                                longitude: tempLng,
                               );
                             }
                             
                             setState(() {
                               _currentDeliveryAddress = fullStr;
+                              _selectedLatitude = tempLat;
+                              _selectedLongitude = tempLng;
                               _isAddressConfirmed = true;
                             });
 
@@ -660,6 +816,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                           paymentMethod: finalPaymentMethod,
                           shopName: widget.shopName,
                           deliveryAddress: _currentDeliveryAddress,
+                          latitude: _selectedLatitude,
+                          longitude: _selectedLongitude,
                           customerName: userCtrl.customerName,
                           customerPhone: userCtrl.phone,
                           isFastDelivery: widget.isFastDelivery,

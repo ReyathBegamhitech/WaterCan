@@ -15,6 +15,8 @@ async function init() {
         status VARCHAR(50) DEFAULT 'Placed',
         time VARCHAR(50),
         delivery_address TEXT,
+        latitude NUMERIC,
+        longitude NUMERIC,
         order_details JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )

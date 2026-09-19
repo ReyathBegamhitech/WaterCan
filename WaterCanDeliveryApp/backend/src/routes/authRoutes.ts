@@ -241,9 +241,9 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     // 4. Insert into addresses table
     await client.query(
-      `INSERT INTO addresses (user_id, door_no, street, city, pincode, is_default)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [userId, doorNo, street, city, pincode, true]
+      `INSERT INTO addresses (user_id, door_no, street, city, pincode, is_default, latitude, longitude)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [userId, doorNo, street, city, pincode, true, req.body.latitude || null, req.body.longitude || null]
     );
 
     await client.query('COMMIT'); // Complete transaction
@@ -288,7 +288,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const addressResult = await pool.query('SELECT door_no, street, city, pincode FROM addresses WHERE user_id = $1 LIMIT 1', [user.id]);
+    const addressResult = await pool.query('SELECT door_no, street, city, pincode, latitude, longitude FROM addresses WHERE user_id = $1 LIMIT 1', [user.id]);
     const addressData = addressResult.rows.length > 0 ? addressResult.rows[0] : null;
 
     res.status(200).json({
@@ -302,6 +302,8 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         street: addressData?.street || '',
         city: addressData?.city || '',
         pincode: addressData?.pincode || '',
+        latitude: addressData?.latitude || null,
+        longitude: addressData?.longitude || null,
       }
     });
   } catch (error) {
@@ -343,7 +345,7 @@ router.put('/phone', async (req: Request, res: Response): Promise<void> => {
 });
 
 router.put('/address', async (req: Request, res: Response): Promise<void> => {
-  const { phone, doorNo, street, city, pincode } = req.body;
+  const { phone, doorNo, street, city, pincode, latitude, longitude } = req.body;
 
   if (!phone || !doorNo || !street || !city || !pincode) {
     res.status(400).json({ success: false, message: 'Missing required fields' });
@@ -363,13 +365,13 @@ router.put('/address', async (req: Request, res: Response): Promise<void> => {
     const addressResult = await pool.query('SELECT id FROM addresses WHERE user_id = $1', [userId]);
     if (addressResult.rows.length === 0) {
       await pool.query(
-        `INSERT INTO addresses (user_id, door_no, street, city, pincode, is_default) VALUES ($1, $2, $3, $4, $5, $6)`,
-        [userId, doorNo, street, city, pincode, true]
+        `INSERT INTO addresses (user_id, door_no, street, city, pincode, is_default, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [userId, doorNo, street, city, pincode, true, latitude || null, longitude || null]
       );
     } else {
       await pool.query(
-        `UPDATE addresses SET door_no = $1, street = $2, city = $3, pincode = $4 WHERE user_id = $5`,
-        [doorNo, street, city, pincode, userId]
+        `UPDATE addresses SET door_no = $1, street = $2, city = $3, pincode = $4, latitude = $5, longitude = $6 WHERE user_id = $7`,
+        [doorNo, street, city, pincode, latitude || null, longitude || null, userId]
       );
     }
 

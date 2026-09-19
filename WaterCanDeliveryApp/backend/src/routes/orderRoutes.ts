@@ -6,16 +6,16 @@ const router = Router();
 // Place a new order
 router.post('/', async (req, res) => {
   try {
-    const { user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address, order_details, payment_method, is_fast_delivery } = req.body;
+    const { user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address, latitude, longitude, order_details, payment_method, is_fast_delivery } = req.body;
     
     if (!user_phone || !shop_name || !quantity || !total_price) {
       return res.status(400).json({ success: false, message: 'Missing required order fields' });
     }
 
     const result = await pool.query(
-      `INSERT INTO app_orders (user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address, order_details, payment_method, is_fast_delivery) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
-      [user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address || '', order_details ? JSON.stringify(order_details) : null, payment_method || 'Cash on Delivery', is_fast_delivery || false]
+      `INSERT INTO app_orders (user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address, latitude, longitude, order_details, payment_method, is_fast_delivery) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
+      [user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address || '', latitude || null, longitude || null, order_details ? JSON.stringify(order_details) : null, payment_method || 'Cash on Delivery', is_fast_delivery || false]
     );
 
     res.status(201).json({ success: true, order: result.rows[0] });

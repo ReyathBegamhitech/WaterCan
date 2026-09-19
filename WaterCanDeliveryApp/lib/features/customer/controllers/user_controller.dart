@@ -11,6 +11,8 @@ class UserController extends ChangeNotifier {
   static const String _keyStreet = 'user_street';
   static const String _keyCity = 'user_city';
   static const String _keyPincode = 'user_pincode';
+  static const String _keyLat = 'user_lat';
+  static const String _keyLng = 'user_lng';
   static const String _keyEmail = 'user_email';
   static const String _keyIsLoggedIn = 'user_is_logged_in';
 
@@ -22,6 +24,8 @@ class UserController extends ChangeNotifier {
   String _street = '';
   String _city = '';
   String _pincode = '';
+  double? _latitude;
+  double? _longitude;
   String _email = '';
   bool _isLoggedIn = false;
 
@@ -31,6 +35,8 @@ class UserController extends ChangeNotifier {
   String get street => _street;
   String get city => _city;
   String get pincode => _pincode;
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
   String get email => _email;
   bool get isLoggedIn => _isLoggedIn;
 
@@ -54,6 +60,8 @@ class UserController extends ChangeNotifier {
       _street = prefs.getString(_keyStreet) ?? _street;
       _city = prefs.getString(_keyCity) ?? _city;
       _pincode = prefs.getString(_keyPincode) ?? _pincode;
+      _latitude = prefs.getDouble(_keyLat);
+      _longitude = prefs.getDouble(_keyLng);
       _email = prefs.getString(_keyEmail) ?? _email;
       _isLoggedIn = prefs.getBool(_keyIsLoggedIn) ?? false;
       notifyListeners();
@@ -70,6 +78,8 @@ class UserController extends ChangeNotifier {
     String street = '',
     String city = '',
     String pincode = '',
+    double? latitude,
+    double? longitude,
     String email = '',
     bool rememberDevice = true,
   }) async {
@@ -79,6 +89,8 @@ class UserController extends ChangeNotifier {
     _street = street.trim();
     _city = city.trim();
     _pincode = pincode.trim();
+    _latitude = latitude;
+    _longitude = longitude;
     _email = email.trim();
     _isLoggedIn = true;
     notifyListeners();
@@ -92,6 +104,8 @@ class UserController extends ChangeNotifier {
         await prefs.setString(_keyStreet, _street);
         await prefs.setString(_keyCity, _city);
         await prefs.setString(_keyPincode, _pincode);
+        if (_latitude != null) await prefs.setDouble(_keyLat, _latitude!);
+        if (_longitude != null) await prefs.setDouble(_keyLng, _longitude!);
         await prefs.setString(_keyEmail, _email);
         await prefs.setBool(_keyIsLoggedIn, true);
       } else {
@@ -101,6 +115,8 @@ class UserController extends ChangeNotifier {
         await prefs.remove(_keyStreet);
         await prefs.remove(_keyCity);
         await prefs.remove(_keyPincode);
+        await prefs.remove(_keyLat);
+        await prefs.remove(_keyLng);
         await prefs.remove(_keyEmail);
         await prefs.remove(_keyIsLoggedIn);
       }
@@ -128,11 +144,15 @@ class UserController extends ChangeNotifier {
     required String street,
     required String city,
     required String pincode,
+    double? latitude,
+    double? longitude,
   }) async {
     _doorNo = doorNo.trim();
     _street = street.trim();
     _city = city.trim();
     _pincode = pincode.trim();
+    if (latitude != null) _latitude = latitude;
+    if (longitude != null) _longitude = longitude;
     notifyListeners();
 
     try {
@@ -146,6 +166,8 @@ class UserController extends ChangeNotifier {
           'street': _street,
           'city': _city,
           'pincode': _pincode,
+          if (_latitude != null) 'latitude': _latitude,
+          if (_longitude != null) 'longitude': _longitude,
         }),
       );
 
@@ -158,6 +180,8 @@ class UserController extends ChangeNotifier {
       await prefs.setString(_keyStreet, _street);
       await prefs.setString(_keyCity, _city);
       await prefs.setString(_keyPincode, _pincode);
+      if (_latitude != null) await prefs.setDouble(_keyLat, _latitude!);
+      if (_longitude != null) await prefs.setDouble(_keyLng, _longitude!);
     } catch (e) {
       debugPrint('Error updating address in prefs/DB: $e');
     }
@@ -184,6 +208,8 @@ class UserController extends ChangeNotifier {
     _street = '';
     _city = '';
     _pincode = '';
+    _latitude = null;
+    _longitude = null;
     _email = '';
     _isLoggedIn = false;
     notifyListeners();
@@ -196,6 +222,8 @@ class UserController extends ChangeNotifier {
       await prefs.remove(_keyStreet);
       await prefs.remove(_keyCity);
       await prefs.remove(_keyPincode);
+      await prefs.remove(_keyLat);
+      await prefs.remove(_keyLng);
       await prefs.remove(_keyEmail);
       await prefs.setBool(_keyIsLoggedIn, false);
     } catch (e) {
