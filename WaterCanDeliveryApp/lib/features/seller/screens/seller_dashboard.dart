@@ -40,7 +40,9 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
       _orderCtrl = Provider.of<OrderController>(context, listen: false);
       _previousOrderCount = _orderCtrl!.activeOrders.length;
       _orderCtrl!.addListener(_onOrderUpdate);
-      _orderCtrl!.startPollingSellerOrders();
+      final userCtrl = Provider.of<UserController>(context, listen: false);
+      final sellerId = userCtrl.assignedSellerId.isNotEmpty ? userCtrl.assignedSellerId : 'S-1001';
+      _orderCtrl!.startPollingSellerOrders(sellerId);
     });
   }
 
@@ -219,6 +221,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
   }
 
   void _showProfileSheet() {
+    final userCtrl = Provider.of<UserController>(context, listen: false);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -245,7 +248,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
               ),
               const SizedBox(height: 16),
               Text(
-                'Blue Drop Water Co.',
+                userCtrl.customerName.isNotEmpty ? userCtrl.customerName : 'Water Can Seller',
                 style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.seller800),
                 textAlign: TextAlign.center,
               ),
@@ -257,7 +260,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Outer Ring Road, Bengaluru',
+                      userCtrl.doorNo.isNotEmpty ? userCtrl.doorNo : 'Address not provided',
                       style: GoogleFonts.plusJakartaSans(fontSize: 16, color: AppColors.onSurface),
                     ),
                   ),
@@ -271,7 +274,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '+91 98765 43210',
+                      userCtrl.phone,
                       style: GoogleFonts.plusJakartaSans(fontSize: 16, color: AppColors.onSurface),
                     ),
                   ),

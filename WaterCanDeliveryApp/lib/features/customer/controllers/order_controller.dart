@@ -83,11 +83,11 @@ class OrderController extends ChangeNotifier {
   }
 
   // Starts polling every 5 seconds for seller orders
-  void startPollingSellerOrders() {
+  void startPollingSellerOrders(String sellerId) {
     _stopPolling();
-    fetchSellerOrders();
+    fetchSellerOrders(sellerId);
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      fetchSellerOrders();
+      fetchSellerOrders(sellerId);
     });
   }
 
@@ -116,9 +116,9 @@ class OrderController extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchSellerOrders() async {
+  Future<void> fetchSellerOrders(String sellerId) async {
     try {
-      final res = await http.get(Uri.parse('${ApiConstants.orders}/seller'));
+      final res = await http.get(Uri.parse('${ApiConstants.orders}/seller/$sellerId'));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         if (data['success'] == true) {
@@ -178,7 +178,7 @@ class OrderController extends ChangeNotifier {
         ];
       }
 
-      final createdAt = item['created_at'] ?? item['time'];
+      final createdAt = item['time'] ?? item['created_at'];
       DateTime time = DateTime.now();
       if (createdAt != null) {
         time = (DateTime.tryParse(createdAt) ?? DateTime.now()).toLocal();
@@ -214,6 +214,7 @@ class OrderController extends ChangeNotifier {
         latitude: item['latitude'] != null ? double.tryParse(item['latitude'].toString()) : null,
         longitude: item['longitude'] != null ? double.tryParse(item['longitude'].toString()) : null,
         isFastDelivery: item['is_fast_delivery'] ?? false,
+        sellerId: item['seller_id'],
       ));
     }
     
@@ -245,6 +246,7 @@ class OrderController extends ChangeNotifier {
         'longitude': newOrder.longitude,
         'order_details': newOrder.items.map((i) => i.toJson()).toList(),
         'is_fast_delivery': newOrder.isFastDelivery,
+        'seller_id': newOrder.sellerId,
       };
 
       final res = await http.post(

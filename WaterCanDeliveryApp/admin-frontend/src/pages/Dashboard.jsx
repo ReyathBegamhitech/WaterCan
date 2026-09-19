@@ -1,27 +1,41 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-const INITIAL_SELLERS = [
-  { cap: '380 Cans/day', hub: 'Indiranagar', joined: '12 Jan 2024', name: 'Sri Venkateshwara Water', phone: '+91 98451 23456', routes: 'Indiranagar, HAL 2nd Stage, Domlur', sellerId: 'S-0101', status: 'active', totalDelivered: '14,200', initials: 'SV' },
-  { cap: '450 Cans/day', hub: 'Koramangala', joined: '18 Feb 2024', name: 'Ganga Pure Waters', phone: '+91 97312 88410', routes: 'Koramangala 4th-8th Block, Sony World', sellerId: 'S-0102', status: 'active', totalDelivered: '19,500', initials: 'GP' },
-  { cap: '520 Cans/day', hub: 'Whitefield', joined: '05 Mar 2024', name: 'BlueDrop Logistics', phone: '+91 94481 77312', routes: 'ITPL, Hope Farm, Kadugodi', sellerId: 'S-0103', status: 'active', totalDelivered: '22,100', initials: 'BD' },
-  { cap: '320 Cans/day', hub: 'Jayanagar', joined: '15 Mar 2024', name: 'Kavery Mineral Water', phone: '+91 99002 44319', routes: 'Jayanagar 3rd-9th Block, JP Nagar 1st', sellerId: 'S-0104', status: 'active', totalDelivered: '11,800', initials: 'KM' },
-  { cap: '290 Cans/day', hub: 'HSR Layout', joined: '22 Mar 2024', name: 'AquaSpring Supply', phone: '+91 91103 55201', routes: 'HSR Sectors 1-7, Agara Lake Rim', sellerId: 'S-0105', status: 'active', totalDelivered: '8,900', initials: 'AS' },
-  { cap: '410 Cans/day', hub: 'BTM Layout', joined: '02 Apr 2024', name: 'Himalayan Cans Co.', phone: '+91 96200 11984', routes: 'BTM 1st & 2nd Stage, Tavarekere', sellerId: 'S-0106', status: 'active', totalDelivered: '15,430', initials: 'HC' },
-  { cap: '340 Cans/day', hub: 'Marathahalli', joined: '10 Apr 2024', name: 'Crystal Drop Hub', phone: '+91 98864 77210', routes: 'Outer Ring Road, Spice Garden', sellerId: 'S-0107', status: 'active', totalDelivered: '9,740', initials: 'CD' },
-  { cap: '310 Cans/day', hub: 'Hebbal', joined: '20 Apr 2024', name: 'Nandi Aqua Traders', phone: '+91 97401 22934', routes: 'Hebbal Kempapura, Manyata Tech Park', sellerId: 'S-0108', status: 'active', totalDelivered: '7,600', initials: 'NA' },
-  { cap: '480 Cans/day', hub: 'Electronic City', joined: '28 Apr 2024', name: 'Oasis Can Express', phone: '+91 99160 88219', routes: 'Phase 1, Neeladri Road, Velankani', sellerId: 'S-0109', status: 'active', totalDelivered: '13,400', initials: 'OE' },
-  { cap: '260 Cans/day', hub: 'Malleswaram', joined: '05 May 2024', name: 'Purity Hub', phone: '+91 98801 33451', routes: 'Malleswaram, Yeshwanthpur', sellerId: 'S-0110', status: 'active', totalDelivered: '5,200', initials: 'PH' },
-  { cap: '150 Cans/day', hub: 'Rajajinagar', joined: '12 May 2024', name: 'Cascade Mineral Depot', phone: '+91 97410 44521', routes: 'Rajajinagar 1st Block, Navrang', sellerId: 'S-0111', status: 'inactive', totalDelivered: '1,200', initials: 'CM' },
-  { cap: '180 Cans/day', hub: 'Yelahanka', joined: '18 May 2024', name: 'Vayu Hydro Services', phone: '+91 99805 12093', routes: 'Yelahanka New Town, Attur', sellerId: 'S-0112', status: 'inactive', totalDelivered: '850', initials: 'VH' },
-];
-
 export default function Dashboard() {
-  const [sellers, setSellers] = useState(INITIAL_SELLERS);
+  const [sellers, setSellers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [isForcedEmpty, setIsForcedEmpty] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:3000/api/auth/admin/sellers')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const formatted = data.sellers.map(s => {
+            const date = new Date(s.created_at);
+            const joined = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            return {
+              name: s.organization_name,
+              phone: s.phone_number,
+              sellerId: s.seller_id,
+              status: 'active', // Assuming all newly created are active
+              cap: '0 Cans/day', // Mock default
+              hub: s.location || 'Unknown',
+              joined: joined,
+              routes: s.location || 'Pending assignment',
+              totalDelivered: '0', // Mock default
+              initials: s.organization_name.substring(0, 2).toUpperCase()
+            };
+          });
+          setSellers(formatted);
+        }
+      })
+      .catch(err => console.error("Failed to fetch sellers:", err))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const filteredSellers = useMemo(() => {
     if (isForcedEmpty) return [];
@@ -82,7 +96,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-space-sm">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-space-sm">
         <div className="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
           <div className="flex flex-col">
             <span className="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Total Sellers</span>
@@ -107,16 +121,6 @@ export default function Dashboard() {
         </div>
         <div className="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
           <div className="flex flex-col">
-            <span className="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Pending Approval</span>
-            <span className="font-headline-lg text-headline-lg text-tertiary mt-0.5">2</span>
-            <span className="font-caption text-caption text-on-surface-variant mt-0.5">KYC validation stage</span>
-          </div>
-          <div className="w-11 h-11 rounded-xl bg-tertiary-fixed/50 flex items-center justify-center text-tertiary">
-            <span className="material-symbols-outlined text-[24px]">pending_actions</span>
-          </div>
-        </div>
-        <div className="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
-          <div className="flex flex-col">
             <span className="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Daily Delivered Cans</span>
             <span className="font-headline-lg text-headline-lg text-primary mt-0.5">1,840</span>
             <span className="font-caption text-caption text-on-surface-variant mt-0.5">20L Standard Jars</span>
@@ -127,8 +131,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-space-md bg-surface-container-lowest p-space-md lg:p-space-lg rounded-xl border border-outline-variant/30 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-outline-variant/20">
+      <div className="flex flex-col gap-space-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm">
           <div className="flex items-center gap-space-sm">
             <h2 className="font-headline-sm text-headline-sm text-on-surface">Registered Sellers</h2>
             <span className="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-caption text-caption font-semibold">
@@ -173,7 +177,7 @@ export default function Dashboard() {
               <div 
                 key={seller.sellerId} 
                 onClick={() => setSelectedSeller(seller)}
-                className={`seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 ${seller.status === 'active' ? 'hover:border-primary/50' : 'hover:border-tertiary/50'} transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md`}
+                className={`seller-card group relative bg-surface-container-lowest rounded-xl border border-outline-variant/40 transition-all duration-300 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-sm ${seller.status === 'active' ? 'hover:border-primary/50 hover:shadow-[0_0_20px_rgba(0,97,148,0.15)] hover:ring-1 hover:ring-primary/20' : 'hover:border-tertiary/50 hover:shadow-[0_0_20px_rgba(84,92,114,0.15)] hover:ring-1 hover:ring-tertiary/20'}`}
               >
                 <div className="flex flex-col">
                   <div className="flex items-start justify-between">

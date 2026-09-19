@@ -274,7 +274,37 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const userResult = await pool.query('SELECT id, full_name, password_hash FROM users WHERE phone_number = $1', [phone]);
+    if (phone.startsWith('S-')) {
+      // Seller Login Flow
+      const sellerResult = await pool.query('SELECT seller_id, organization_name, password_hash, location, phone_number, plain_password FROM app_sellers WHERE seller_id = $1', [phone]);
+      if (sellerResult.rows.length === 0) {
+        res.status(401).json({ success: false, message: 'Invalid Seller ID or password' });
+        return;
+      }
+
+      const seller = sellerResult.rows[0];
+      const isMatch = await bcrypt.compare(password, seller.password_hash);
+      
+      if (!isMatch) {
+        res.status(401).json({ success: false, message: 'Invalid Seller ID or password' });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Seller Login successful',
+        user: {
+          isSeller: true,
+          seller_id: seller.seller_id,
+          fullName: seller.organization_name,
+          phone: seller.phone_number || seller.seller_id,
+          doorNo: seller.location,
+        }
+      });
+      return;
+    }
+
+    const userResult = await pool.query('SELECT id, full_name, password_hash, assigned_seller_id FROM users WHERE phone_number = $1', [phone]);
     if (userResult.rows.length === 0) {
       res.status(401).json({ success: false, message: 'Invalid phone number or password' });
       return;
@@ -291,10 +321,21 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     const addressResult = await pool.query('SELECT door_no, street, city, pincode, latitude, longitude FROM addresses WHERE user_id = $1 LIMIT 1', [user.id]);
     const addressData = addressResult.rows.length > 0 ? addressResult.rows[0] : null;
 
+    let shopName = '';
+    let shopAddress = '';
+    if (user.assigned_seller_id) {
+      const shopResult = await pool.query('SELECT organization_name, location FROM app_sellers WHERE seller_id = $1', [user.assigned_seller_id]);
+      if (shopResult.rows.length > 0) {
+        shopName = shopResult.rows[0].organization_name;
+        shopAddress = shopResult.rows[0].location;
+      }
+    }
+
     res.status(200).json({
       success: true,
       message: 'Login successful',
       user: {
+        isSeller: false,
         id: user.id,
         fullName: user.full_name,
         phone: phone,
@@ -304,6 +345,9 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         pincode: addressData?.pincode || '',
         latitude: addressData?.latitude || null,
         longitude: addressData?.longitude || null,
+        assigned_seller_id: user.assigned_seller_id,
+        shop_name: shopName,
+        shop_address: shopAddress
       }
     });
   } catch (error) {
@@ -383,3 +427,99 @@ router.put('/address', async (req: Request, res: Response): Promise<void> => {
 });
 
 export default router;
+
+// Admin: Get all sellers
+router.get('/admin/sellers', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query('SELECT seller_id, organization_name, location, phone_number, plain_password, created_at FROM app_sellers ORDER BY created_at DESC');
+    res.status(200).json({ success: true, sellers: result.rows });
+  } catch (error) {
+    console.error('Fetch sellers error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Admin: Create a new seller
+router.post('/admin/seller', async (req: Request, res: Response): Promise<void> => {
+  const { sellerName, sellerId, contactNumber, address, password } = req.body;
+
+  if (!sellerName || !sellerId || !contactNumber || !address || !password) {
+    res.status(400).json({ success: false, message: 'Missing required fields' });
+    return;
+  }
+
+  try {
+    // Check if sellerId already exists
+    const checkResult = await pool.query('SELECT seller_id FROM app_sellers WHERE seller_id = $1', [sellerId]);
+    if (checkResult.rows.length > 0) {
+      res.status(409).json({ success: false, message: 'Seller ID is already taken' });
+      return;
+    }
+
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    const result = await pool.query(
+      `INSERT INTO app_sellers (seller_id, organization_name, location, phone_number, password_hash, plain_password)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING seller_id, organization_name, location, phone_number`,
+      [sellerId, sellerName, address, contactNumber, passwordHash, password]
+    );
+
+    res.status(201).json({ success: true, message: 'Seller created successfully', seller: result.rows[0] });
+  } catch (error) {
+    console.error('Create seller error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Admin: Update a seller
+router.put('/admin/seller/:id', async (req: Request, res: Response): Promise<void> => {
+  const sellerId = req.params.id;
+  const { sellerName, contactNumber, address, password } = req.body;
+
+  if (!sellerName || !contactNumber || !address) {
+    res.status(400).json({ success: false, message: 'Missing required fields' });
+    return;
+  }
+
+  try {
+    if (password && password.trim().length > 0) {
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+      await pool.query(
+        `UPDATE app_sellers 
+         SET organization_name = $1, location = $2, phone_number = $3, password_hash = $4, plain_password = $5 
+         WHERE seller_id = $6`,
+        [sellerName, address, contactNumber, passwordHash, password, sellerId]
+      );
+    } else {
+      await pool.query(
+        `UPDATE app_sellers 
+         SET organization_name = $1, location = $2, phone_number = $3 
+         WHERE seller_id = $4`,
+        [sellerName, address, contactNumber, sellerId]
+      );
+    }
+    res.status(200).json({ success: true, message: 'Seller updated successfully' });
+  } catch (error) {
+    console.error('Update seller error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Admin: Delete a seller
+router.delete('/admin/seller/:id', async (req: Request, res: Response): Promise<void> => {
+  const sellerId = req.params.id;
+
+  try {
+    const result = await pool.query('DELETE FROM app_sellers WHERE seller_id = $1 RETURNING seller_id', [sellerId]);
+    if (result.rowCount === 0) {
+      res.status(404).json({ success: false, message: 'Seller not found' });
+      return;
+    }
+    res.status(200).json({ success: true, message: 'Seller deleted successfully' });
+  } catch (error) {
+    console.error('Delete seller error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});

@@ -15,6 +15,10 @@ class UserController extends ChangeNotifier {
   static const String _keyLng = 'user_lng';
   static const String _keyEmail = 'user_email';
   static const String _keyIsLoggedIn = 'user_is_logged_in';
+  static const String _keyAssignedSellerId = 'assigned_seller_id';
+  static const String _keyShopName = 'shop_name';
+  static const String _keyShopAddress = 'shop_address';
+  static const String _keyIsSeller = 'user_is_seller';
 
   static const String defaultFullAddress = '';
 
@@ -28,6 +32,10 @@ class UserController extends ChangeNotifier {
   double? _longitude;
   String _email = '';
   bool _isLoggedIn = false;
+  String _assignedSellerId = '';
+  String _shopName = '';
+  String _shopAddress = '';
+  bool _isSeller = false;
 
   String get customerName => _customerName;
   String get phone => _phone;
@@ -39,6 +47,10 @@ class UserController extends ChangeNotifier {
   double? get longitude => _longitude;
   String get email => _email;
   bool get isLoggedIn => _isLoggedIn;
+  String get assignedSellerId => _assignedSellerId;
+  String get shopName => _shopName;
+  String get shopAddress => _shopAddress;
+  bool get isSeller => _isSeller;
 
   String get fullAddress {
     final parts = [_doorNo, _street, _city, _pincode].where((p) => p.isNotEmpty).toList();
@@ -64,6 +76,10 @@ class UserController extends ChangeNotifier {
       _longitude = prefs.getDouble(_keyLng);
       _email = prefs.getString(_keyEmail) ?? _email;
       _isLoggedIn = prefs.getBool(_keyIsLoggedIn) ?? false;
+      _assignedSellerId = prefs.getString(_keyAssignedSellerId) ?? _assignedSellerId;
+      _shopName = prefs.getString(_keyShopName) ?? _shopName;
+      _shopAddress = prefs.getString(_keyShopAddress) ?? _shopAddress;
+      _isSeller = prefs.getBool(_keyIsSeller) ?? false;
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading user prefs: $e');
@@ -81,6 +97,10 @@ class UserController extends ChangeNotifier {
     double? latitude,
     double? longitude,
     String email = '',
+    String assignedSellerId = '',
+    String shopName = '',
+    String shopAddress = '',
+    bool isSeller = false,
     bool rememberDevice = true,
   }) async {
     _customerName = name.trim().isNotEmpty ? name.trim() : 'User';
@@ -92,6 +112,10 @@ class UserController extends ChangeNotifier {
     _latitude = latitude;
     _longitude = longitude;
     _email = email.trim();
+    _assignedSellerId = assignedSellerId.trim();
+    _shopName = shopName.trim();
+    _shopAddress = shopAddress.trim();
+    _isSeller = isSeller;
     _isLoggedIn = true;
     notifyListeners();
 
@@ -107,6 +131,10 @@ class UserController extends ChangeNotifier {
         if (_latitude != null) await prefs.setDouble(_keyLat, _latitude!);
         if (_longitude != null) await prefs.setDouble(_keyLng, _longitude!);
         await prefs.setString(_keyEmail, _email);
+        await prefs.setString(_keyAssignedSellerId, _assignedSellerId);
+        await prefs.setString(_keyShopName, _shopName);
+        await prefs.setString(_keyShopAddress, _shopAddress);
+        await prefs.setBool(_keyIsSeller, _isSeller);
         await prefs.setBool(_keyIsLoggedIn, true);
       } else {
         await prefs.remove(_keyName);
@@ -118,6 +146,10 @@ class UserController extends ChangeNotifier {
         await prefs.remove(_keyLat);
         await prefs.remove(_keyLng);
         await prefs.remove(_keyEmail);
+        await prefs.remove(_keyAssignedSellerId);
+        await prefs.remove(_keyShopName);
+        await prefs.remove(_keyShopAddress);
+        await prefs.remove(_keyIsSeller);
         await prefs.remove(_keyIsLoggedIn);
       }
     } catch (e) {

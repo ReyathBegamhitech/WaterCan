@@ -19,6 +19,7 @@ class PaymentMethodScreen extends StatefulWidget {
   final String shopName;
   final String deliveryAddress;
   final bool isFastDelivery;
+  final String sellerId;
 
   const PaymentMethodScreen({
     super.key,
@@ -27,6 +28,7 @@ class PaymentMethodScreen extends StatefulWidget {
     required this.shopName,
     required this.deliveryAddress,
     required this.isFastDelivery,
+    required this.sellerId,
   });
 
   @override
@@ -821,6 +823,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                           customerName: userCtrl.customerName,
                           customerPhone: userCtrl.phone,
                           isFastDelivery: widget.isFastDelivery,
+                          sellerId: widget.sellerId,
                         );
 
                         Provider.of<OrderController>(context, listen: false).placeOrder(newOrder);

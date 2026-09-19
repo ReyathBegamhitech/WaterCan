@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await userCtrl.loadFromPrefs();
     if (userCtrl.isLoggedIn) {
       if (!mounted) return;
-      if (userCtrl.phone.toLowerCase().contains('seller')) {
+      if (userCtrl.isSeller || userCtrl.phone.toLowerCase().contains('seller')) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const SellerDashboardScreen()),
@@ -117,6 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login successful!')));
 
         final user = data['user'];
+        final isSeller = user['isSeller'] ?? false;
+        
         await Provider.of<UserController>(context, listen: false).setUser(
           name: user['fullName'] ?? '',
           phone: user['phone'] ?? '',
@@ -125,20 +127,32 @@ class _LoginScreenState extends State<LoginScreen> {
           city: user['city'] ?? '',
           pincode: user['pincode'] ?? '',
           email: user['email'] ?? '',
+          assignedSellerId: user['assigned_seller_id'] ?? (isSeller ? user['seller_id'] : ''),
+          shopName: user['shop_name'] ?? (isSeller ? user['fullName'] : ''),
+          shopAddress: user['shop_address'] ?? (isSeller ? user['doorNo'] : ''),
+          isSeller: isSeller,
           rememberDevice: _rememberDevice,
         );
 
         if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BuyerDashboardScreen(
-              customerName: user['fullName'],
-              address: [user['doorNo'], user['street'], user['city'], user['pincode']].where((p) => p != null && p.toString().isNotEmpty).join(', '),
-              phone: user['phone'],
+        
+        if (isSeller) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const SellerDashboardScreen()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BuyerDashboardScreen(
+                customerName: user['fullName'],
+                address: [user['doorNo'], user['street'], user['city'], user['pincode']].where((p) => p != null && p.toString().isNotEmpty).join(', '),
+                phone: user['phone'],
+              ),
             ),
-          ),
-        );
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Login failed.')));
       }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../customer/controllers/order_controller.dart';
+import '../../customer/controllers/user_controller.dart';
 import '../widgets/seller_history_order_card.dart';
 
 class SellerOrderHistoryScreen extends StatefulWidget {
@@ -152,7 +153,9 @@ class _SellerOrderHistoryScreenState extends State<SellerOrderHistoryScreen> {
               ),
               InkWell(
                 onTap: () {
-                  Provider.of<OrderController>(context, listen: false).fetchSellerOrders();
+                  final userCtrl = Provider.of<UserController>(context, listen: false);
+                  final sellerId = userCtrl.assignedSellerId.isNotEmpty ? userCtrl.assignedSellerId : 'S-1001';
+                  Provider.of<OrderController>(context, listen: false).fetchSellerOrders(sellerId);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Refreshing history...', style: GoogleFonts.plusJakartaSans()),

@@ -932,7 +932,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Aqua Pure Springs Hub',
+                            userCtrl.shopName.isNotEmpty ? userCtrl.shopName : 'Water Can Shop',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -948,7 +948,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
-                                  'Sector 4, Bellandur, Bengaluru - 560103',
+                                  userCtrl.shopAddress.isNotEmpty ? userCtrl.shopAddress : 'Address not provided',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 14,
                                     color: AppColors.onSurfaceVariant,
@@ -1041,9 +1041,9 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => OrderConfigurationScreen(
-                                shop: const {
-                                  'id': '1',
-                                  'name': 'Aqua Pure Springs Hub',
+                                shop: {
+                                  'id': userCtrl.assignedSellerId.isNotEmpty ? userCtrl.assignedSellerId : 'S-0000',
+                                  'name': userCtrl.shopName.isNotEmpty ? userCtrl.shopName : 'Water Can Shop',
                                   'location': 'Sector 4, Bellandur, Bengaluru - 560103',
                                 },
                                 deliveryAddress: userCtrl.fullAddress.isNotEmpty && userCtrl.fullAddress != 'No address provided' 

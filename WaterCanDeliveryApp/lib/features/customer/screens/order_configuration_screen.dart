@@ -520,81 +520,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Delivery Address Section
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerLowest,
-                    border: Border.all(
-                      color: AppColors.primary.withOpacity(0.3),
-                      width: 1.5,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'DELIVERY ADDRESS',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                              color: AppColors.onSurfaceVariant,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () => _showEditAddressModal(context),
-                            borderRadius: BorderRadius.circular(6),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1),
-                              ),
-                              child: Text(
-                                'EDIT',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primary,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Consumer<UserController>(
-                              builder: (context, userCtrl, _) {
-                                return Text(
-                                  _getEffectiveDeliveryAddress(context),
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.onSurface,
-                                    height: 1.4,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
+
 
                 // 25L CAN Section
                 _buildProductSection(
@@ -944,6 +870,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                             shopName: currentShopName,
                             deliveryAddress: effectiveDeliveryAddress,
                             isFastDelivery: _isFastDelivery,
+                            sellerId: widget.shop['id'] ?? '',
                           ),
                         ),
                       ).then((_) {

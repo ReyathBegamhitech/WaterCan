@@ -596,6 +596,7 @@ class TrackDeliveryScreen extends StatelessWidget {
                     shopName: order.shopName ?? 'Blue Drop Water Co.',
                     deliveryAddress: order.deliveryAddress,
                     isFastDelivery: order.isFastDelivery,
+                    sellerId: order.sellerId ?? '',
                   ),
                 ),
               );

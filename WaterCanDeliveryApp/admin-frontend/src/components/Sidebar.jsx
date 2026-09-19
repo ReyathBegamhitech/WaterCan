@@ -42,6 +42,17 @@ export default function Sidebar() {
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary transition-colors">person_add</span>
             <span className="font-label-md text-label-md">Create Seller</span>
           </NavLink>
+          <NavLink
+            to="/sellers"
+            className={({ isActive }) =>
+              isActive
+                ? "flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-all group bg-primary-fixed/40 text-on-primary-fixed-variant font-headline-sm border-l-4 border-primary shadow-sm"
+                : "flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all group"
+            }
+          >
+            <span className="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary transition-colors">list_alt</span>
+            <span className="font-label-md text-label-md">Sellers List</span>
+          </NavLink>
         </nav>
       </div>
       <div className="p-space-md border-t border-outline-variant/20 bg-surface-container-lowest">

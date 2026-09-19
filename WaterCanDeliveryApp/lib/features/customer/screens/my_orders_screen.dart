@@ -48,25 +48,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
             letterSpacing: -0.5,
           ),
         ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: AppColors.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryContainer.withOpacity(0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.water_drop, color: AppColors.onPrimary, size: 22),
-          ),
-        ],
+
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
           onPressed: () => Navigator.pop(context),
@@ -293,7 +275,14 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
         if (isCancelled) {
           // no actions
         } else if (order.status == OrderStatus.delivered) {
-          actions.add(_buildActionButton('View Receipt', Icons.receipt_long, AppColors.surfaceContainer, AppColors.onSurface, false));
+          actions.add(_buildActionButton(
+            'View Receipt', 
+            Icons.receipt_long, 
+            AppColors.surfaceContainer, 
+            AppColors.onSurface, 
+            false,
+            onPressed: () => _showReceiptBottomSheet(context, order)
+          ));
           actions.add(_buildActionButton(
             'Reorder', 
             Icons.replay, 
@@ -310,6 +299,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
                     shopName: order.shopName ?? 'Water Can Shop',
                     deliveryAddress: order.deliveryAddress ?? '',
                     isFastDelivery: order.isFastDelivery,
+                    sellerId: order.sellerId ?? '',
                   ),
                 ),
               );
@@ -639,6 +629,160 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with TickerProviderStat
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showReceiptBottomSheet(BuildContext context, OrderModel order) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: const BoxDecoration(
+          color: AppColors.surfaceContainerLowest,
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 16),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.receipt_long, color: AppColors.primary, size: 24),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Order Receipt',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(color: AppColors.outlineVariant, height: 1),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Order Info
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Order ID:', style: GoogleFonts.plusJakartaSans(color: AppColors.onSurfaceVariant, fontSize: 13)),
+                        Text(order.id, style: GoogleFonts.plusJakartaSans(color: AppColors.onSurface, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Date:', style: GoogleFonts.plusJakartaSans(color: AppColors.onSurfaceVariant, fontSize: 13)),
+                        Text(order.formattedDate, style: GoogleFonts.plusJakartaSans(color: AppColors.onSurface, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Payment Method:', style: GoogleFonts.plusJakartaSans(color: AppColors.onSurfaceVariant, fontSize: 13)),
+                        Text(order.paymentMethod.toUpperCase(), style: GoogleFonts.plusJakartaSans(color: AppColors.onSurface, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Products
+                    Text('Items', style: GoogleFonts.plusJakartaSans(color: AppColors.onSurface, fontWeight: FontWeight.bold, fontSize: 15)),
+                    const SizedBox(height: 12),
+                    ...order.items.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${item.quantity}x ${item.product.name}',
+                                style: GoogleFonts.plusJakartaSans(color: AppColors.onSurfaceVariant, fontSize: 14),
+                              ),
+                            ),
+                            Text(
+                              '₹${(item.product.price * item.quantity).toStringAsFixed(0)}',
+                              style: GoogleFonts.plusJakartaSans(color: AppColors.onSurface, fontWeight: FontWeight.w600, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+
+                    if (order.isFastDelivery) ...[
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Fast Delivery', style: GoogleFonts.plusJakartaSans(color: AppColors.onSurfaceVariant, fontSize: 14)),
+                            Text('₹50', style: GoogleFonts.plusJakartaSans(color: AppColors.onSurface, fontWeight: FontWeight.w600, fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    const Divider(color: AppColors.outlineVariant, height: 32),
+
+                    // Total
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total Amount', style: GoogleFonts.plusJakartaSans(color: AppColors.onSurface, fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text('₹${order.totalAmount.toStringAsFixed(0)}', style: GoogleFonts.plusJakartaSans(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 20)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Close Button
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryContainer,
+                    foregroundColor: AppColors.onPrimary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Close', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, fontSize: 15)),
+                ),
               ),
             ),
           ],

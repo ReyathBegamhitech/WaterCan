@@ -33,6 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Timer? _countdownTimer;
   String? _lastReceivedOtp;
 
+  final TextEditingController _sellerIdController = TextEditingController();
   final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _doorNoController = TextEditingController();
@@ -83,6 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    _sellerIdController.dispose();
     _customerNameController.dispose();
     _emailController.dispose();
     _doorNoController.dispose();
@@ -301,7 +303,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    if (_customerNameController.text.isEmpty ||
+    if (_sellerIdController.text.isEmpty ||
+        _customerNameController.text.isEmpty ||
         _phoneController.text.isEmpty ||
         _doorNoController.text.isEmpty ||
         _streetController.text.isEmpty ||
@@ -345,6 +348,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Uri.parse(ApiConstants.register),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
+          'seller_id': _sellerIdController.text,
           'customerName': _customerNameController.text,
           'phone': _phoneController.text,
           'whatsapp': _whatsappController.text,
@@ -377,6 +381,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           city: city,
           pincode: pincode,
           email: email,
+          assignedSellerId: data['assigned_seller_id'] ?? '',
+          shopName: data['shop_name'] ?? '',
         );
 
         if (!mounted) return;
@@ -568,6 +574,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // 1. Seller ID (Mandatory)
+              CustomTextField(
+                label: 'Seller ID *',
+                hintText: 'Enter Seller ID (e.g. S-1001)',
+                controller: _sellerIdController,
+              ),
+              const SizedBox(height: 20),
+
               // 2. Customer Name
               CustomTextField(
                 label: 'Customer Name *',
