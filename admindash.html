@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en" style="">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="web_dashboard" name="shell-type">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        @layer base {
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                overscroll-behavior: none;
+            }
+
+            main>:first-child {
+                margin-top: 0 !important;
+            }
+
+            main>:last-child {
+                margin-bottom: 0 !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+        id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-highest": "#e0e3e5", "surface-bright": "#f7f9fb", "secondary-fixed": "#6ffbbe", "primary-fixed": "#cce5ff", "surface-container": "#eceef0", "tertiary": "#545c72", "surface-container-high": "#e6e8ea", "surface": "#f7f9fb", "on-primary": "#ffffff", "on-surface-variant": "#3f4850", "inverse-on-surface": "#eff1f3", "on-secondary": "#ffffff", "tertiary-container": "#6c748b", "on-primary-fixed-variant": "#004b73", "primary-fixed-dim": "#93ccff", "on-error": "#ffffff", "on-primary-fixed": "#001d31", "on-surface": "#191c1e", "surface-variant": "#e0e3e5", "on-tertiary-fixed": "#131b2e", "error-container": "#ffdad6", "on-tertiary-container": "#fefcff", "outline-variant": "#bfc7d2", "secondary-fixed-dim": "#4edea3", "background": "#f7f9fb", "tertiary-fixed": "#dae2fd", "on-tertiary": "#ffffff", "surface-container-low": "#f2f4f6", "on-tertiary-fixed-variant": "#3f465c", "secondary": "#006c49", "outline": "#707881", "surface-tint": "#006398", "primary": "#006194", "primary-container": "#007bb9", "surface-container-lowest": "#ffffff", "on-secondary-container": "#00714d", "secondary-container": "#6cf8bb", "inverse-surface": "#2d3133", "error": "#ba1a1a", "inverse-primary": "#93ccff", "on-error-container": "#93000a", "tertiary-fixed-dim": "#bec6e0", "surface-dim": "#d8dadc", "on-secondary-fixed": "#002113", "on-background": "#191c1e", "on-secondary-fixed-variant": "#005236", "on-primary-container": "#fdfcff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter-sm": "1rem", "space-xl": "2rem", "margin": "2rem", "space-md": "1rem", "space-lg": "1.5rem", "margin-sm": "1rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-xs": "0.25rem" }, "fontFamily": { "display-lg": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], "caption": ["Inter"], "headline-md": ["Inter"], "headline-lg": ["Inter"], "label-sm": ["Inter"], "headline-sm": ["Inter"], "label-md": ["Inter"] }, "fontSize": { "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "caption": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.025em", "fontWeight": "600" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.005em", "fontWeight": "500" }] } } } };</script>
+</head>
+
+<body class="bg-background font-body-md text-on-surface antialiased">
+    <aside
+        class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.02)]">
+        <div class="flex flex-col">
+            <div class="h-16 px-space-md flex items-center gap-space-sm border-b border-outline-variant/20"><img
+                    alt="AquaFlow Water Delivery Admin Logo" class="h-8 w-auto object-contain"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1W9O2c-t0fJguo1QisCIOsVdSrR9zXwVNkWYkAAvd5fNUcKQK0Cri3MyKnu__aeWMGjzloTCkFI7E81-XHsDOLULG6vIS47vHwRqVRTnAc5IMCWjYA0y9RppSguoFEA8JJPOTHU7DjSeqSAMHBPSZJDlq-NLHZah9MNyvHmLZIVWBE1a0vYSI7RtW6dPRHF2DuQlK70oipspS5vU3bBqWhCvWAXeXZ1LUVBzgoWbgG5ACNIco2YmRivMp4">
+                <div class="flex flex-col"><span
+                        class="font-headline-sm text-headline-sm text-primary tracking-tight">AquaFlow</span><span
+                        class="font-caption text-caption text-on-surface-variant leading-none">Dispatch &amp;
+                        Network</span></div>
+            </div>
+            <div class="px-space-md py-space-sm"><span
+                    class="font-label-sm text-label-sm text-on-surface-variant/70 uppercase tracking-wider">Main
+                    Management</span></div>
+            <nav class="flex flex-col gap-space-xs px-space-sm"
+                data-active-classes="bg-primary-fixed/40 text-on-primary-fixed-variant font-headline-sm border-l-4 border-primary shadow-sm">
+                <a aria-current="page"
+                    class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-all group bg-primary-fixed/40 text-on-primary-fixed-variant font-headline-sm border-l-4 border-primary shadow-sm"
+                    data-path="dashboard" href="#"><span
+                        class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary transition-colors">dashboard</span><span
+                        class="font-label-md text-label-md">Dashboard</span></a><a
+                    class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all group"
+                    data-path="create-seller" href="#"><span
+                        class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary transition-colors">person_add</span><span
+                        class="font-label-md text-label-md">Create Seller</span></a></nav>
+        </div>
+        <div class="p-space-md border-t border-outline-variant/20 bg-surface-container-lowest">
+            <div class="flex items-center justify-between px-space-sm py-space-xs rounded-lg bg-surface-container-low">
+                <div class="flex items-center gap-space-xs"><span
+                        class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span
+                        class="font-caption text-caption text-secondary font-semibold">Hub Active</span></div><span
+                    class="font-caption text-caption text-on-surface-variant">v2.4 LTS</span>
+            </div>
+        </div>
+    </aside>
+    <div class="pl-64 flex flex-col min-h-screen">
+        <header
+            class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/20 z-40 flex items-center justify-between px-gutter">
+            <div class="flex items-center gap-space-md"><img alt="AquaFlow Water Delivery Admin Logo"
+                    class="h-8 w-auto object-contain"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1W9O2c-t0fJguo1QisCIOsVdSrR9zXwVNkWYkAAvd5fNUcKQK0Cri3MyKnu__aeWMGjzloTCkFI7E81-XHsDOLULG6vIS47vHwRqVRTnAc5IMCWjYA0y9RppSguoFEA8JJPOTHU7DjSeqSAMHBPSZJDlq-NLHZah9MNyvHmLZIVWBE1a0vYSI7RtW6dPRHF2DuQlK70oipspS5vU3bBqWhCvWAXeXZ1LUVBzgoWbgG5ACNIco2YmRivMp4">
+                <div class="h-4 w-px bg-outline-variant/50"></div><span
+                    class="font-headline-sm text-headline-sm text-on-surface">AquaFlow Admin</span>
+                <div
+                    class="hidden sm:flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container text-on-surface-variant font-caption text-caption">
+                    <span class="material-symbols-outlined text-[14px]">water_drop</span><span class="">Regional
+                        Logistics</span></div>
+            </div>
+            <div class="flex items-center gap-space-lg">
+                <div
+                    class="hidden md:flex items-center gap-space-xs px-space-md py-1 rounded-full bg-secondary-fixed/30 text-on-secondary-fixed-variant">
+                    <span class="w-2 h-2 rounded-full bg-secondary"></span><span
+                        class="font-label-sm text-label-sm font-semibold">Operational</span></div>
+                <div class="flex items-center gap-space-sm pl-space-sm border-l border-outline-variant/30">
+                    <div class="text-right hidden sm:block">
+                        <p class="font-label-md text-[13px] font-medium text-on-surface leading-none">Super Admin</p>
+                    </div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary-fixed"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO9M9mlUQGXXfDyj9_QjWBIdxTcHH25IB3Y6WmN2lWb-DDWZpJFf06Zuyz0Y0qeCxDk-hh74iKtSesG4aGtw_BEClAXZObXB8a_-AN1NjtJo6U3cFNDs4d_qHfVVPPSSkp0--7Bn3wPXfHoDYiEib6W0G4-yXvbpflGudJKmSA_yGdwdx5W46K7SUZcgBBg6jPw37B_-ff49Z2cg8Ea7SiXnu_E7VeGFfj1pECBfepuclLz7i-vuS3">
+                </div>
+            </div>
+        </header>
+        <main class="w-full pt-16 bg-background flex-1 px-gutter py-space-lg">
+            <div class="flex flex-col w-full gap-space-lg">
+                <!-- TOP HEADER & CONTROLS BANNER -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+                    <div class="flex flex-col gap-space-xs">
+                        <div class="flex items-center gap-space-sm">
+                            <h1 class="font-headline-lg text-headline-lg text-on-surface">Dashboard</h1>
+                            <span
+                                class="px-space-sm py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Live Fleet
+                            </span>
+                        </div>
+                        <p class="font-body-md text-body-md text-on-surface-variant">
+                            Manage water delivery sellers, distribution coverage, and active vendor accounts.
+                        </p>
+                    </div>
+                    <!-- Quick Actions -->
+                    <div class="flex items-center flex-wrap sm:flex-nowrap gap-space-sm">
+                        <div class="relative w-full sm:w-80">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-tertiary">search</span>
+                            <input
+                                class="w-full pl-9 pr-3 py-2 bg-surface-container-lowest rounded-xl border border-outline-variant/40 text-on-surface font-body-md text-body-md placeholder-tertiary focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all shadow-sm"
+                                id="sellerSearchInput" placeholder="Search seller by name, ID or mobile..." type="text">
+                        </div>
+                        <a class="inline-flex items-center justify-center gap-space-xs px-space-md py-2 bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:bg-primary-container active:bg-primary transition-all shadow-sm shrink-0"
+                            data-path="create-seller" href="#">
+                            <span class="material-symbols-outlined text-[18px]">person_add</span>
+                            <span class="">+ Create Seller</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- KPI SUMMARY CARDS -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-space-sm">
+                    <div
+                        class="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
+                        <div class="flex flex-col">
+                            <span
+                                class="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Total
+                                Sellers</span>
+                            <span class="font-headline-lg text-headline-lg text-on-surface mt-0.5"
+                                id="metricTotal">24</span>
+                            <span class="font-caption text-caption text-secondary flex items-center gap-0.5 mt-0.5">
+                                <span class="material-symbols-outlined text-[14px]">arrow_upward</span> +3 this month
+                            </span>
+                        </div>
+                        <div
+                            class="w-11 h-11 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-[24px]">local_shipping</span>
+                        </div>
+                    </div>
+                    <div
+                        class="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
+                        <div class="flex flex-col">
+                            <span
+                                class="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Active
+                                Now</span>
+                            <span class="font-headline-lg text-headline-lg text-secondary mt-0.5"
+                                id="metricActive">22</span>
+                            <span class="font-caption text-caption text-on-surface-variant mt-0.5">91.6%
+                                operational</span>
+                        </div>
+                        <div
+                            class="w-11 h-11 rounded-xl bg-secondary-fixed/40 flex items-center justify-center text-secondary">
+                            <span class="material-symbols-outlined text-[24px]">verified</span>
+                        </div>
+                    </div>
+                    <div
+                        class="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
+                        <div class="flex flex-col">
+                            <span
+                                class="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Pending
+                                Approval</span>
+                            <span class="font-headline-lg text-headline-lg text-tertiary mt-0.5"
+                                id="metricPending">2</span>
+                            <span class="font-caption text-caption text-on-surface-variant mt-0.5">KYC validation
+                                stage</span>
+                        </div>
+                        <div
+                            class="w-11 h-11 rounded-xl bg-tertiary-fixed/50 flex items-center justify-center text-tertiary">
+                            <span class="material-symbols-outlined text-[24px]">pending_actions</span>
+                        </div>
+                    </div>
+                    <div
+                        class="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
+                        <div class="flex flex-col">
+                            <span
+                                class="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Daily
+                                Delivered Cans</span>
+                            <span class="font-headline-lg text-headline-lg text-primary mt-0.5">1,840</span>
+                            <span class="font-caption text-caption text-on-surface-variant mt-0.5">20L Standard
+                                Jars</span>
+                        </div>
+                        <div
+                            class="w-11 h-11 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-[24px]"
+                                style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- MAIN REGISTRATION SECTION -->
+                <div
+                    class="flex flex-col gap-space-md bg-surface-container-lowest p-space-md lg:p-space-lg rounded-xl border border-outline-variant/30 shadow-sm">
+                    <!-- Section Header & Filter Tabs -->
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-outline-variant/20">
+                        <div class="flex items-center gap-space-sm">
+                            <h2 class="font-headline-sm text-headline-sm text-on-surface">Registered Sellers</h2>
+                            <span
+                                class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-caption text-caption font-semibold"
+                                id="sellersCountBadge">24 Sellers</span>
+                        </div>
+                        <div class="flex items-center gap-space-sm self-start sm:self-auto">
+                            <!-- Segmented Filter -->
+                            <div class="flex items-center bg-surface-container-low p-1 rounded-xl">
+                                <button
+                                    class="filter-tab px-3 py-1 rounded-lg font-label-sm text-label-sm font-semibold transition-all bg-surface-container-lowest text-primary shadow-xs"
+                                    id="filterAll">
+                                    All (24)
+                                </button>
+                                <button
+                                    class="filter-tab px-3 py-1 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all"
+                                    id="filterActive">
+                                    Active (22)
+                                </button>
+                                <button
+                                    class="filter-tab px-3 py-1 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all"
+                                    id="filterInactive">
+                                    Inactive (2)
+                                </button>
+                            </div>
+                            <!-- Empty State Preview Toggle -->
+                            <button
+                                class="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-outline-variant/40 hover:bg-surface-container-low text-on-surface-variant font-caption text-caption font-semibold transition-colors"
+                                id="btnToggleEmpty" title="Toggle Empty State preview">
+                                <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                <span id="emptyToggleText" class="">Preview Empty</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- SELLER GRID -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5"
+                        id="sellerGridContainer">
+                        <!-- Card 1 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="380 Cans/day" data-hub="Indiranagar" data-joined="12 Jan 2024"
+                            data-name="Sri Venkateshwara Water" data-phone="+91 98451 23456"
+                            data-routes="Indiranagar, HAL 2nd Stage, Domlur" data-seller-id="S-0101"
+                            data-status="active" data-total-delivered="14,200">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            SV
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        Sri Venkateshwara Water</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0101</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 98451 23456</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Indiranagar</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="450 Cans/day" data-hub="Koramangala" data-joined="18 Feb 2024"
+                            data-name="Ganga Pure Waters" data-phone="+91 97312 88410"
+                            data-routes="Koramangala 4th-8th Block, Sony World" data-seller-id="S-0102"
+                            data-status="active" data-total-delivered="19,500">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            GP
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        Ganga Pure Waters</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0102</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 97312 88410</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Koramangala</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="520 Cans/day" data-hub="Whitefield" data-joined="05 Mar 2024"
+                            data-name="BlueDrop Logistics" data-phone="+91 94481 77312"
+                            data-routes="ITPL, Hope Farm, Kadugodi" data-seller-id="S-0103" data-status="active"
+                            data-total-delivered="22,100">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            BD
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        BlueDrop Logistics</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0103</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 94481 77312</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Whitefield</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 4 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="320 Cans/day" data-hub="Jayanagar" data-joined="15 Mar 2024"
+                            data-name="Kavery Mineral Water" data-phone="+91 99002 44319"
+                            data-routes="Jayanagar 3rd-9th Block, JP Nagar 1st" data-seller-id="S-0104"
+                            data-status="active" data-total-delivered="11,800">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            KM
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        Kavery Mineral Water</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0104</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 99002 44319</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Jayanagar</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 5 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="290 Cans/day" data-hub="HSR Layout" data-joined="22 Mar 2024"
+                            data-name="AquaSpring Supply" data-phone="+91 91103 55201"
+                            data-routes="HSR Sectors 1-7, Agara Lake Rim" data-seller-id="S-0105" data-status="active"
+                            data-total-delivered="8,900">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            AS
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        AquaSpring Supply</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0105</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 91103 55201</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">HSR Layout</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 6 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="410 Cans/day" data-hub="BTM Layout" data-joined="02 Apr 2024"
+                            data-name="Himalayan Cans Co." data-phone="+91 96200 11984"
+                            data-routes="BTM 1st &amp; 2nd Stage, Tavarekere" data-seller-id="S-0106"
+                            data-status="active" data-total-delivered="15,430">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            HC
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        Himalayan Cans Co.</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0106</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 96200 11984</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">BTM Layout</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 7 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="340 Cans/day" data-hub="Marathahalli" data-joined="10 Apr 2024"
+                            data-name="Crystal Drop Hub" data-phone="+91 98864 77210"
+                            data-routes="Outer Ring Road, Spice Garden" data-seller-id="S-0107" data-status="active"
+                            data-total-delivered="9,740">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            CD
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        Crystal Drop Hub</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0107</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 98864 77210</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Marathahalli</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 8 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="310 Cans/day" data-hub="Hebbal" data-joined="20 Apr 2024"
+                            data-name="Nandi Aqua Traders" data-phone="+91 97401 22934"
+                            data-routes="Hebbal Kempapura, Manyata Tech Park" data-seller-id="S-0108"
+                            data-status="active" data-total-delivered="7,600">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            NA
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        Nandi Aqua Traders</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0108</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 97401 22934</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Hebbal</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 9 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="480 Cans/day" data-hub="Electronic City" data-joined="28 Apr 2024"
+                            data-name="Oasis Can Express" data-phone="+91 99160 88219"
+                            data-routes="Phase 1, Neeladri Road, Velankani" data-seller-id="S-0109" data-status="active"
+                            data-total-delivered="13,400">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            OE
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        Oasis Can Express</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0109</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 99160 88219</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Electronic City</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 10 -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-primary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="260 Cans/day" data-hub="Malleshwaram" data-joined="03 May 2024"
+                            data-name="Pristine Pure Springs" data-phone="+91 98450 33418"
+                            data-routes="Sampige Road, Margosa, Sadashivanagar" data-seller-id="S-0110"
+                            data-status="active" data-total-delivered="6,120">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            PS
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-primary bg-surface-container-lowest rounded-full p-0.5 shadow-xs"
+                                            style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3
+                                        class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                                        Pristine Pure Springs</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0110</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 98450 33418</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Malleshwaram</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 11 (Inactive) -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-tertiary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="150 Cans/day" data-hub="Rajajinagar" data-joined="12 May 2024"
+                            data-name="Cascade Mineral Depot" data-phone="+91 97410 44521"
+                            data-routes="Rajajinagar 1st Block, Navrang" data-seller-id="S-0111" data-status="inactive"
+                            data-total-delivered="1,200">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-surface-container text-tertiary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            CM
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-tertiary bg-surface-container-lowest rounded-full p-0.5 shadow-xs">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Inactive
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-on-surface group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Cascade
+                                        Mineral Depot</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0111</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 97410 44521</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Rajajinagar</span>
+
+                            </div>
+                        </div>
+                        <!-- Card 12 (Inactive) -->
+                        <div class="seller-card group relative bg-surface-container-lowest hover:bg-surface-container-lowest/90 rounded-xl border border-outline-variant/40 hover:border-tertiary/50 transition-all duration-200 p-space-md flex flex-col justify-between aspect-square cursor-pointer shadow-xs hover:shadow-md"
+                            data-cap="180 Cans/day" data-hub="Yelahanka" data-joined="18 May 2024"
+                            data-name="Vayu Hydro Services" data-phone="+91 99805 12093"
+                            data-routes="Yelahanka New Town, Attur" data-seller-id="S-0112" data-status="inactive"
+                            data-total-delivered="850">
+                            <div class="flex flex-col">
+                                <div class="flex items-start justify-between">
+                                    <div class="relative">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-surface-container text-tertiary flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+                                            VH
+                                        </div>
+                                        <span
+                                            class="material-symbols-outlined text-[13px] absolute -bottom-1 -right-1 text-tertiary bg-surface-container-lowest rounded-full p-0.5 shadow-xs">water_drop</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-caption text-caption font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Inactive
+                                        </span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary group-hover:text-on-surface group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Vayu Hydro
+                                        Services</h3>
+                                    <span
+                                        class="inline-block mt-0.5 font-caption text-caption bg-surface-container text-on-surface-variant font-mono px-1.5 py-0.5 rounded">ID:
+                                        S-0112</span>
+                                </div>
+                                <div
+                                    class="mt-2.5 flex items-center gap-1 text-on-surface-variant font-body-md text-body-md">
+                                    <span class="material-symbols-outlined text-[16px] text-tertiary">call</span>
+                                    <span class="truncate">+91 99805 12093</span>
+                                </div>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-outline-variant/20 flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                <span class="truncate max-w-[55%]">Yelahanka</span>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- EMPTY STATE COMPONENT (Toggled or dynamically shown) -->
+                    <div class="hidden flex-col items-center justify-center py-16 px-4 text-center" id="emptyStateView">
+                        <div
+                            class="w-20 h-20 rounded-2xl bg-surface-container-low flex items-center justify-center text-tertiary mb-space-md border border-outline-variant/30">
+                            <span class="material-symbols-outlined text-[42px] text-primary"
+                                style="font-variation-settings: &quot;FILL&quot; 1;">water_drop</span>
+                        </div>
+                        <h3 class="font-headline-md text-headline-md text-on-surface">No sellers registered yet</h3>
+                        <p class="font-body-md text-body-md text-on-surface-variant max-w-md mt-1.5 mb-space-lg">
+                            Get started by adding your first regional water delivery partner to the network to begin
+                            tracking fleets, stock reserves, and route dispatching.
+                        </p>
+                        <a class="inline-flex items-center gap-space-xs px-space-lg py-2.5 bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:bg-primary-container active:bg-primary transition-all shadow-sm"
+                            data-path="create-seller" href="#">
+                            <span class="material-symbols-outlined text-[20px]">person_add</span>
+                            <span class="">Create Seller</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- SLIDE-OVER SELLER DETAILS DRAWER -->
+                <div class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-xs z-50 transition-opacity duration-300"
+                    id="sellerDrawerOverlay"></div>
+                <aside
+                    class="fixed top-0 right-0 h-screen w-full sm:w-[420px] bg-surface-container-lowest z-50 transform transition-transform duration-300 ease-in-out flex flex-col justify-between shadow-2xl border-l border-outline-variant/30"
+                    id="sellerDrawer">
+                    <!-- Header -->
+                    <div
+                        class="p-space-lg border-b border-outline-variant/20 flex items-center justify-between bg-surface-container-low">
+                        <div class="flex items-center gap-space-sm">
+                            <div class="w-11 h-11 rounded-xl bg-primary text-on-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold"
+                                id="drawerAvatar">CM</div>
+                            <div class="flex flex-col">
+                                <h3 class="font-headline-sm text-headline-sm text-on-surface leading-tight"
+                                    id="drawerSellerName">Cascade Mineral Depot</h3>
+                                <span class="font-caption text-caption text-on-surface-variant font-mono"
+                                    id="drawerSellerId">ID: S-0111</span>
+                            </div>
+                        </div>
+                        <button
+                            class="w-8 h-8 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors"
+                            id="closeDrawerBtn">
+                            <span class="material-symbols-outlined text-[20px]">close</span>
+                        </button>
+                    </div>
+                    <!-- Body -->
+                    <div class="p-space-lg flex-1 overflow-y-auto flex flex-col gap-space-lg">
+                        <!-- Status Badge & Delivery Metric -->
+                        <div class="grid grid-cols-2 gap-space-sm">
+                            <div
+                                class="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col">
+                                <span class="font-caption text-caption text-on-surface-variant">Account Status</span>
+                                <div class="mt-1 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-outline" id="drawerStatusDot"></span>
+                                    <span class="font-label-md text-label-md font-semibold text-on-surface"
+                                        id="drawerStatusText">Inactive</span>
+                                </div>
+                            </div>
+                            <div
+                                class="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col">
+                                <span class="font-caption text-caption text-on-surface-variant">Total Jars
+                                    Delivered</span>
+                                <span class="font-headline-sm text-headline-sm font-bold text-primary mt-1"
+                                    id="drawerTotalDelivered">1,200</span>
+                            </div>
+                        </div>
+                        <!-- Key Seller Attributes List -->
+                        <div class="flex flex-col gap-space-md">
+                            <span
+                                class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Operational
+                                Info</span>
+                            <div class="flex flex-col gap-space-sm divide-y divide-outline-variant/20">
+                                <div class="pt-2 first:pt-0 flex items-center justify-between">
+                                    <span
+                                        class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[18px] text-tertiary">call</span>
+                                        Phone Contact
+                                    </span>
+                                    <span class="font-label-md text-label-md text-on-surface font-mono"
+                                        id="drawerPhone">+91 97410 44521</span>
+                                </div>
+                                <div class="pt-2 flex items-center justify-between">
+                                    <span
+                                        class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[18px] text-tertiary">chat</span>
+                                        WhatsApp Alert
+                                    </span>
+                                    <span
+                                        class="font-caption text-caption text-secondary font-semibold bg-secondary-fixed/30 px-2 py-0.5 rounded-full">Connected</span>
+                                </div>
+                                <div class="pt-2 flex items-center justify-between">
+                                    <span
+                                        class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary">warehouse</span>
+                                        Distribution Hub
+                                    </span>
+                                    <span class="font-label-md text-label-md text-on-surface"
+                                        id="drawerHub">Rajajinagar</span>
+                                </div>
+                                <div class="pt-2 flex items-center justify-between">
+                                    <span
+                                        class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[18px] text-tertiary">speed</span>
+                                        Daily Quota
+                                    </span>
+                                    <span class="font-label-md text-label-md text-primary font-semibold"
+                                        id="drawerCap">150 Cans/day</span>
+                                </div>
+                                <div class="pt-2 flex items-center justify-between">
+                                    <span
+                                        class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-tertiary">calendar_today</span>
+                                        Registered Since
+                                    </span>
+                                    <span class="font-label-md text-label-md text-on-surface" id="drawerJoined">12 May
+                                        2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Coverage Territory -->
+                        <div class="flex flex-col gap-space-xs">
+                            <span
+                                class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Assigned
+                                Dispatch Corridors</span>
+                            <div
+                                class="p-space-md bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-start gap-2 text-on-surface-variant">
+                                <span
+                                    class="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">alt_route</span>
+                                <p class="font-body-md text-body-md leading-relaxed text-on-surface" id="drawerRoutes">
+                                    Rajajinagar 1st Block, Navrang</p>
+                            </div>
+                        </div>
+                        <!-- Security / Account Audit Info -->
+                        <div
+                            class="p-space-md rounded-xl bg-surface-container-low/50 border border-outline-variant/20 flex items-center gap-3">
+                            <span class="material-symbols-outlined text-[24px] text-secondary">verified_user</span>
+                            <div class="flex flex-col">
+                                <span class="font-label-sm text-label-sm text-on-surface font-semibold">FSSAI &amp;
+                                    Water Quality Certified</span>
+                                <span class="font-caption text-caption text-on-surface-variant">Batch testing logs
+                                    synchronized daily</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Footer Controls -->
+                    <div
+                        class="p-space-lg border-t border-outline-variant/20 bg-surface-container-low flex items-center gap-space-sm">
+                        <button
+                            class="flex-1 py-2.5 px-4 rounded-xl border border-outline-variant/50 hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors"
+                            id="drawerToggleStatusBtn">Activate Seller</button>
+                        <a class="flex-1 py-2.5 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md text-center hover:bg-primary-container transition-colors shadow-sm"
+                            data-path="create-seller" href="#">
+                            Edit Vendor
+                        </a>
+                    </div>
+                </aside>
+            </div>
+            <script>
+                (function initDashboard() {
+                    const searchInput = document.getElementById('sellerSearchInput');
+                    const cards = Array.from(document.querySelectorAll('.seller-card'));
+                    const gridContainer = document.getElementById('sellerGridContainer');
+                    const emptyStateView = document.getElementById('emptyStateView');
+                    const sellersCountBadge = document.getElementById('sellersCountBadge');
+
+                    const filterAll = document.getElementById('filterAll');
+                    const filterActive = document.getElementById('filterActive');
+                    const filterInactive = document.getElementById('filterInactive');
+                    const btnToggleEmpty = document.getElementById('btnToggleEmpty');
+                    const emptyToggleText = document.getElementById('emptyToggleText');
+
+                    let currentStatusFilter = 'all';
+                    let isForcedEmpty = false;
+
+                    // Filter Tab Switching
+                    function setFilter(status, activeBtn) {
+                        currentStatusFilter = status;
+                        [filterAll, filterActive, filterInactive].forEach(btn => {
+                            btn.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+                            btn.classList.add('text-on-surface-variant');
+                        });
+                        activeBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+                        activeBtn.classList.remove('text-on-surface-variant');
+                        applyFilters();
+                    }
+
+                    filterAll.addEventListener('click', () => setFilter('all', filterAll));
+                    filterActive.addEventListener('click', () => setFilter('active', filterActive));
+                    filterInactive.addEventListener('click', () => setFilter('inactive', filterInactive));
+
+                    // Dynamic Filter Engine
+                    function applyFilters() {
+                        if (isForcedEmpty) {
+                            gridContainer.classList.add('hidden');
+                            emptyStateView.classList.remove('hidden');
+                            sellersCountBadge.innerText = '0 Sellers';
+                            return;
+                        }
+
+                        const query = (searchInput.value || '').toLowerCase().trim();
+                        let visibleCount = 0;
+
+                        cards.forEach(card => {
+                            const name = (card.dataset.name || '').toLowerCase();
+                            const id = (card.dataset.sellerId || '').toLowerCase();
+                            const phone = (card.dataset.phone || '').toLowerCase();
+                            const status = card.dataset.status;
+
+                            const matchesQuery = !query || name.includes(query) || id.includes(query) || phone.includes(query);
+                            const matchesStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
+
+                            if (matchesQuery && matchesStatus) {
+                                card.classList.remove('hidden');
+                                visibleCount++;
+                            } else {
+                                card.classList.add('hidden');
+                            }
+                        });
+
+                        sellersCountBadge.innerText = `${visibleCount} Sellers`;
+
+                        if (visibleCount === 0) {
+                            gridContainer.classList.add('hidden');
+                            emptyStateView.classList.remove('hidden');
+                        } else {
+                            gridContainer.classList.remove('hidden');
+                            emptyStateView.classList.add('hidden');
+                        }
+                    }
+
+                    searchInput.addEventListener('input', applyFilters);
+
+                    // Empty state preview toggle button
+                    btnToggleEmpty.addEventListener('click', () => {
+                        isForcedEmpty = !isForcedEmpty;
+                        emptyToggleText.innerText = isForcedEmpty ? 'Show Sellers' : 'Preview Empty';
+                        applyFilters();
+                    });
+
+                    // Drawer Elements
+                    const drawer = document.getElementById('sellerDrawer');
+                    const overlay = document.getElementById('sellerDrawerOverlay');
+                    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+
+                    const drawerAvatar = document.getElementById('drawerAvatar');
+                    const drawerSellerName = document.getElementById('drawerSellerName');
+                    const drawerSellerId = document.getElementById('drawerSellerId');
+                    const drawerStatusDot = document.getElementById('drawerStatusDot');
+                    const drawerStatusText = document.getElementById('drawerStatusText');
+                    const drawerTotalDelivered = document.getElementById('drawerTotalDelivered');
+                    const drawerPhone = document.getElementById('drawerPhone');
+                    const drawerHub = document.getElementById('drawerHub');
+                    const drawerCap = document.getElementById('drawerCap');
+                    const drawerJoined = document.getElementById('drawerJoined');
+                    const drawerRoutes = document.getElementById('drawerRoutes');
+                    const drawerToggleStatusBtn = document.getElementById('drawerToggleStatusBtn');
+
+                    let currentSelectedCard = null;
+
+                    function openSellerDrawer(card) {
+                        currentSelectedCard = card;
+                        const data = card.dataset;
+
+                        const initials = (data.name || 'SW').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+                        drawerAvatar.innerText = initials;
+                        drawerSellerName.innerText = data.name;
+                        drawerSellerId.innerText = `ID: ${data.sellerId}`;
+                        drawerPhone.innerText = data.phone;
+                        drawerHub.innerText = data.hub;
+                        drawerCap.innerText = data.cap;
+                        drawerJoined.innerText = data.joined || '01 Jan 2024';
+                        drawerTotalDelivered.innerText = data.totalDelivered || '10,000';
+                        drawerRoutes.innerText = data.routes || 'Primary Municipal Territory';
+
+                        const isActive = data.status === 'active';
+                        drawerStatusText.innerText = isActive ? 'Active' : 'Inactive';
+                        drawerStatusDot.className = `w-2 h-2 rounded-full ${isActive ? 'bg-secondary' : 'bg-outline'}`;
+                        drawerToggleStatusBtn.innerText = isActive ? 'Deactivate Seller' : 'Activate Seller';
+
+                        overlay.classList.remove('opacity-0', 'pointer-events-none');
+                        drawer.classList.remove('translate-x-full');
+                    }
+
+                    function closeSellerDrawer() {
+                        overlay.classList.add('opacity-0', 'pointer-events-none');
+                        drawer.classList.add('translate-x-full');
+                    }
+
+                    cards.forEach(card => {
+                        card.addEventListener('click', () => openSellerDrawer(card));
+                    });
+
+                    closeDrawerBtn.addEventListener('click', closeSellerDrawer);
+                    overlay.addEventListener('click', closeSellerDrawer);
+
+                    // Toggle active status inside drawer
+                    drawerToggleStatusBtn.addEventListener('click', () => {
+                        if (!currentSelectedCard) return;
+                        const wasActive = currentSelectedCard.dataset.status === 'active';
+                        const newStatus = wasActive ? 'inactive' : 'active';
+                        currentSelectedCard.dataset.status = newStatus;
+
+                        // Update small tag on the card
+                        const pill = currentSelectedCard.querySelector('[data-status-pill]') || currentSelectedCard.querySelector('.rounded-full.bg-secondary-fixed\\/40, .rounded-full.bg-surface-container-high');
+                        if (pill) {
+                            if (newStatus === 'active') {
+                                pill.className = 'flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-caption text-caption font-semibold';
+                                pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active';
+                            } else {
+                                pill.className = 'flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-caption text-caption font-semibold';
+                                pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Inactive';
+                            }
+                        }
+
+                        openSellerDrawer(currentSelectedCard);
+                        applyFilters();
+                    });
+
+                    // Keyboard accessibility
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') closeSellerDrawer();
+                    });
+                })();
+            </script>
+        </main>
+    </div>
+
+</body>
+
+</html>

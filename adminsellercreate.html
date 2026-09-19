@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en" style="">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="web_dashboard" name="shell-type">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        @layer base {
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                overscroll-behavior: none;
+            }
+
+            main>:first-child {
+                margin-top: 0 !important;
+            }
+
+            main>:last-child {
+                margin-bottom: 0 !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+        id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-highest": "#e0e3e5", "surface-bright": "#f7f9fb", "secondary-fixed": "#6ffbbe", "primary-fixed": "#cce5ff", "surface-container": "#eceef0", "tertiary": "#545c72", "surface-container-high": "#e6e8ea", "surface": "#f7f9fb", "on-primary": "#ffffff", "on-surface-variant": "#3f4850", "inverse-on-surface": "#eff1f3", "on-secondary": "#ffffff", "tertiary-container": "#6c748b", "on-primary-fixed-variant": "#004b73", "primary-fixed-dim": "#93ccff", "on-error": "#ffffff", "on-primary-fixed": "#001d31", "on-surface": "#191c1e", "surface-variant": "#e0e3e5", "on-tertiary-fixed": "#131b2e", "error-container": "#ffdad6", "on-tertiary-container": "#fefcff", "outline-variant": "#bfc7d2", "secondary-fixed-dim": "#4edea3", "background": "#f7f9fb", "tertiary-fixed": "#dae2fd", "on-tertiary": "#ffffff", "surface-container-low": "#f2f4f6", "on-tertiary-fixed-variant": "#3f465c", "secondary": "#006c49", "outline": "#707881", "surface-tint": "#006398", "primary": "#006194", "primary-container": "#007bb9", "surface-container-lowest": "#ffffff", "on-secondary-container": "#00714d", "secondary-container": "#6cf8bb", "inverse-surface": "#2d3133", "error": "#ba1a1a", "inverse-primary": "#93ccff", "on-error-container": "#93000a", "tertiary-fixed-dim": "#bec6e0", "surface-dim": "#d8dadc", "on-secondary-fixed": "#002113", "on-background": "#191c1e", "on-secondary-fixed-variant": "#005236", "on-primary-container": "#fdfcff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter-sm": "1rem", "space-xl": "2rem", "margin": "2rem", "space-md": "1rem", "space-lg": "1.5rem", "margin-sm": "1rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-xs": "0.25rem" }, "fontFamily": { "display-lg": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], "caption": ["Inter"], "headline-md": ["Inter"], "headline-lg": ["Inter"], "label-sm": ["Inter"], "headline-sm": ["Inter"], "label-md": ["Inter"] }, "fontSize": { "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "caption": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.025em", "fontWeight": "600" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.005em", "fontWeight": "500" }] } } } };</script>
+</head>
+
+<body class="bg-background font-body-md text-on-surface antialiased">
+    <aside
+        class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.02)]">
+        <div class="flex flex-col">
+            <div class="h-16 px-space-md flex items-center gap-space-sm border-b border-outline-variant/20"><img
+                    alt="AquaFlow Water Delivery Admin Logo" class="h-8 w-auto object-contain"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1W9O2c-t0fJguo1QisCIOsVdSrR9zXwVNkWYkAAvd5fNUcKQK0Cri3MyKnu__aeWMGjzloTCkFI7E81-XHsDOLULG6vIS47vHwRqVRTnAc5IMCWjYA0y9RppSguoFEA8JJPOTHU7DjSeqSAMHBPSZJDlq-NLHZah9MNyvHmLZIVWBE1a0vYSI7RtW6dPRHF2DuQlK70oipspS5vU3bBqWhCvWAXeXZ1LUVBzgoWbgG5ACNIco2YmRivMp4">
+                <div class="flex flex-col"><span
+                        class="font-headline-sm text-headline-sm text-primary tracking-tight">AquaFlow</span><span
+                        class="font-caption text-caption text-on-surface-variant leading-none">Dispatch &amp;
+                        Network</span></div>
+            </div>
+            <div class="px-space-md py-space-sm"><span
+                    class="font-label-sm text-label-sm text-on-surface-variant/70 uppercase tracking-wider">Main
+                    Management</span></div>
+            <nav class="flex flex-col gap-space-xs px-space-sm"
+                data-active-classes="bg-primary-fixed/40 text-on-primary-fixed-variant font-headline-sm border-l-4 border-primary shadow-sm">
+                <a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all group"
+                    data-path="dashboard" href="#"><span
+                        class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary transition-colors">dashboard</span><span
+                        class="font-label-md text-label-md">Dashboard</span></a><a aria-current="page"
+                    class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg bg-primary-fixed/40 text-on-primary-fixed-variant font-headline-sm shadow-sm"
+                    data-path="create-seller" href="#"><span
+                        class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary transition-colors">person_add</span><span
+                        class="font-label-md text-label-md">Create Seller</span></a></nav>
+        </div>
+        <div class="p-space-md border-t border-outline-variant/20 bg-surface-container-lowest">
+            <div class="flex items-center justify-between px-space-sm py-space-xs rounded-lg bg-surface-container-low">
+                <div class="flex items-center gap-space-xs"><span
+                        class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span
+                        class="font-caption text-caption text-secondary font-semibold">Hub Active</span></div><span
+                    class="font-caption text-caption text-on-surface-variant">v2.4 LTS</span>
+            </div>
+        </div>
+    </aside>
+    <div class="pl-64 flex flex-col min-h-screen">
+        <header
+            class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/20 z-40 flex items-center justify-between px-gutter">
+            <div class="flex items-center gap-space-md"><img alt="AquaFlow Water Delivery Admin Logo"
+                    class="h-8 w-auto object-contain"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1W9O2c-t0fJguo1QisCIOsVdSrR9zXwVNkWYkAAvd5fNUcKQK0Cri3MyKnu__aeWMGjzloTCkFI7E81-XHsDOLULG6vIS47vHwRqVRTnAc5IMCWjYA0y9RppSguoFEA8JJPOTHU7DjSeqSAMHBPSZJDlq-NLHZah9MNyvHmLZIVWBE1a0vYSI7RtW6dPRHF2DuQlK70oipspS5vU3bBqWhCvWAXeXZ1LUVBzgoWbgG5ACNIco2YmRivMp4">
+                <div class="h-4 w-px bg-outline-variant/50"></div><span
+                    class="font-headline-sm text-headline-sm text-on-surface">AquaFlow Admin</span>
+                <div
+                    class="hidden sm:flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container text-on-surface-variant font-caption text-caption">
+                    <span class="material-symbols-outlined text-[14px]">water_drop</span><span class="">Regional
+                        Logistics</span></div>
+            </div>
+            <div class="flex items-center gap-space-lg">
+                <div
+                    class="hidden md:flex items-center gap-space-xs px-space-md py-1 rounded-full bg-secondary-fixed/30 text-on-secondary-fixed-variant">
+                    <span class="w-2 h-2 rounded-full bg-secondary"></span><span
+                        class="font-label-sm text-label-sm font-semibold">Operational</span></div>
+                <div class="flex items-center gap-space-sm pl-space-sm border-l border-outline-variant/30">
+                    <div class="text-right hidden sm:block">
+                        <p class="font-label-sm text-label-sm font-medium text-on-surface leading-none">Super Admin</p>
+                    </div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary-fixed"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO9M9mlUQGXXfDyj9_QjWBIdxTcHH25IB3Y6WmN2lWb-DDWZpJFf06Zuyz0Y0qeCxDk-hh74iKtSesG4aGtw_BEClAXZObXB8a_-AN1NjtJo6U3cFNDs4d_qHfVVPPSSkp0--7Bn3wPXfHoDYiEib6W0G4-yXvbpflGudJKmSA_yGdwdx5W46K7SUZcgBBg6jPw37B_-ff49Z2cg8Ea7SiXnu_E7VeGFfj1pECBfepuclLz7i-vuS3">
+                </div>
+            </div>
+        </header>
+        <main class="w-full pt-16 bg-background flex-1 px-gutter py-space-lg">
+            <div class="flex flex-col w-full">
+                <script>
+                    document.addEventListener("DOMContentLoaded", () => {
+                        const dashboardNav = document.querySelector('aside nav a[data-path="dashboard"]');
+                        const createSellerNav = document.querySelector('aside nav a[data-path="create-seller"]');
+                        if (dashboardNav && createSellerNav) {
+                            dashboardNav.className = "flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all group";
+                            createSellerNav.className = "flex items-center gap-space-sm px-space-md py-space-sm rounded-lg bg-primary-fixed/40 text-on-primary-fixed-variant font-headline-sm shadow-sm";
+                        }
+                    });
+                </script>
+                <div class="w-full max-w-5xl mx-auto flex flex-col gap-space-lg pb-space-xl">
+                    <!-- Breadcrumb & Header Meta -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+                        <div class="flex flex-col gap-1">
+                            <nav aria-label="Breadcrumb"
+                                class="flex items-center gap-space-xs font-caption text-caption text-on-surface-variant mb-1">
+                                <a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+                                    <span class="material-symbols-outlined text-[15px]">grid_view</span>
+                                    <span class="">Dashboard</span>
+                                </a>
+                                <span class="text-outline-variant">/</span>
+                                <span class="text-on-surface font-semibold">Create Seller</span>
+                            </nav>
+                            <div class="flex items-center gap-space-sm">
+                                <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Create
+                                    Seller</h1>
+                                <span
+                                    class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-label-sm text-label-sm">
+                                    <span class="material-symbols-outlined text-[13px] text-secondary">verified</span>
+                                    New Onboarding
+                                </span>
+                            </div>
+                            <p class="font-body-md text-body-md text-on-surface-variant">Register a new water can
+                                delivery agency or distributor to the AquaFlow network.</p>
+                        </div>
+                        <!-- Quick Action Simulation bar -->
+                        <div
+                            class="flex items-center gap-space-xs bg-surface-container-low p-1.5 rounded-full self-start md:self-auto">
+                            <button
+                                class="px-space-sm py-1 rounded-full font-label-sm text-label-sm text-primary hover:bg-surface-container transition-all flex items-center gap-1"
+                                id="btn-prefill" type="button">
+                                <span class="material-symbols-outlined text-[16px]">auto_fix_high</span>
+                                Demo Auto-fill
+                            </button>
+                            <div class="w-px h-4 bg-outline-variant/40"></div>
+                            <button
+                                class="px-space-sm py-1 rounded-full font-label-sm text-label-sm text-error hover:bg-error-container/40 transition-all flex items-center gap-1"
+                                id="btn-simulate-error" type="button">
+                                <span class="material-symbols-outlined text-[16px]">bug_report</span>
+                                Simulate Error
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Global Error Alert Box (Hidden by default) -->
+                    <div class="hidden transition-all duration-300" id="submission-error-banner">
+                        <div
+                            class="p-space-md rounded-xl bg-error-container text-on-error-container flex items-start gap-space-sm shadow-sm">
+                            <span class="material-symbols-outlined text-error text-[22px] shrink-0 mt-0.5">error</span>
+                            <div class="flex-1 flex flex-col gap-0.5">
+                                <p class="font-headline-sm text-headline-sm font-semibold">Unable to create seller</p>
+                                <p class="font-body-md text-body-md text-on-error-container/90"
+                                    id="submission-error-text">Please check the highlighted information below, resolve
+                                    all errors, and try again.</p>
+                            </div>
+                            <button class="text-on-error-container/70 hover:text-on-error-container p-1 rounded-full"
+                                id="close-error-banner" type="button">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Success View Wrapper (Hidden initially) -->
+                    <div class="hidden flex-col gap-space-lg" id="success-confirmation-view">
+                        <div
+                            class="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl flex flex-col items-center text-center">
+                            <div
+                                class="w-16 h-16 rounded-full bg-secondary-fixed/50 text-secondary flex items-center justify-center mb-space-md shadow-sm">
+                                <span class="material-symbols-outlined text-[36px]"
+                                    style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+                            </div>
+                            <h2 class="font-headline-lg text-headline-lg text-on-surface mb-space-xs">Seller Created
+                                Successfully</h2>
+                            <p class="font-body-md text-body-md text-on-surface-variant max-w-lg mb-space-lg">
+                                The water delivery agency has been registered to the AquaFlow network and login
+                                credentials have been dispatched via automated SMS and Email.
+                            </p>
+                            <!-- Summary Receipt Card -->
+                            <div
+                                class="w-full max-w-xl bg-surface-container-low rounded-xl p-space-lg text-left mb-space-xl flex flex-col gap-space-md">
+                                <div class="flex items-center justify-between pb-space-sm">
+                                    <span
+                                        class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Registration
+                                        Receipt</span>
+                                    <span
+                                        class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Active &amp;
+                                        Verified
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+                                    <div class="flex flex-col">
+                                        <span class="font-caption text-caption text-on-surface-variant">Seller Entity
+                                            Name</span>
+                                        <span class="font-headline-sm text-headline-sm text-on-surface"
+                                            id="summary-seller-name">Ganga Pure Waters</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="font-caption text-caption text-on-surface-variant">Unique Network
+                                            ID</span>
+                                        <span class="font-headline-sm text-headline-sm text-primary font-mono"
+                                            id="summary-seller-id">S-1042</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="font-caption text-caption text-on-surface-variant">Primary Dispatch
+                                            Phone</span>
+                                        <span class="font-body-lg text-body-lg text-on-surface font-medium"
+                                            id="summary-seller-phone">+91 98765 43210</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="font-caption text-caption text-on-surface-variant">Dispatch
+                                            WhatsApp</span>
+                                        <span class="font-body-lg text-body-lg text-on-surface font-medium"
+                                            id="summary-seller-whatsapp">+91 98765 43210</span>
+                                    </div>
+                                    <div class="flex flex-col sm:col-span-2">
+                                        <span class="font-caption text-caption text-on-surface-variant">Registered Hub
+                                            Location</span>
+                                        <span class="font-body-md text-body-md text-on-surface"
+                                            id="summary-seller-address">Plot 45, Sector 12, Industrial Area, Hyderabad -
+                                            500081</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Action CTAs -->
+                            <div class="flex flex-wrap items-center justify-center gap-space-md w-full max-w-md">
+                                <a class="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-space-xs px-space-lg py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-sm font-label-md text-label-md"
+                                    href="#">
+                                    <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                                    <span class="">Go to Dashboard</span>
+                                </a>
+                                <button
+                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-space-xs px-space-lg py-2.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-all font-label-md text-label-md"
+                                    id="btn-register-another" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">person_add</span>
+                                    <span class="">Register Another Seller</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Main Registration Form Container -->
+                    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden transition-all"
+                        id="form-card-container">
+                        <!-- Stepper / Section Header -->
+                        <div
+                            class="p-space-lg bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+                            <div class="flex items-center gap-space-md">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center shadow-xs">
+                                    <span class="material-symbols-outlined text-[20px]">badge</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <h2 class="font-headline-md text-headline-md text-on-surface">Seller Information
+                                        &amp; Credentials</h2>
+                                    <p class="font-caption text-caption text-on-surface-variant">Fill in agency
+                                        verification details and setup administrator sign-in access</p>
+                                </div>
+                            </div>
+                            <!-- Progress chip -->
+                            <div
+                                class="flex items-center gap-space-xs self-start md:self-auto px-space-md py-1 rounded-full bg-surface-container-lowest shadow-xs text-on-surface-variant font-label-sm text-label-sm">
+                                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                                <span class="">Step 1 of 1: Identity &amp; Auth</span>
+                            </div>
+                        </div>
+                        <!-- Form Body -->
+                        <form class="p-space-lg md:p-space-xl flex flex-col gap-space-lg" id="create-seller-form"
+                            novalidate="">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-space-xl gap-y-space-lg">
+                                <!-- LEFT COLUMN: Identity & Contacts -->
+                                <div class="flex flex-col gap-space-lg">
+                                    <div class="flex items-center gap-2 pb-1 text-primary">
+                                        <span class="material-symbols-outlined text-[18px]">domain</span>
+                                        <span
+                                            class="font-label-md text-label-md tracking-wider uppercase font-semibold">Business
+                                            Identity</span>
+                                    </div>
+                                    <!-- Seller Name -->
+                                    <div class="flex flex-col gap-1.5" id="group-sellerName">
+                                        <label
+                                            class="font-label-md text-label-md text-on-surface font-semibold flex items-center justify-between"
+                                            for="sellerName">
+                                            <span class="">Seller Name <span class="text-error">*</span></span>
+                                            <span
+                                                class="font-caption text-caption text-on-surface-variant font-normal">Agency
+                                                name</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input aria-describedby="sellerName-helper sellerName-error"
+                                                class="w-full h-11 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all"
+                                                id="sellerName" name="sellerName"
+                                                placeholder="Enter seller name (e.g. Ganga Pure Waters)" type="text">
+                                        </div>
+                                        <span class="font-caption text-caption text-on-surface-variant"
+                                            id="sellerName-helper">Business or agency legal name registered with
+                                            AquaFlow</span>
+                                        <span
+                                            class="hidden font-caption text-caption text-error items-center gap-1 mt-0.5"
+                                            id="sellerName-error">
+                                            <span class="material-symbols-outlined text-[14px]">error</span>
+                                            <span class="">This field is required.</span>
+                                        </span>
+                                    </div>
+                                    <!-- Seller ID -->
+                                    <div class="flex flex-col gap-1.5" id="group-sellerId">
+                                        <div class="flex items-center justify-between">
+                                            <label class="font-label-md text-label-md text-on-surface font-semibold"
+                                                for="sellerId">
+                                                Seller ID <span class="text-error">*</span>
+                                            </label>
+                                            <span
+                                                class="hidden items-center gap-1 font-caption text-caption text-secondary font-medium"
+                                                id="sellerId-status-badge">
+                                                <span class="material-symbols-outlined text-[14px]">check</span>
+                                                Available
+                                            </span>
+                                        </div>
+                                        <div class="relative">
+                                            <input aria-describedby="sellerId-helper sellerId-error"
+                                                class="w-full h-11 px-3.5 uppercase font-mono rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all"
+                                                id="sellerId" name="sellerId"
+                                                placeholder="Enter unique seller ID (e.g. S-1042)" type="text">
+                                            <button
+                                                class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-primary font-caption text-caption font-semibold transition-colors"
+                                                id="btn-generate-id" type="button">
+                                                Generate
+                                            </button>
+                                        </div>
+                                        <span class="font-caption text-caption text-on-surface-variant"
+                                            id="sellerId-helper">Real-time uniqueness check (Prefix 'S-'
+                                            recommended)</span>
+                                        <span
+                                            class="hidden font-caption text-caption text-error items-center gap-1 mt-0.5"
+                                            id="sellerId-error">
+                                            <span class="material-symbols-outlined text-[14px]">error</span>
+                                            <span class="">This field is required.</span>
+                                        </span>
+                                    </div>
+                                    <!-- Contact Number -->
+                                    <div class="flex flex-col gap-1.5" id="group-contactNumber">
+                                        <label class="font-label-md text-label-md text-on-surface font-semibold"
+                                            for="contactNumber">
+                                            Contact Number <span class="text-error">*</span>
+                                        </label>
+                                        <div class="relative flex items-center">
+                                            <div
+                                                class="absolute left-0 top-0 bottom-0 px-3 bg-surface-container flex items-center gap-1.5 rounded-l-lg pointer-events-none text-on-surface-variant font-label-md text-label-md">
+                                                <img alt="India flag" class="w-4 h-auto rounded-xs object-cover"
+                                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7fW5Ewgdw9GSONF-njOzDXEQlrvrg-ayvy5BH7LziloGp94cUdynoddqK169wCip4Fh-h54CCABmrR0S96gwozPCsrS5AYpOV5RJ16F9w_yl01XO48OzpBx0RJgUhis55V--TPi2fCXX-A5W2XD7zDoYveMIuIX-1_SCLdBv59UXz-renyCy3H2pVGDshgAu9RvMjLZg6C0S4j8tTvTOhoiJP8quY8MSzKPN-1vriOnZqPoWYrlG9">
+                                                <span class="">+91</span>
+                                            </div>
+                                            <input aria-describedby="contactNumber-error"
+                                                class="w-full h-11 pl-20 pr-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all"
+                                                id="contactNumber" maxlength="10" name="contactNumber"
+                                                placeholder="98765 43210" type="tel">
+                                        </div>
+                                        <span
+                                            class="hidden font-caption text-caption text-error items-center gap-1 mt-0.5"
+                                            id="contactNumber-error">
+                                            <span class="material-symbols-outlined text-[14px]">error</span>
+                                            <span class="">Please enter a valid contact number (10 digits).</span>
+                                        </span>
+                                    </div>
+                                    <!-- WhatsApp Number -->
+                                    <div class="flex flex-col gap-1.5" id="group-whatsappNumber">
+                                        <div class="flex items-center justify-between flex-wrap gap-1">
+                                            <label class="font-label-md text-label-md text-on-surface font-semibold"
+                                                for="whatsappNumber">
+                                                WhatsApp Number <span class="text-error">*</span>
+                                            </label>
+                                            <label
+                                                class="flex items-center gap-1.5 cursor-pointer text-on-surface-variant hover:text-on-surface select-none">
+                                                <input
+                                                    class="w-4 h-4 rounded text-primary focus:ring-0 accent-primary cursor-pointer"
+                                                    id="sync-whatsapp-checkbox" type="checkbox">
+                                                <span class="font-caption text-caption font-medium">Same as Contact
+                                                    Number</span>
+                                            </label>
+                                        </div>
+                                        <div class="relative flex items-center">
+                                            <div
+                                                class="absolute left-0 top-0 bottom-0 px-3 bg-surface-container flex items-center gap-1.5 rounded-l-lg pointer-events-none text-on-surface-variant font-label-md text-label-md">
+                                                <span
+                                                    class="material-symbols-outlined text-[16px] text-secondary">chat</span>
+                                                <span class="">+91</span>
+                                            </div>
+                                            <input aria-describedby="whatsappNumber-error"
+                                                class="w-full h-11 pl-20 pr-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all"
+                                                id="whatsappNumber" maxlength="10" name="whatsappNumber"
+                                                placeholder="98765 43210" type="tel">
+                                        </div>
+                                        <span
+                                            class="hidden font-caption text-caption text-error items-center gap-1 mt-0.5"
+                                            id="whatsappNumber-error">
+                                            <span class="material-symbols-outlined text-[14px]">error</span>
+                                            <span class="">Please enter a valid WhatsApp number (10 digits).</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- RIGHT COLUMN: Credentials & Authentication -->
+                                <div class="flex flex-col gap-space-lg">
+                                    <div class="flex items-center gap-2 pb-1 text-primary">
+                                        <span class="material-symbols-outlined text-[18px]">lock</span>
+                                        <span
+                                            class="font-label-md text-label-md tracking-wider uppercase font-semibold">Access
+                                            Credentials</span>
+                                    </div>
+                                    <!-- Email Address -->
+                                    <div class="flex flex-col gap-1.5" id="group-email">
+                                        <label class="font-label-md text-label-md text-on-surface font-semibold"
+                                            for="email">
+                                            Email Address <span class="text-error">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input aria-describedby="email-error"
+                                                class="w-full h-11 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all"
+                                                id="email" name="email" placeholder="contact@gangapurewaters.com"
+                                                type="email">
+                                        </div>
+                                        <span
+                                            class="hidden font-caption text-caption text-error items-center gap-1 mt-0.5"
+                                            id="email-error">
+                                            <span class="material-symbols-outlined text-[14px]">error</span>
+                                            <span class="">Please enter a valid email address.</span>
+                                        </span>
+                                    </div>
+                                    <!-- Password -->
+                                    <div class="flex flex-col gap-1.5" id="group-password">
+                                        <label class="font-label-md text-label-md text-on-surface font-semibold"
+                                            for="password">
+                                            Password <span class="text-error">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input aria-describedby="password-error"
+                                                class="w-full h-11 pl-3.5 pr-11 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all"
+                                                id="password" name="password"
+                                                placeholder="Create strong portal password" type="password">
+                                            <button
+                                                class="toggle-password-visibility absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface p-1"
+                                                data-toggle-for="password" type="button">
+                                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                            </button>
+                                        </div>
+                                        <!-- Password Strength Meter -->
+                                        <div class="flex flex-col gap-1 mt-1">
+                                            <div class="flex items-center gap-1.5 w-full">
+                                                <div class="h-1.5 flex-1 rounded-full bg-surface-container transition-colors duration-300"
+                                                    id="strength-bar-1"></div>
+                                                <div class="h-1.5 flex-1 rounded-full bg-surface-container transition-colors duration-300"
+                                                    id="strength-bar-2"></div>
+                                                <div class="h-1.5 flex-1 rounded-full bg-surface-container transition-colors duration-300"
+                                                    id="strength-bar-3"></div>
+                                                <div class="h-1.5 flex-1 rounded-full bg-surface-container transition-colors duration-300"
+                                                    id="strength-bar-4"></div>
+                                            </div>
+                                            <div
+                                                class="flex items-center justify-between font-caption text-caption text-on-surface-variant">
+                                                <span class="">Password strength:</span>
+                                                <span class="font-medium text-outline" id="strength-label">Enter
+                                                    password</span>
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="hidden font-caption text-caption text-error items-center gap-1 mt-0.5"
+                                            id="password-error">
+                                            <span class="material-symbols-outlined text-[14px]">error</span>
+                                            <span class="">Password must be at least 8 characters.</span>
+                                        </span>
+                                    </div>
+                                    <!-- Confirm Password -->
+                                    <div class="flex flex-col gap-1.5" id="group-confirmPassword">
+                                        <label class="font-label-md text-label-md text-on-surface font-semibold"
+                                            for="confirmPassword">
+                                            Confirm Password <span class="text-error">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input aria-describedby="confirmPassword-error"
+                                                class="w-full h-11 pl-3.5 pr-11 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all"
+                                                id="confirmPassword" name="confirmPassword"
+                                                placeholder="Re-enter password" type="password">
+                                            <button
+                                                class="toggle-password-visibility absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface p-1"
+                                                data-toggle-for="confirmPassword" type="button">
+                                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                            </button>
+                                        </div>
+                                        <span
+                                            class="hidden font-caption text-caption text-error items-center gap-1 mt-0.5"
+                                            id="confirmPassword-error">
+                                            <span class="material-symbols-outlined text-[14px]">error</span>
+                                            <span class="">Passwords do not match.</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- FULL WIDTH: Complete Hub Address -->
+                                <div class="md:col-span-2 flex flex-col gap-1.5" id="group-address">
+                                    <div class="flex items-center gap-2 pb-1 text-primary">
+                                        <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                        <span
+                                            class="font-label-md text-label-md tracking-wider uppercase font-semibold">Logistics
+                                            Territory &amp; Hub</span>
+                                    </div>
+                                    <label class="font-label-md text-label-md text-on-surface font-semibold"
+                                        for="address">
+                                        Complete Business / Delivery Hub Address <span class="text-error">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <textarea aria-describedby="address-error"
+                                            class="w-full p-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all resize-y min-h-[96px]"
+                                            id="address" name="address"
+                                            placeholder="Enter complete seller address including street, landmark, area and pincode..."
+                                            rows="3"></textarea>
+                                    </div>
+                                    <span class="hidden font-caption text-caption text-error items-center gap-1 mt-0.5"
+                                        id="address-error">
+                                        <span class="material-symbols-outlined text-[14px]">error</span>
+                                        <span class="">This field is required.</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Form Action Bar -->
+                            <div
+                                class="mt-space-md pt-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-md bg-surface-container-lowest">
+                                <div class="flex items-center gap-space-md w-full sm:w-auto">
+                                    <a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors py-2 px-1"
+                                        href="#">
+                                        Cancel
+                                    </a>
+                                    <button
+                                        class="px-space-md py-2.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-all flex items-center gap-1.5"
+                                        id="btn-reset" type="button">
+                                        <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                                        <span class="">Reset Form</span>
+                                    </button>
+                                </div>
+                                <div class="w-full sm:w-auto flex items-center justify-end">
+                                    <button
+                                        class="w-full sm:w-auto min-w-[190px] px-space-xl py-3 rounded-full bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-space-xs disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                                        id="btn-submit" type="submit">
+                                        <span class="material-symbols-outlined text-[20px]"
+                                            id="btn-submit-icon">person_add</span>
+                                        <span
+                                            class="hidden animate-spin h-5 w-5 border-2 border-on-primary border-t-transparent rounded-full"
+                                            id="btn-submit-spinner"></span>
+                                        <span id="btn-submit-text" class="">Create Seller</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Administrative Notes Card -->
+                    <div
+                        class="bg-surface-container-low rounded-xl p-space-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+                        <div class="flex items-start gap-space-sm">
+                            <span class="material-symbols-outlined text-primary text-[24px] mt-0.5">info</span>
+                            <div class="flex flex-col">
+                                <p class="font-headline-sm text-headline-sm text-on-surface">Auto-activation Protocol
+                                </p>
+                                <p class="font-caption text-caption text-on-surface-variant max-w-2xl">Upon seller
+                                    submission, an automated verification token is dispatched to the registered mobile
+                                    and email. Agencies must complete their initial inventory sync within 48 hours.</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-center gap-space-xs text-on-surface-variant font-caption text-caption self-end md:self-center shrink-0">
+                            <span class="material-symbols-outlined text-[16px] text-secondary">security</span>
+                            <span class="">256-bit TLS Encrypted</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Interactive Client-side Script -->
+                <script>
+                    (function () {
+                        const form = document.getElementById("create-seller-form");
+                        const sellerName = document.getElementById("sellerName");
+                        const sellerId = document.getElementById("sellerId");
+                        const contactNumber = document.getElementById("contactNumber");
+                        const whatsappNumber = document.getElementById("whatsappNumber");
+                        const syncWhatsappCheckbox = document.getElementById("sync-whatsapp-checkbox");
+                        const email = document.getElementById("email");
+                        const password = document.getElementById("password");
+                        const confirmPassword = document.getElementById("confirmPassword");
+                        const address = document.getElementById("address");
+
+                        const errorBanner = document.getElementById("submission-error-banner");
+                        const errorText = document.getElementById("submission-error-text");
+                        const closeErrorBtn = document.getElementById("close-error-banner");
+                        const formCardContainer = document.getElementById("form-card-container");
+                        const successView = document.getElementById("success-confirmation-view");
+
+                        const btnSubmit = document.getElementById("btn-submit");
+                        const btnSubmitText = document.getElementById("btn-submit-text");
+                        const btnSubmitIcon = document.getElementById("btn-submit-icon");
+                        const btnSubmitSpinner = document.getElementById("btn-submit-spinner");
+                        const btnReset = document.getElementById("btn-reset");
+                        const btnPrefill = document.getElementById("btn-prefill");
+                        const btnSimulateError = document.getElementById("btn-simulate-error");
+                        const btnRegisterAnother = document.getElementById("btn-register-another");
+                        const btnGenerateId = document.getElementById("btn-generate-id");
+                        const sellerIdStatusBadge = document.getElementById("sellerId-status-badge");
+
+                        // Password strength meters
+                        const strengthBars = [
+                            document.getElementById("strength-bar-1"),
+                            document.getElementById("strength-bar-2"),
+                            document.getElementById("strength-bar-3"),
+                            document.getElementById("strength-bar-4")
+                        ];
+                        const strengthLabel = document.getElementById("strength-label");
+
+                        // Existing IDs for simulated uniqueness check
+                        const takenIds = ["S-1001", "S-1002", "S-1003", "S-2020"];
+
+                        // Password visibility togglers
+                        document.querySelectorAll(".toggle-password-visibility").forEach(btn => {
+                            btn.addEventListener("click", () => {
+                                const targetId = btn.getAttribute("data-toggle-for");
+                                const targetInput = document.getElementById(targetId);
+                                const iconSpan = btn.querySelector(".material-symbols-outlined");
+                                if (targetInput.type === "password") {
+                                    targetInput.type = "text";
+                                    iconSpan.textContent = "visibility_off";
+                                } else {
+                                    targetInput.type = "password";
+                                    iconSpan.textContent = "visibility";
+                                }
+                            });
+                        });
+
+                        // Synchronize WhatsApp input
+                        syncWhatsappCheckbox.addEventListener("change", () => {
+                            if (syncWhatsappCheckbox.checked) {
+                                whatsappNumber.value = contactNumber.value;
+                                validateField(whatsappNumber);
+                            }
+                        });
+                        contactNumber.addEventListener("input", () => {
+                            if (syncWhatsappCheckbox.checked) {
+                                whatsappNumber.value = contactNumber.value;
+                            }
+                        });
+
+                        // Seller ID Generator helper
+                        btnGenerateId.addEventListener("click", () => {
+                            const rand = Math.floor(1000 + Math.random() * 9000);
+                            sellerId.value = "S-" + rand;
+                            validateField(sellerId);
+                        });
+
+                        // Password Strength logic
+                        password.addEventListener("input", () => {
+                            const val = password.value;
+                            let score = 0;
+                            if (val.length >= 8) score++;
+                            if (/[A-Z]/.test(val)) score++;
+                            if (/[0-9]/.test(val)) score++;
+                            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+                            strengthBars.forEach(bar => {
+                                bar.className = "h-1.5 flex-1 rounded-full bg-surface-container transition-colors duration-300";
+                            });
+
+                            if (val.length === 0) {
+                                strengthLabel.textContent = "Enter password";
+                                strengthLabel.className = "font-medium text-outline";
+                            } else if (score <= 1) {
+                                strengthBars[0].className = "h-1.5 flex-1 rounded-full bg-error transition-colors duration-300";
+                                strengthLabel.textContent = "Weak";
+                                strengthLabel.className = "font-medium text-error";
+                            } else if (score <= 3) {
+                                strengthBars[0].className = "h-1.5 flex-1 rounded-full bg-primary transition-colors duration-300";
+                                strengthBars[1].className = "h-1.5 flex-1 rounded-full bg-primary transition-colors duration-300";
+                                strengthBars[2].className = "h-1.5 flex-1 rounded-full bg-primary transition-colors duration-300";
+                                strengthLabel.textContent = "Medium";
+                                strengthLabel.className = "font-medium text-primary";
+                            } else {
+                                strengthBars.forEach(bar => {
+                                    bar.className = "h-1.5 flex-1 rounded-full bg-secondary transition-colors duration-300";
+                                });
+                                strengthLabel.textContent = "Strong";
+                                strengthLabel.className = "font-medium text-secondary";
+                            }
+
+                            if (confirmPassword.value) {
+                                validateField(confirmPassword);
+                            }
+                        });
+
+                        // Validation logic per field
+                        function setError(el, msg) {
+                            const group = document.getElementById("group-" + el.id);
+                            const errEl = document.getElementById(el.id + "-error");
+                            if (group && errEl) {
+                                el.classList.add("bg-error-container/20");
+                                el.classList.add("shadow-[0_0_0_2px_rgba(186,26,26,0.5)]");
+                                errEl.querySelector("span:last-child").textContent = msg;
+                                errEl.classList.remove("hidden");
+                                errEl.classList.add("flex");
+                            }
+                        }
+
+                        function clearError(el) {
+                            const group = document.getElementById("group-" + el.id);
+                            const errEl = document.getElementById(el.id + "-error");
+                            if (group && errEl) {
+                                el.classList.remove("bg-error-container/20");
+                                el.classList.remove("shadow-[0_0_0_2px_rgba(186,26,26,0.5)]");
+                                errEl.classList.add("hidden");
+                                errEl.classList.remove("flex");
+                            }
+                        }
+
+                        function validateField(el) {
+                            const val = el.value.trim();
+                            if (el === sellerName) {
+                                if (!val) {
+                                    setError(el, "This field is required.");
+                                    return false;
+                                }
+                                clearError(el);
+                                return true;
+                            }
+                            if (el === sellerId) {
+                                if (!val) {
+                                    sellerIdStatusBadge.classList.add("hidden");
+                                    setError(el, "This field is required.");
+                                    return false;
+                                }
+                                if (takenIds.includes(val.toUpperCase())) {
+                                    sellerIdStatusBadge.classList.add("hidden");
+                                    setError(el, "Seller ID already exists.");
+                                    return false;
+                                }
+                                clearError(el);
+                                sellerIdStatusBadge.classList.remove("hidden");
+                                sellerIdStatusBadge.classList.add("flex");
+                                return true;
+                            }
+                            if (el === contactNumber) {
+                                const phoneRegex = /^[6-9]\d{9}$/;
+                                if (!val) {
+                                    setError(el, "This field is required.");
+                                    return false;
+                                }
+                                if (!phoneRegex.test(val.replace(/\s+/g, ''))) {
+                                    setError(el, "Please enter a valid contact number (10 digits).");
+                                    return false;
+                                }
+                                clearError(el);
+                                return true;
+                            }
+                            if (el === whatsappNumber) {
+                                const phoneRegex = /^[6-9]\d{9}$/;
+                                if (!val) {
+                                    setError(el, "This field is required.");
+                                    return false;
+                                }
+                                if (!phoneRegex.test(val.replace(/\s+/g, ''))) {
+                                    setError(el, "Please enter a valid WhatsApp number (10 digits).");
+                                    return false;
+                                }
+                                clearError(el);
+                                return true;
+                            }
+                            if (el === email) {
+                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                if (!val) {
+                                    setError(el, "This field is required.");
+                                    return false;
+                                }
+                                if (!emailRegex.test(val)) {
+                                    setError(el, "Please enter a valid email address.");
+                                    return false;
+                                }
+                                clearError(el);
+                                return true;
+                            }
+                            if (el === password) {
+                                if (!val) {
+                                    setError(el, "This field is required.");
+                                    return false;
+                                }
+                                if (val.length < 8) {
+                                    setError(el, "Password must be at least 8 characters.");
+                                    return false;
+                                }
+                                clearError(el);
+                                return true;
+                            }
+                            if (el === confirmPassword) {
+                                if (!val) {
+                                    setError(el, "This field is required.");
+                                    return false;
+                                }
+                                if (val !== password.value) {
+                                    setError(el, "Passwords do not match.");
+                                    return false;
+                                }
+                                clearError(el);
+                                return true;
+                            }
+                            if (el === address) {
+                                if (!val) {
+                                    setError(el, "This field is required.");
+                                    return false;
+                                }
+                                clearError(el);
+                                return true;
+                            }
+                            return true;
+                        }
+
+                        [sellerName, sellerId, contactNumber, whatsappNumber, email, password, confirmPassword, address].forEach(input => {
+                            input.addEventListener("blur", () => validateField(input));
+                            input.addEventListener("input", () => {
+                                if (input.classList.contains("bg-error-container/20")) {
+                                    validateField(input);
+                                }
+                            });
+                        });
+
+                        // Reset form
+                        btnReset.addEventListener("click", () => {
+                            form.reset();
+                            [sellerName, sellerId, contactNumber, whatsappNumber, email, password, confirmPassword, address].forEach(clearError);
+                            sellerIdStatusBadge.classList.add("hidden");
+                            strengthBars.forEach(b => b.className = "h-1.5 flex-1 rounded-full bg-surface-container transition-colors duration-300");
+                            strengthLabel.textContent = "Enter password";
+                            strengthLabel.className = "font-medium text-outline";
+                            errorBanner.classList.add("hidden");
+                        });
+
+                        // Demo auto-fill
+                        btnPrefill.addEventListener("click", () => {
+                            sellerName.value = "Ganga Pure Waters";
+                            sellerId.value = "S-1042";
+                            contactNumber.value = "9876543210";
+                            whatsappNumber.value = "9876543210";
+                            syncWhatsappCheckbox.checked = true;
+                            email.value = "dispatch@gangapurewaters.com";
+                            password.value = "AquaFlow@2024!";
+                            confirmPassword.value = "AquaFlow@2024!";
+                            address.value = "Plot 45, Sector 12, Industrial Area, Hyderabad - 500081";
+
+                            // Trigger strength and validity updates
+                            password.dispatchEvent(new Event("input"));
+                            [sellerName, sellerId, contactNumber, whatsappNumber, email, confirmPassword, address].forEach(el => validateField(el));
+                            errorBanner.classList.add("hidden");
+                        });
+
+                        // Simulate Error toggle
+                        btnSimulateError.addEventListener("click", () => {
+                            sellerId.value = "S-1001"; // known duplicate
+                            password.value = "pass";
+                            confirmPassword.value = "mismatch";
+                            contactNumber.value = "123";
+                            validateField(sellerId);
+                            validateField(contactNumber);
+                            validateField(password);
+                            validateField(confirmPassword);
+
+                            errorText.textContent = "Unable to create seller. Please check the entered information and try again.";
+                            errorBanner.classList.remove("hidden");
+                            errorBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        });
+
+                        closeErrorBtn.addEventListener("click", () => {
+                            errorBanner.classList.add("hidden");
+                        });
+
+                        // Form submission
+                        form.addEventListener("submit", (e) => {
+                            e.preventDefault();
+                            errorBanner.classList.add("hidden");
+
+                            const fields = [sellerName, sellerId, contactNumber, whatsappNumber, email, password, confirmPassword, address];
+                            let isValid = true;
+                            fields.forEach(f => {
+                                if (!validateField(f)) isValid = false;
+                            });
+
+                            if (!isValid) {
+                                errorText.textContent = "Unable to create seller. Please check the highlighted information and try again.";
+                                errorBanner.classList.remove("hidden");
+                                errorBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                return;
+                            }
+
+                            // Trigger loading state
+                            btnSubmit.disabled = true;
+                            btnSubmitIcon.classList.add("hidden");
+                            btnSubmitSpinner.classList.remove("hidden");
+                            btnSubmitText.textContent = "Provisioning Seller...";
+
+                            setTimeout(() => {
+                                btnSubmit.disabled = false;
+                                btnSubmitIcon.classList.remove("hidden");
+                                btnSubmitSpinner.classList.add("hidden");
+                                btnSubmitText.textContent = "Create Seller";
+
+                                // Populate Summary Card
+                                document.getElementById("summary-seller-name").textContent = sellerName.value;
+                                document.getElementById("summary-seller-id").textContent = sellerId.value.toUpperCase();
+                                document.getElementById("summary-seller-phone").textContent = "+91 " + contactNumber.value;
+                                document.getElementById("summary-seller-whatsapp").textContent = "+91 " + whatsappNumber.value;
+                                document.getElementById("summary-seller-address").textContent = address.value;
+
+                                // Transition to success view
+                                formCardContainer.classList.add("hidden");
+                                successView.classList.remove("hidden");
+                                successView.classList.add("flex");
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }, 1200);
+                        });
+
+                        // Register another button handler
+                        btnRegisterAnother.addEventListener("click", () => {
+                            form.reset();
+                            [sellerName, sellerId, contactNumber, whatsappNumber, email, password, confirmPassword, address].forEach(clearError);
+                            sellerIdStatusBadge.classList.add("hidden");
+                            strengthBars.forEach(b => b.className = "h-1.5 flex-1 rounded-full bg-surface-container");
+                            strengthLabel.textContent = "Enter password";
+                            strengthLabel.className = "font-medium text-outline";
+
+                            successView.classList.add("hidden");
+                            successView.classList.remove("flex");
+                            formCardContainer.classList.remove("hidden");
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        });
+
+                    })();
+                </script>
+            </div>
+        </main>
+    </div>
+
+</body>
+
+</html>
