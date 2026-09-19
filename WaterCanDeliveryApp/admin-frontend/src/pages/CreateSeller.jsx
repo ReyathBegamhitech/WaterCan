@@ -93,7 +93,7 @@ export default function CreateSeller() {
         setIsSubmitting(true);
 
         // Call backend API
-        fetch('http://localhost:3000/api/auth/admin/seller', {
+        fetch(`${import.meta.env.VITE_API_URL}/auth/admin/seller`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -10,7 +10,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/auth/admin/sellers')
+    fetch(`${import.meta.env.VITE_API_URL}/auth/admin/sellers`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

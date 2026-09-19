@@ -25,7 +25,7 @@ export default function SellerList() {
   const fetchSellers = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:3000/api/auth/admin/sellers');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/admin/sellers`);
       const data = await res.json();
       if (data.success) {
         setSellers(data.sellers);
@@ -64,7 +64,7 @@ export default function SellerList() {
 
     try {
       setIsSaving(true);
-      const res = await fetch(`http://localhost:3000/api/auth/admin/seller/${currentSeller.seller_id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/admin/seller/${currentSeller.seller_id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -95,7 +95,7 @@ export default function SellerList() {
     
     try {
       setIsDeleting(true);
-      const res = await fetch(`http://localhost:3000/api/auth/admin/seller/${sellerId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/admin/seller/${sellerId}`, {
         method: 'DELETE',
       });
       const data = await res.json();
