@@ -79,6 +79,63 @@ class SellerOrderCard extends StatelessWidget {
     }
   }
 
+  void _showLocationOptions(BuildContext context, double lat, double lng) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                ),
+                Text(
+                  'Address Options',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.map, color: AppColors.primary),
+                  title: Text('View on Map', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                  subtitle: Text('Open the exact pin location', style: GoogleFonts.plusJakartaSans(fontSize: 12)),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.directions, color: Colors.green),
+                  title: Text('Get Directions', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                  subtitle: Text('Navigate to the customer location', style: GoogleFonts.plusJakartaSans(fontSize: 12)),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _makePhoneCall() async {
     final phone = order.customerPhone;
     if (phone == null || phone.isEmpty) return;
@@ -245,18 +302,38 @@ class SellerOrderCard extends StatelessWidget {
           const SizedBox(height: 8),
 
           // Location
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.location_on, size: 16, color: Colors.redAccent),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  order.deliveryAddress.isNotEmpty ? order.deliveryAddress : 'No address provided',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.grey.shade700),
-                ),
+          InkWell(
+            onTap: () {
+              if (order.latitude != null && order.longitude != null) {
+                _showLocationOptions(context, order.latitude!, order.longitude!);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Exact location not available for this order.')),
+                );
+              }
+            },
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.location_on, size: 16, color: Colors.redAccent),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      order.deliveryAddress.isNotEmpty ? order.deliveryAddress : 'No address provided',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13, 
+                        color: Colors.blue.shade700, 
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.blue.shade700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
           const SizedBox(height: 12),
           

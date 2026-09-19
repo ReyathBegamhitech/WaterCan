@@ -211,6 +211,8 @@ class OrderController extends ChangeNotifier {
         customerName: item['buyer_name'],
         customerPhone: item['user_phone'],
         deliveryAddress: item['delivery_address'] ?? '',
+        latitude: item['latitude'] != null ? double.tryParse(item['latitude'].toString()) : null,
+        longitude: item['longitude'] != null ? double.tryParse(item['longitude'].toString()) : null,
         isFastDelivery: item['is_fast_delivery'] ?? false,
       ));
     }
@@ -239,6 +241,8 @@ class OrderController extends ChangeNotifier {
         'time': newOrder.timestamp.toIso8601String(),
         'payment_method': newOrder.paymentMethod,
         'delivery_address': newOrder.deliveryAddress,
+        'latitude': newOrder.latitude,
+        'longitude': newOrder.longitude,
         'order_details': newOrder.items.map((i) => i.toJson()).toList(),
         'is_fast_delivery': newOrder.isFastDelivery,
       };
