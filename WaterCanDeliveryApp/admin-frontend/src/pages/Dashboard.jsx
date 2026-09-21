@@ -336,7 +336,11 @@ export default function Dashboard() {
               >
                 {selectedSeller.status === 'active' ? 'Deactivate Seller' : 'Activate Seller'}
               </button>
-              <Link to="/create-seller" className="flex-1 py-2.5 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md text-center hover:bg-primary-container transition-colors shadow-sm">
+              <Link 
+                to="/sellers"
+                state={{ search: selectedSeller.sellerId, openEdit: true }}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md text-center hover:bg-primary-container transition-colors shadow-sm"
+              >
                 Edit Vendor
               </Link>
             </div>

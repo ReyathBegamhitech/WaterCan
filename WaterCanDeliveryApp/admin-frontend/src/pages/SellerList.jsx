@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export default function SellerList() {
+  const location = useLocation();
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(location.state?.search || '');
 
   // Edit Modal State
   const [isEditing, setIsEditing] = useState(false);
@@ -22,6 +24,16 @@ export default function SellerList() {
   useEffect(() => {
     fetchSellers();
   }, []);
+
+  useEffect(() => {
+    if (sellers.length > 0 && location.state?.openEdit && location.state?.search) {
+      const sellerToEdit = sellers.find(s => s.seller_id === location.state.search);
+      if (sellerToEdit && !isEditing) {
+        handleEditClick(sellerToEdit);
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [sellers, location.state]);
 
   const fetchSellers = async () => {
     try {
