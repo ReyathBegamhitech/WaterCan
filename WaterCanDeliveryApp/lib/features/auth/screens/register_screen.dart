@@ -41,9 +41,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _pincodeController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController(text: '');
-  final TextEditingController _whatsappController = TextEditingController(text: '');
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final TextEditingController _phoneController =
+      TextEditingController(text: '');
+  final TextEditingController _whatsappController =
+      TextEditingController(text: '');
 
   // 4-digit OTP Controllers & Focus Nodes
   final TextEditingController _otp1Controller = TextEditingController();
@@ -65,6 +68,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void initState() {
     super.initState();
     _passwordController.addListener(() {
+      setState(() {});
+    });
+    _confirmPasswordController.addListener(() {
       setState(() {});
     });
 
@@ -172,12 +178,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.mark_email_read_outlined, color: Colors.greenAccent, size: 20),
+                  const Icon(Icons.mark_email_read_outlined,
+                      color: Colors.greenAccent, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       data['message'] ?? 'SMS sent successfully!',
-                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                      style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -244,7 +252,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.getSellerDetails}/${sellerId.trim()}'));
+      final response = await http.get(
+          Uri.parse('${ApiConstants.getSellerDetails}/${sellerId.trim()}'));
       final data = jsonDecode(response.body);
 
       if (!mounted) return;
@@ -273,7 +282,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _verifyOtp() async {
-    final enteredOtp = '${_otp1Controller.text}${_otp2Controller.text}${_otp3Controller.text}${_otp4Controller.text}'.trim();
+    final enteredOtp =
+        '${_otp1Controller.text}${_otp2Controller.text}${_otp3Controller.text}${_otp4Controller.text}'
+            .trim();
     if (enteredOtp.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -361,13 +372,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _cityController.text.isEmpty ||
         _pincodeController.text.isEmpty ||
         _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill all required fields.')));
       return;
     }
     if (!_isPhoneVerified) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please verify your phone number via OTP before registering.'),
+          content: Text(
+              'Please verify your phone number via OTP before registering.'),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
         ),
@@ -377,7 +390,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_verifiedShopName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a valid Seller ID and wait for it to verify.'),
+          content:
+              Text('Please enter a valid Seller ID and wait for it to verify.'),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
         ),
@@ -385,7 +399,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Passwords do not match.')));
       return;
     }
 
@@ -394,14 +409,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
     final bool hasLowercase = password.contains(RegExp(r'[a-z]'));
     final bool hasNumber = password.contains(RegExp(r'[0-9]'));
-    final bool hasSpecial = password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
-    
-    if (!(hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecial)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please meet all password criteria.')));
+    final bool hasSpecial =
+        password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
+
+    if (!(hasMinLength &&
+        hasUppercase &&
+        hasLowercase &&
+        hasNumber &&
+        hasSpecial)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please meet all password criteria.')));
       return;
     }
 
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final response = await http.post(
@@ -446,21 +469,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
 
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful!')));
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BuyerDashboardScreen(
-          customerName: name,
-          phone: phone,
-        )));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration successful!')));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => BuyerDashboardScreen(
+                      customerName: name,
+                      phone: phone,
+                    )));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Registration failed.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Registration failed.')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error connecting to server.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error connecting to server.')));
       }
     } finally {
       if (mounted) {
-        setState(() { _isLoading = false; });
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -470,7 +501,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(isMet ? Icons.check_circle : Icons.radio_button_unchecked, size: 15, color: isMet ? AppColors.secondary : Colors.grey.shade400),
+          Icon(isMet ? Icons.check_circle : Icons.radio_button_unchecked,
+              size: 15,
+              color: isMet ? AppColors.secondary : Colors.grey.shade400),
           const SizedBox(width: 6),
           Text(
             text,
@@ -503,7 +536,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         border: Border.all(
           color: _isPhoneVerified
               ? const Color(0xFF16A34A)
-              : (controller.text.isNotEmpty ? AppColors.primary : AppColors.outlineVariant.withOpacity(0.4)),
+              : (controller.text.isNotEmpty
+                  ? AppColors.primary
+                  : AppColors.outlineVariant.withOpacity(0.4)),
           width: _isPhoneVerified || controller.text.isNotEmpty ? 1.5 : 1.0,
         ),
         boxShadow: [
@@ -588,8 +623,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
     final bool hasLowercase = password.contains(RegExp(r'[a-z]'));
     final bool hasNumber = password.contains(RegExp(r'[0-9]'));
-    final bool hasSpecial = password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
-    
+    final bool hasSpecial =
+        password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
+
     int criteriaMetCount = 0;
     if (hasMinLength) criteriaMetCount++;
     if (hasUppercase) criteriaMetCount++;
@@ -623,7 +659,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: CircleAvatar(
               backgroundColor: AppColors.primary,
               radius: 16,
-              child: const Icon(Icons.person, size: 18, color: AppColors.onPrimary),
+              child: const Icon(Icons.person,
+                  size: 18, color: AppColors.onPrimary),
             ),
           ),
         ],
@@ -647,15 +684,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 },
                 helperText: _verifiedShopName,
                 errorText: _sellerVerificationError,
-                suffixWidget: _isVerifyingSeller 
-                  ? const Padding(
-                      padding: EdgeInsets.all(14.0),
-                      child: SizedBox(
-                        width: 16, height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-                      ),
-                    )
-                  : null,
+                suffixWidget: _isVerifyingSeller
+                    ? const Padding(
+                        padding: EdgeInsets.all(14.0),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: AppColors.primary),
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(height: 20),
 
@@ -678,7 +717,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     suffixWidget: _isPhoneVerified
                         ? const Padding(
                             padding: EdgeInsets.only(right: 12.0),
-                            child: Icon(Icons.check_circle, color: Color(0xFF16A34A)),
+                            child: Icon(Icons.check_circle,
+                                color: Color(0xFF16A34A)),
                           )
                         : null,
                     controller: _phoneController,
@@ -690,11 +730,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Icon(
                         _isPhoneVerified
                             ? Icons.check_circle_outline
-                            : (_otpSent ? Icons.sms_outlined : Icons.phonelink_ring_outlined),
+                            : (_otpSent
+                                ? Icons.sms_outlined
+                                : Icons.phonelink_ring_outlined),
                         size: 14,
                         color: _isPhoneVerified
                             ? const Color(0xFF16A34A)
-                            : (_otpSent ? AppColors.primary : AppColors.outline),
+                            : (_otpSent
+                                ? AppColors.primary
+                                : AppColors.outline),
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -705,10 +749,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 : 'Verification required via SMS OTP.'),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          fontWeight: _isPhoneVerified ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: _isPhoneVerified
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                           color: _isPhoneVerified
                               ? const Color(0xFF16A34A)
-                              : (_otpSent ? AppColors.primary : AppColors.outline),
+                              : (_otpSent
+                                  ? AppColors.primary
+                                  : AppColors.outline),
                         ),
                       ),
                     ],
@@ -721,10 +769,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _isPhoneVerified ? const Color(0xFFF0FDF4) : AppColors.surfaceContainerLow,
+                  color: _isPhoneVerified
+                      ? const Color(0xFFF0FDF4)
+                      : AppColors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _isPhoneVerified ? const Color(0xFF16A34A).withOpacity(0.3) : Colors.transparent,
+                    color: _isPhoneVerified
+                        ? const Color(0xFF16A34A).withOpacity(0.3)
+                        : Colors.transparent,
                   ),
                 ),
                 child: Column(
@@ -740,13 +792,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: _isPhoneVerified ? const Color(0xFF16A34A) : AppColors.onSurface,
+                                color: _isPhoneVerified
+                                    ? const Color(0xFF16A34A)
+                                    : AppColors.onSurface,
                               ),
                             ),
                             if (_isPhoneVerified) ...[
                               const SizedBox(width: 6),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFDCFCE7),
                                   borderRadius: BorderRadius.circular(4),
@@ -769,7 +824,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               Icon(
                                 Icons.timer_outlined,
                                 size: 16,
-                                color: _otpSent && _timerSeconds > 0 ? const Color(0xFF16A34A) : AppColors.outline,
+                                color: _otpSent && _timerSeconds > 0
+                                    ? const Color(0xFF16A34A)
+                                    : AppColors.outline,
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -777,7 +834,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: _otpSent && _timerSeconds > 0 ? const Color(0xFF16A34A) : AppColors.outline,
+                                  color: _otpSent && _timerSeconds > 0
+                                      ? const Color(0xFF16A34A)
+                                      : AppColors.outline,
                                 ),
                               ),
                             ],
@@ -821,10 +880,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: SizedBox(
                             height: 40,
                             child: ElevatedButton(
-                              onPressed: _isPhoneVerified || _isSendingOtp ? null : _sendOtp,
+                              onPressed: _isPhoneVerified || _isSendingOtp
+                                  ? null
+                                  : _sendOtp,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: _otpSent ? AppColors.surfaceContainerHighest : AppColors.primary,
-                                foregroundColor: _otpSent ? AppColors.onSurface : AppColors.onPrimary,
+                                backgroundColor: _otpSent
+                                    ? AppColors.surfaceContainerHighest
+                                    : AppColors.primary,
+                                foregroundColor: _otpSent
+                                    ? AppColors.onSurface
+                                    : AppColors.onPrimary,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -834,7 +899,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ? const SizedBox(
                                       width: 16,
                                       height: 16,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2, color: Colors.white),
                                     )
                                   : Text(
                                       _otpSent ? 'RESEND OTP' : 'SEND OTP',
@@ -851,10 +917,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: SizedBox(
                             height: 40,
                             child: ElevatedButton(
-                              onPressed: _isPhoneVerified || _isVerifyingOtp || !_otpSent ? null : _verifyOtp,
+                              onPressed: _isPhoneVerified ||
+                                      _isVerifyingOtp ||
+                                      !_otpSent
+                                  ? null
+                                  : _verifyOtp,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: _isPhoneVerified ? const Color(0xFF16A34A) : AppColors.primaryContainer,
-                                foregroundColor: _isPhoneVerified ? Colors.white : AppColors.onPrimaryContainer,
+                                backgroundColor: _isPhoneVerified
+                                    ? const Color(0xFF16A34A)
+                                    : AppColors.primaryContainer,
+                                foregroundColor: _isPhoneVerified
+                                    ? Colors.white
+                                    : AppColors.onPrimaryContainer,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -864,17 +938,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ? const SizedBox(
                                       width: 16,
                                       height: 16,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.primary),
                                     )
                                   : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         if (_isPhoneVerified) ...[
-                                          const Icon(Icons.check, size: 16, color: Colors.white),
+                                          const Icon(Icons.check,
+                                              size: 16, color: Colors.white),
                                           const SizedBox(width: 4),
                                         ],
                                         Text(
-                                          _isPhoneVerified ? 'VERIFIED' : 'VERIFY',
+                                          _isPhoneVerified
+                                              ? 'VERIFIED'
+                                              : 'VERIFY',
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w700,
@@ -893,7 +973,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         if (!_isPhoneVerified) ...[
                           InkWell(
-                            onTap: (_otpSent && _timerSeconds == 0 && !_isSendingOtp)
+                            onTap: (_otpSent &&
+                                    _timerSeconds == 0 &&
+                                    !_isSendingOtp)
                                 ? _sendOtp
                                 : null,
                             child: Text(
@@ -922,7 +1004,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ] else ...[
                           Row(
                             children: [
-                              const Icon(Icons.verified, size: 16, color: Color(0xFF16A34A)),
+                              const Icon(Icons.verified,
+                                  size: 16, color: Color(0xFF16A34A)),
                               const SizedBox(width: 4),
                               Text(
                                 'OTP verified successfully.',
@@ -959,7 +1042,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                     activeColor: AppColors.primary,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                    visualDensity:
+                        const VisualDensity(horizontal: -4, vertical: -4),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -1038,7 +1122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Expanded(
                     child: CustomTextField(
                       label: 'Pincode *',
-                      hintText: '6 Digit PIN',
+                      hintText: 'Pincode',
                       controller: _pincodeController,
                     ),
                   ),
@@ -1052,7 +1136,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 hintText: 'Enter password',
                 controller: _passwordController,
                 obscureText: _obscurePassword,
-                suffixIcon: _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                suffixIcon: _obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
                 onSuffixIconTap: () {
                   setState(() {
                     _obscurePassword = !_obscurePassword;
@@ -1060,29 +1146,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 },
               ),
               const SizedBox(height: 8),
-              
+
               // Password Strength Indicator Pill Bar
               Row(
                 children: [
-                  Expanded(child: Container(height: 4, decoration: BoxDecoration(color: criteriaMetCount >= 1 ? (criteriaMetCount >= 5 ? AppColors.secondary : Colors.orange) : AppColors.surfaceContainerHighest, borderRadius: BorderRadius.circular(2)))),
+                  Expanded(
+                      child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
+                              color: criteriaMetCount >= 1
+                                  ? (criteriaMetCount >= 5
+                                      ? AppColors.secondary
+                                      : Colors.orange)
+                                  : AppColors.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(width: 6),
-                  Expanded(child: Container(height: 4, decoration: BoxDecoration(color: criteriaMetCount >= 3 ? (criteriaMetCount >= 5 ? AppColors.secondary : Colors.orange) : AppColors.surfaceContainerHighest, borderRadius: BorderRadius.circular(2)))),
+                  Expanded(
+                      child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
+                              color: criteriaMetCount >= 3
+                                  ? (criteriaMetCount >= 5
+                                      ? AppColors.secondary
+                                      : Colors.orange)
+                                  : AppColors.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(width: 6),
-                  Expanded(child: Container(height: 4, decoration: BoxDecoration(color: criteriaMetCount >= 5 ? AppColors.secondary : AppColors.surfaceContainerHighest, borderRadius: BorderRadius.circular(2)))),
+                  Expanded(
+                      child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
+                              color: criteriaMetCount >= 5
+                                  ? AppColors.secondary
+                                  : AppColors.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(2)))),
                 ],
               ),
               const SizedBox(height: 6),
               Row(
                 children: [
-                  Text('Weak', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: criteriaMetCount >= 1 ? Colors.orange : AppColors.outlineVariant)),
+                  Text('Weak',
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: criteriaMetCount >= 1
+                              ? Colors.orange
+                              : AppColors.outlineVariant)),
                   const SizedBox(width: 12),
-                  Text('Medium', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: criteriaMetCount >= 3 ? Colors.orange : AppColors.outlineVariant)),
+                  Text('Medium',
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: criteriaMetCount >= 3
+                              ? Colors.orange
+                              : AppColors.outlineVariant)),
                   const SizedBox(width: 12),
-                  Text('Strong ✓', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: criteriaMetCount >= 5 ? AppColors.secondary : AppColors.outlineVariant)),
+                  Text('Strong ✓',
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: criteriaMetCount >= 5
+                              ? AppColors.secondary
+                              : AppColors.outlineVariant)),
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Password Requirements Checklist
               Container(
                 padding: const EdgeInsets.all(12),
@@ -1111,27 +1238,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hintText: 'Re-enter password',
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
-                    suffixIcon: _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    suffixIcon: _obscureConfirmPassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
                     onSuffixIconTap: () {
                       setState(() {
                         _obscureConfirmPassword = !_obscureConfirmPassword;
                       });
                     },
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.check_circle, size: 16, color: AppColors.secondary),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Passwords match successfully.',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: AppColors.secondary,
+                  if (_confirmPasswordController.text.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                            _passwordController.text == _confirmPasswordController.text
+                                ? Icons.check_circle
+                                : Icons.error_outline,
+                            size: 16,
+                            color: _passwordController.text == _confirmPasswordController.text
+                                ? AppColors.secondary
+                                : Colors.red),
+                        const SizedBox(width: 4),
+                        Text(
+                          _passwordController.text == _confirmPasswordController.text
+                              ? 'Passwords match successfully.'
+                              : 'Passwords do not match.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: _passwordController.text == _confirmPasswordController.text
+                                ? AppColors.secondary
+                                : Colors.red,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
               const SizedBox(height: 32),

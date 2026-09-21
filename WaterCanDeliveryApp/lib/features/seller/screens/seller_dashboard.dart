@@ -599,6 +599,48 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
           ),
         );
       },
+      onOutForDelivery: () {
+        orderCtrl.updateOrderStatusByString(order.id, 'Out for Delivery');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Order #${order.id} marked as Out for Delivery', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.orange.shade700,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+      onDelivered: () {
+        final isCOD = order.paymentMethod.toLowerCase() == 'cod' || order.paymentMethod.toLowerCase().contains('cash on delivery');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Complete Order'),
+            content: Text(isCOD 
+              ? 'Has the cash of ₹${order.totalAmount.round()} been collected? Mark this order as fully delivered?' 
+              : 'Mark this order as completely delivered?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              ),
+              TextButton(
+                onPressed: () {
+                  orderCtrl.updateOrderStatusByString(order.id, 'Delivered');
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Order #${order.id} successfully delivered!', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+                      backgroundColor: Colors.green.shade700,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+                child: Text(isCOD ? 'Yes, Cash Collected' : 'Yes, Delivered', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

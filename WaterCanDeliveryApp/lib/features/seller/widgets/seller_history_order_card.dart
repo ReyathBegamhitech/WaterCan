@@ -63,46 +63,52 @@ class SellerHistoryOrderCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5EBE0),
-                        border: Border.all(color: const Color(0xFFE6CCB2)),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'ORDER $orderId',
-                        style: GoogleFonts.plusJakartaSans(color: const Color(0xFF78350F), fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (isFastDelivery) ...[
+                Expanded(
+                  child: Row(
+                    children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE11D48),
-                          borderRadius: BorderRadius.circular(4),
+                          color: const Color(0xFFF5EBE0),
+                          border: Border.all(color: const Color(0xFFE6CCB2)),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          '⚡ FAST',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
+                          'ORDER $orderId',
+                          style: GoogleFonts.plusJakartaSans(color: const Color(0xFF78350F), fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                         ),
                       ),
                       const SizedBox(width: 8),
+                      if (isFastDelivery) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE11D48),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '⚡ FAST',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: Text(
+                          time,
+                          style: GoogleFonts.plusJakartaSans(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w500),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
-                    Text(
-                      time,
-                      style: GoogleFonts.plusJakartaSans(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w500),
-                    ),
-                  ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                   decoration: BoxDecoration(

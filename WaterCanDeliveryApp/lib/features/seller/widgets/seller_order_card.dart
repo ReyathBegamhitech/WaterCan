@@ -9,6 +9,8 @@ class SellerOrderCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onAccept;
   final VoidCallback? onDecline;
+  final VoidCallback? onOutForDelivery;
+  final VoidCallback? onDelivered;
 
   const SellerOrderCard({
     super.key,
@@ -16,10 +18,20 @@ class SellerOrderCard extends StatelessWidget {
     this.onTap,
     this.onAccept,
     this.onDecline,
+    this.onOutForDelivery,
+    this.onDelivered,
   });
 
+  String get _effectiveStatus {
+    final isUPI = order.paymentMethod.toLowerCase().contains('upi');
+    if (isUPI && order.sellerStatusString == 'Placed') {
+      return 'Accepted';
+    }
+    return order.sellerStatusString;
+  }
+
   Color _getStatusBgColor() {
-    switch (order.sellerStatusString) {
+    switch (_effectiveStatus) {
       case 'Placed':
         return Colors.blue.shade100;
       case 'Accepted':
@@ -36,7 +48,7 @@ class SellerOrderCard extends StatelessWidget {
   }
 
   Color _getStatusTextColor() {
-    switch (order.sellerStatusString) {
+    switch (_effectiveStatus) {
       case 'Placed':
         return Colors.blue.shade800;
       case 'Accepted':
@@ -53,7 +65,7 @@ class SellerOrderCard extends StatelessWidget {
   }
 
   Color _getStatusBorderColor() {
-    switch (order.sellerStatusString) {
+    switch (_effectiveStatus) {
       case 'Placed':
         return Colors.blue.shade200;
       case 'Accepted':
@@ -70,7 +82,7 @@ class SellerOrderCard extends StatelessWidget {
   }
 
   int _getStatusStep() {
-    switch (order.sellerStatusString) {
+    switch (_effectiveStatus) {
       case 'Placed': return 0;
       case 'Accepted': return 1;
       case 'Out for Delivery': return 2;
@@ -152,6 +164,7 @@ class SellerOrderCard extends StatelessWidget {
     final isUPI = order.paymentMethod.toLowerCase().contains('upi');
     final isCOD = order.paymentMethod.toLowerCase() == 'cod' || order.paymentMethod.toLowerCase().contains('cash on delivery');
     final showActions = isCOD && order.sellerStatusString == 'Placed';
+    final showUpdateActions = _effectiveStatus == 'Accepted' || _effectiveStatus == 'Out for Delivery';
 
     return GestureDetector(
       onTap: onTap,
@@ -177,61 +190,69 @@ class SellerOrderCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0E4D7),
-                      border: Border.all(color: const Color(0xFFD7C2B2)),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.receipt_long, size: 14, color: Color(0xFF5C4033)),
-                        const SizedBox(width: 4),
-                        Text(
-                          order.id.startsWith('#') ? order.id : '#${order.id}',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: const Color(0xFF5C4033),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (order.isFastDelivery) ...[
+              Expanded(
+                child: Row(
+                  children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE11D48),
-                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xFFF0E4D7),
+                        border: Border.all(color: const Color(0xFFD7C2B2)),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(
-                        '⚡ FAST',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.receipt_long, size: 14, color: Color(0xFF5C4033)),
+                          const SizedBox(width: 4),
+                          Text(
+                            order.id.startsWith('#') ? order.id : '#${order.id}',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: const Color(0xFF5C4033),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: 8),
-                  ],
-                  Text(
-                    order.formattedDate,
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.grey.shade500,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                    if (order.isFastDelivery) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE11D48),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '⚡ FAST',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(
+                      child: Text(
+                        order.formattedDate,
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.grey.shade500,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -241,7 +262,7 @@ class SellerOrderCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      order.sellerStatusString,
+                      _effectiveStatus,
                       style: GoogleFonts.plusJakartaSans(
                         color: _getStatusTextColor(),
                         fontSize: 10,
@@ -272,13 +293,22 @@ class SellerOrderCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.person, size: 16, color: AppColors.seller600),
-                  const SizedBox(width: 6),
-                  Text(buyerName, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(Icons.person, size: 16, color: AppColors.seller600),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        buyerName, 
+                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               InkWell(
                 onTap: _makePhoneCall,
                 child: Container(
@@ -355,9 +385,12 @@ class SellerOrderCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.water_drop, size: 16, color: AppColors.seller500),
                     const SizedBox(width: 8),
-                    Text(
-                      '${order.totalQuantity}x Water Cans Ordered',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87),
+                    Expanded(
+                      child: Text(
+                        '${order.totalQuantity}x Water Cans Ordered',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -414,20 +447,26 @@ class SellerOrderCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(isUPI ? Icons.qr_code : Icons.money, size: 16, color: isUPI ? Colors.purple : Colors.green),
-                          const SizedBox(width: 6),
-                          Text(
-                            isUPI ? 'Paid via UPI' : 'Cash on Delivery',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13, 
-                              fontWeight: FontWeight.bold, 
-                              color: isUPI ? Colors.purple.shade700 : Colors.green.shade700,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(isUPI ? Icons.qr_code : Icons.money, size: 16, color: isUPI ? Colors.purple : Colors.green),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                isUPI ? 'Paid via UPI' : 'Cash on Delivery',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13, 
+                                  fontWeight: FontWeight.bold, 
+                                  color: isUPI ? Colors.purple.shade700 : Colors.green.shade700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         'Total: ₹${order.totalAmount.round()}',
                         style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.black),
@@ -472,7 +511,7 @@ class SellerOrderCard extends StatelessWidget {
             ),
           ],
           
-          if (!showActions && order.sellerStatusString != 'Cancelled') ...[
+          if (!showActions && _effectiveStatus != 'Cancelled') ...[
             const SizedBox(height: 12),
             // Progress Tracker for non-placed/UPI orders
             Container(
@@ -487,6 +526,39 @@ class SellerOrderCard extends StatelessWidget {
                 ],
               ),
             )
+          ],
+          
+          if (showUpdateActions) ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _effectiveStatus == 'Out for Delivery' ? null : onOutForDelivery,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.seller700,
+                      side: BorderSide(color: _effectiveStatus == 'Out for Delivery' ? Colors.grey.shade300 : AppColors.seller500),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text('Out for Delivery', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onDelivered,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text('Delivered', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ),
+                ),
+              ],
+            ),
           ]
         ],
       ),

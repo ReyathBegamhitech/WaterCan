@@ -22,11 +22,11 @@ class ProductModel {
       };
 
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
-        id: json['id'],
-        name: json['name'],
-        price: json['price'],
-        imageUrl: json['imageUrl'],
-        shopName: json['shopName'],
+        id: json['id']?.toString() ?? '',
+        name: json['name']?.toString() ?? 'Product',
+        price: json['price'] != null ? double.tryParse(json['price'].toString()) ?? 0.0 : 0.0,
+        imageUrl: json['imageUrl']?.toString() ?? '',
+        shopName: json['shopName']?.toString() ?? '',
       );
 }
 
@@ -50,8 +50,8 @@ class CartItem {
       };
 
   factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
-        product: ProductModel.fromJson(json['product']),
-        quantity: json['quantity'],
-        returnEmptyCans: json['returnEmptyCans'],
+        product: ProductModel.fromJson(json['product'] as Map<String, dynamic>? ?? {}),
+        quantity: json['quantity'] != null ? int.tryParse(json['quantity'].toString()) ?? 1 : 1,
+        returnEmptyCans: json['returnEmptyCans'] != null ? int.tryParse(json['returnEmptyCans'].toString()) : null,
       );
 }
