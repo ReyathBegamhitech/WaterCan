@@ -388,7 +388,7 @@ class TrackDeliveryScreen extends StatelessWidget {
           ),
           _buildMilestoneStep(
             title: 'Order Accepted',
-            time: 'Pending',
+            time: currentStep >= 2 ? '' : 'Pending',
             desc: 'Partner plant confirmed fulfillment',
             isDone: currentStep > 2,
             isActive: currentStep == 2,
@@ -398,16 +398,16 @@ class TrackDeliveryScreen extends StatelessWidget {
 
           _buildMilestoneStep(
             title: 'Out for Delivery',
-            time: 'Pending',
+            time: currentStep >= 3 ? '' : 'Pending',
             desc: 'Transit in progress to your doorstep',
-            isDone: currentStep > 4,
-            isActive: currentStep == 4,
-            lineColor: currentStep > 4 ? AppColors.primaryContainer : AppColors.surfaceContainerHigh,
+            isDone: currentStep > 3,
+            isActive: currentStep == 3,
+            lineColor: currentStep > 3 ? AppColors.primaryContainer : AppColors.surfaceContainerHigh,
             showLine: true,
           ),
           _buildMilestoneStep(
             title: 'Delivered',
-            time: 'Pending',
+            time: currentStep >= 4 ? '' : 'Pending',
             desc: 'Handover & digital empty can verification',
             isDone: currentStep == 4,
             isActive: currentStep == 4,

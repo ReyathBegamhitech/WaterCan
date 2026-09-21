@@ -91,7 +91,7 @@ class SellerOrderCard extends StatelessWidget {
     }
   }
 
-  void _showLocationOptions(BuildContext context, double lat, double lng) {
+  void _showLocationOptions(BuildContext context, {double? lat, double? lng, String? address}) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -118,10 +118,11 @@ class SellerOrderCard extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.map, color: AppColors.primary),
                   title: Text('View on Map', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
-                  subtitle: Text('Open the exact pin location', style: GoogleFonts.plusJakartaSans(fontSize: 12)),
+                  subtitle: Text('Open the location', style: GoogleFonts.plusJakartaSans(fontSize: 12)),
                   onTap: () async {
                     Navigator.pop(context);
-                    final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+                    final query = (lat != null && lng != null) ? '$lat,$lng' : Uri.encodeComponent(address ?? '');
+                    final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
                     if (await canLaunchUrl(url)) {
                       await launchUrl(url, mode: LaunchMode.externalApplication);
                     }
@@ -134,7 +135,8 @@ class SellerOrderCard extends StatelessWidget {
                   subtitle: Text('Navigate to the customer location', style: GoogleFonts.plusJakartaSans(fontSize: 12)),
                   onTap: () async {
                     Navigator.pop(context);
-                    final url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+                    final query = (lat != null && lng != null) ? '$lat,$lng' : Uri.encodeComponent(address ?? '');
+                    final url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$query');
                     if (await canLaunchUrl(url)) {
                       await launchUrl(url, mode: LaunchMode.externalApplication);
                     }
@@ -334,11 +336,11 @@ class SellerOrderCard extends StatelessWidget {
           // Location
           InkWell(
             onTap: () {
-              if (order.latitude != null && order.longitude != null) {
-                _showLocationOptions(context, order.latitude!, order.longitude!);
+              if ((order.latitude != null && order.longitude != null) || order.deliveryAddress.isNotEmpty) {
+                _showLocationOptions(context, lat: order.latitude, lng: order.longitude, address: order.deliveryAddress);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Exact location not available for this order.')),
+                  const SnackBar(content: Text('Address not available for this order.')),
                 );
               }
             },

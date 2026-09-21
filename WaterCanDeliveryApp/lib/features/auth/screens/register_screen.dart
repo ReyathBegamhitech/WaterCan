@@ -183,7 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      data['message'] ?? 'SMS sent successfully!',
+                      (data['message'] as String?)?.replaceAll('SMS', 'Call') ?? 'Call sent successfully!',
                       style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600),
                     ),
@@ -1252,21 +1252,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Row(
                       children: [
                         Icon(
-                            _passwordController.text == _confirmPasswordController.text
+                            _passwordController.text ==
+                                    _confirmPasswordController.text
                                 ? Icons.check_circle
                                 : Icons.error_outline,
                             size: 16,
-                            color: _passwordController.text == _confirmPasswordController.text
+                            color: _passwordController.text ==
+                                    _confirmPasswordController.text
                                 ? AppColors.secondary
                                 : Colors.red),
                         const SizedBox(width: 4),
                         Text(
-                          _passwordController.text == _confirmPasswordController.text
+                          _passwordController.text ==
+                                  _confirmPasswordController.text
                               ? 'Passwords match successfully.'
                               : 'Passwords do not match.',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
-                            color: _passwordController.text == _confirmPasswordController.text
+                            color: _passwordController.text ==
+                                    _confirmPasswordController.text
                                 ? AppColors.secondary
                                 : Colors.red,
                           ),
