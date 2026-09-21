@@ -14,6 +14,8 @@ class CustomTextField extends StatelessWidget {
   final String? errorText;
   final int maxLines;
   final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
+  final String? helperText;
 
   const CustomTextField({
     super.key,
@@ -28,6 +30,8 @@ class CustomTextField extends StatelessWidget {
     this.errorText,
     this.maxLines = 1,
     this.controller,
+    this.onChanged,
+    this.helperText,
   });
 
   @override
@@ -63,6 +67,7 @@ class CustomTextField extends StatelessWidget {
             controller: controller,
             maxLines: maxLines,
             obscureText: obscureText,
+            onChanged: onChanged,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.w400,
@@ -115,6 +120,23 @@ class CustomTextField extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                   color: AppColors.tertiary,
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (helperText != null && errorText == null) ...[
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(Icons.check_circle_outline, size: 16, color: Color(0xFF16A34A)),
+              const SizedBox(width: 4),
+              Text(
+                helperText!,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF16A34A),
                 ),
               ),
             ],

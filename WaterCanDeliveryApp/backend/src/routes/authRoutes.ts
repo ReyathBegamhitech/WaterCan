@@ -198,7 +198,7 @@ router.post('/verify-otp', async (req: Request, res: Response): Promise<void> =>
 });
 
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
-  const { customerName, phone, whatsapp, email, doorNo, street, city, pincode, password } = req.body;
+  const { customerName, phone, whatsapp, email, doorNo, street, city, pincode, password, seller_id } = req.body;
 
   if (!customerName || !phone || !doorNo || !street || !city || !pincode || !password) {
     res.status(400).json({ success: false, message: 'Missing required fields' });
@@ -231,11 +231,24 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
+    let assignedSellerId = null;
+    let shopName = '';
+    let shopAddress = '';
+
+    if (seller_id) {
+      const sellerResult = await client.query('SELECT organization_name, location FROM app_sellers WHERE seller_id = $1', [seller_id]);
+      if (sellerResult.rows.length > 0) {
+        assignedSellerId = seller_id;
+        shopName = sellerResult.rows[0].organization_name;
+        shopAddress = sellerResult.rows[0].location;
+      }
+    }
+
     // 3. Insert into users table
     const userResult = await client.query(
-      `INSERT INTO users (full_name, phone_number, email, password_hash) 
-       VALUES ($1, $2, $3, $4) RETURNING id`,
-      [customerName, cleanPhone, email || null, passwordHash]
+      `INSERT INTO users (full_name, phone_number, email, password_hash, assigned_seller_id) 
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      [customerName, cleanPhone, email || null, passwordHash, assignedSellerId]
     );
     const userId = userResult.rows[0].id;
 
@@ -255,6 +268,9 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: 'User registered successfully',
       userId: userId,
+      assigned_seller_id: assignedSellerId,
+      shop_name: shopName,
+      shop_address: shopAddress
     });
   } catch (error) {
     await client.query('ROLLBACK'); // Abort transaction on error
@@ -422,6 +438,32 @@ router.put('/address', async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({ success: true, message: 'Address updated successfully' });
   } catch (error) {
     console.error('Update address error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Get seller details for dynamic validation
+router.get('/seller-details/:sellerId', async (req: Request, res: Response): Promise<void> => {
+  const { sellerId } = req.params;
+  if (!sellerId) {
+    res.status(400).json({ success: false, message: 'Missing seller ID' });
+    return;
+  }
+  
+  try {
+    const result = await pool.query('SELECT organization_name, location FROM app_sellers WHERE seller_id = $1', [sellerId]);
+    if (result.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'Seller not found' });
+      return;
+    }
+    
+    res.status(200).json({
+      success: true,
+      shopName: result.rows[0].organization_name,
+      location: result.rows[0].location
+    });
+  } catch (error) {
+    console.error('Error fetching seller details:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });

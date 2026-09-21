@@ -56,6 +56,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final FocusNode _focus3 = FocusNode();
   final FocusNode _focus4 = FocusNode();
 
+  Timer? _debounce;
+  String? _verifiedShopName;
+  String? _sellerVerificationError;
+  bool _isVerifyingSeller = false;
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _countdownTimer?.cancel();
     _sellerIdController.dispose();
     _customerNameController.dispose();
@@ -222,6 +228,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  Future<void> _verifySellerId(String sellerId) async {
+    if (sellerId.trim().isEmpty) {
+      setState(() {
+        _verifiedShopName = null;
+        _sellerVerificationError = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isVerifyingSeller = true;
+      _sellerVerificationError = null;
+      _verifiedShopName = null;
+    });
+
+    try {
+      final response = await http.get(Uri.parse('${ApiConstants.getSellerDetails}/${sellerId.trim()}'));
+      final data = jsonDecode(response.body);
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        setState(() {
+          _verifiedShopName = '${data['shopName']} (${data['location']})';
+        });
+      } else {
+        setState(() {
+          _sellerVerificationError = data['message'] ?? 'Invalid Seller ID';
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _sellerVerificationError = 'Could not verify seller';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isVerifyingSeller = false;
+        });
+      }
+    }
+  }
+
   Future<void> _verifyOtp() async {
     final enteredOtp = '${_otp1Controller.text}${_otp2Controller.text}${_otp3Controller.text}${_otp4Controller.text}'.trim();
     if (enteredOtp.length < 4) {
@@ -318,6 +368,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please verify your phone number via OTP before registering.'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (_verifiedShopName == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid Seller ID and wait for it to verify.'),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
         ),
@@ -579,6 +639,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 label: 'Seller ID *',
                 hintText: 'Enter Seller ID (e.g. S-1001)',
                 controller: _sellerIdController,
+                onChanged: (value) {
+                  if (_debounce?.isActive ?? false) _debounce!.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 500), () {
+                    _verifySellerId(value);
+                  });
+                },
+                helperText: _verifiedShopName,
+                errorText: _sellerVerificationError,
+                suffixWidget: _isVerifyingSeller 
+                  ? const Padding(
+                      padding: EdgeInsets.all(14.0),
+                      child: SizedBox(
+                        width: 16, height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                      ),
+                    )
+                  : null,
               ),
               const SizedBox(height: 20),
 
