@@ -8,7 +8,19 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT?.trim() || '5432', 10),
   ssl: { rejectUnauthorized: false },
 });
-pool.query("UPDATE users SET assigned_seller_id = 'S-1001' WHERE assigned_seller_id IS NULL OR assigned_seller_id = '' RETURNING phone_number")
-  .then(r => console.log('Updated users:', r.rows))
+
+const sql = `
+SELECT 
+  s.seller_id, 
+  COUNT(o.id) as overall_orders,
+  SUM(CASE WHEN o.status IN ('Placed', 'Accepted', 'Out for Delivery') THEN 1 ELSE 0 END) as orders_in_process,
+  SUM(CASE WHEN EXTRACT(MONTH FROM o.created_at) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 ELSE 0 END) as monthly_orders
+FROM app_sellers s
+LEFT JOIN app_orders o ON s.seller_id = o.seller_id
+GROUP BY s.seller_id
+`;
+
+pool.query(sql)
+  .then(r => console.log('Query result:', r.rows))
   .catch(console.error)
   .finally(() => pool.end());

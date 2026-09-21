@@ -10,7 +10,11 @@ export default function CreateSeller() {
         email: '',
         password: '',
         confirmPassword: '',
-        address: ''
+        doorNo: '',
+        street: '',
+        area: '',
+        city: '',
+        pincode: ''
     });
 
     const [errors, setErrors] = useState({});
@@ -76,7 +80,11 @@ export default function CreateSeller() {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Please enter a valid email address.';
         if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters.';
         if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match.';
-        if (!formData.address.trim()) newErrors.address = 'This field is required.';
+        if (!formData.doorNo.trim()) newErrors.doorNo = 'Door No is required.';
+        if (!formData.street.trim()) newErrors.street = 'Street is required.';
+        if (!formData.area.trim()) newErrors.area = 'Area is required.';
+        if (!formData.city.trim()) newErrors.city = 'City is required.';
+        if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = 'Valid 6-digit Pincode is required.';
         return newErrors;
     };
 
@@ -92,6 +100,8 @@ export default function CreateSeller() {
         setGlobalError(false);
         setIsSubmitting(true);
 
+        const combinedAddress = `${formData.doorNo.trim()}, ${formData.street.trim()}, ${formData.area.trim()}, ${formData.city.trim()} - ${formData.pincode.trim()}`;
+
         // Call backend API
         fetch(`${import.meta.env.VITE_API_URL}/auth/admin/seller`, {
             method: 'POST',
@@ -102,7 +112,7 @@ export default function CreateSeller() {
                 sellerName: formData.sellerName,
                 sellerId: formData.sellerId,
                 contactNumber: formData.contactNumber,
-                address: formData.address,
+                address: combinedAddress,
                 password: formData.password
             })
         })
@@ -134,7 +144,11 @@ export default function CreateSeller() {
             email: 'demo@aquaflow.com',
             password: 'Password@123',
             confirmPassword: 'Password@123',
-            address: '123 Demo Street, Bangalore - 560001'
+            doorNo: '123',
+            street: 'Main Road',
+            area: 'Indiranagar',
+            city: 'Bangalore',
+            pincode: '560038'
         });
         setSyncWhatsapp(true);
         setErrors({});
@@ -443,22 +457,38 @@ export default function CreateSeller() {
                             </div>
                         </div>
 
-                        <div className="md:col-span-2 flex flex-col gap-1.5">
-                            <div className="flex items-center gap-2 pb-1 text-primary">
+                        <div className="md:col-span-2">
+                            <div className="flex items-center gap-2 pb-3 text-primary">
                                 <span className="material-symbols-outlined text-[18px]">location_on</span>
                                 <span className="font-label-md text-label-md tracking-wider uppercase font-semibold">Logistics Territory &amp; Hub</span>
                             </div>
-                            <label className="font-label-md text-label-md text-on-surface font-semibold" htmlFor="address">
-                                Complete Business / Delivery Hub Address <span className="text-error">*</span>
-                            </label>
-                            <div className="relative">
-                                <textarea
-                                    className={`w-full p-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all resize-y min-h-[96px] ${errors.address ? 'border border-error shadow-[0_0_0_1px_rgba(186,26,26,1)]' : ''}`}
-                                    id="address" name="address" placeholder="Enter complete seller address including street, landmark, area and pincode..." rows="3"
-                                    value={formData.address} onChange={handleChange}
-                                ></textarea>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-space-lg gap-y-space-md">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="font-label-md text-label-md text-on-surface font-semibold" htmlFor="doorNo">Door / Building No <span className="text-error">*</span></label>
+                                    <input className={`w-full h-11 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all ${errors.doorNo ? 'border border-error shadow-[0_0_0_1px_rgba(186,26,26,1)]' : ''}`} id="doorNo" name="doorNo" placeholder="No 12/A" type="text" value={formData.doorNo} onChange={handleChange} />
+                                    {errors.doorNo && <span className="font-caption text-caption text-error flex items-center gap-1 mt-0.5"><span className="material-symbols-outlined text-[14px]">error</span>{errors.doorNo}</span>}
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="font-label-md text-label-md text-on-surface font-semibold" htmlFor="street">Street Name <span className="text-error">*</span></label>
+                                    <input className={`w-full h-11 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all ${errors.street ? 'border border-error shadow-[0_0_0_1px_rgba(186,26,26,1)]' : ''}`} id="street" name="street" placeholder="Main Street" type="text" value={formData.street} onChange={handleChange} />
+                                    {errors.street && <span className="font-caption text-caption text-error flex items-center gap-1 mt-0.5"><span className="material-symbols-outlined text-[14px]">error</span>{errors.street}</span>}
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="font-label-md text-label-md text-on-surface font-semibold" htmlFor="area">Area / Locality <span className="text-error">*</span></label>
+                                    <input className={`w-full h-11 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all ${errors.area ? 'border border-error shadow-[0_0_0_1px_rgba(186,26,26,1)]' : ''}`} id="area" name="area" placeholder="Downtown" type="text" value={formData.area} onChange={handleChange} />
+                                    {errors.area && <span className="font-caption text-caption text-error flex items-center gap-1 mt-0.5"><span className="material-symbols-outlined text-[14px]">error</span>{errors.area}</span>}
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="font-label-md text-label-md text-on-surface font-semibold" htmlFor="city">City <span className="text-error">*</span></label>
+                                    <input className={`w-full h-11 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all ${errors.city ? 'border border-error shadow-[0_0_0_1px_rgba(186,26,26,1)]' : ''}`} id="city" name="city" placeholder="Chennai" type="text" value={formData.city} onChange={handleChange} />
+                                    {errors.city && <span className="font-caption text-caption text-error flex items-center gap-1 mt-0.5"><span className="material-symbols-outlined text-[14px]">error</span>{errors.city}</span>}
+                                </div>
+                                <div className="flex flex-col gap-1.5 md:col-span-2 lg:col-span-1">
+                                    <label className="font-label-md text-label-md text-on-surface font-semibold" htmlFor="pincode">Pincode <span className="text-error">*</span></label>
+                                    <input className={`w-full h-11 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_rgba(0,97,148,0.35)] transition-all ${errors.pincode ? 'border border-error shadow-[0_0_0_1px_rgba(186,26,26,1)]' : ''}`} id="pincode" name="pincode" placeholder="600001" maxLength="6" type="text" value={formData.pincode} onChange={handleChange} />
+                                    {errors.pincode && <span className="font-caption text-caption text-error flex items-center gap-1 mt-0.5"><span className="material-symbols-outlined text-[14px]">error</span>{errors.pincode}</span>}
+                                </div>
                             </div>
-                            {errors.address && <span className="font-caption text-caption text-error flex items-center gap-1 mt-0.5"><span className="material-symbols-outlined text-[14px]">error</span>{errors.address}</span>}
                         </div>
                     </div>
 
@@ -467,7 +497,7 @@ export default function CreateSeller() {
                             <Link to="/" className="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors py-2 px-1">
                                 Cancel
                             </Link>
-                            <button onClick={() => { setFormData({ sellerName: '', sellerId: '', contactNumber: '', whatsappNumber: '', email: '', password: '', confirmPassword: '', address: '' }); setErrors({}); setGlobalError(false); setSyncWhatsapp(false); }} className="px-space-md py-2.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-all flex items-center gap-1.5" type="button">
+                            <button onClick={() => { setFormData({ sellerName: '', sellerId: '', contactNumber: '', whatsappNumber: '', email: '', password: '', confirmPassword: '', doorNo: '', street: '', area: '', city: '', pincode: '' }); setErrors({}); setGlobalError(false); setSyncWhatsapp(false); }} className="px-space-md py-2.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-all flex items-center gap-1.5" type="button">
                                 <span className="material-symbols-outlined text-[18px]">restart_alt</span>
                                 <span>Reset Form</span>
                             </button>
@@ -486,19 +516,6 @@ export default function CreateSeller() {
                 </form>
             </div>
 
-            <div className="bg-surface-container-low rounded-xl p-space-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
-                <div className="flex items-start gap-space-sm">
-                    <span className="material-symbols-outlined text-primary text-[24px] mt-0.5">info</span>
-                    <div className="flex flex-col">
-                        <p className="font-headline-sm text-headline-sm text-on-surface">Auto-activation Protocol</p>
-                        <p className="font-caption text-caption text-on-surface-variant max-w-2xl">Upon seller submission, an automated verification token is dispatched to the registered mobile and email. Agencies must complete their initial inventory sync within 48 hours.</p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-space-xs text-on-surface-variant font-caption text-caption self-end md:self-center shrink-0">
-                    <span className="material-symbols-outlined text-[16px] text-secondary">security</span>
-                    <span>256-bit TLS Encrypted</span>
-                </div>
-            </div>
         </div>
     );
 }

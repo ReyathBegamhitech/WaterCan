@@ -26,7 +26,9 @@ export default function Dashboard() {
               hub: s.location || 'Unknown',
               joined: joined,
               routes: s.location || 'Pending assignment',
-              totalDelivered: '0', // Mock default
+              overallOrders: s.overall_orders || '0',
+              ordersInProcess: s.orders_in_process || '0',
+              monthlyOrders: s.monthly_orders || '0',
               initials: s.organization_name.substring(0, 2).toUpperCase()
             };
           });
@@ -68,10 +70,13 @@ export default function Dashboard() {
     <div className="flex flex-col w-full gap-space-lg">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="flex flex-col gap-space-xs">
-          <div className="flex items-center gap-space-sm">
-            <h1 className="font-headline-lg text-headline-lg text-on-surface">Dashboard</h1>
-            <span className="px-space-sm py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span> Live Fleet
+          <div className="flex items-center gap-3 pb-1">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-[#005cbb] text-white flex items-center justify-center shadow-md">
+              <span className="material-symbols-outlined text-[26px]">space_dashboard</span>
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-on-surface">Dashboard</h1>
+            <span className="ml-2 px-3 py-1 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold flex items-center gap-1.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span> Live Fleet
             </span>
           </div>
           <p className="font-body-md text-body-md text-on-surface-variant">
@@ -133,9 +138,12 @@ export default function Dashboard() {
 
       <div className="flex flex-col gap-space-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm">
-          <div className="flex items-center gap-space-sm">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface">Registered Sellers</h2>
-            <span className="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-caption text-caption font-semibold">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[28px]">storefront</span>
+              <h2 className="text-2xl font-bold tracking-tight text-on-surface">Registered Sellers</h2>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-caption text-caption font-semibold shadow-sm border border-outline-variant/30">
               {filteredSellers.length} Sellers
             </span>
           </div>
@@ -170,6 +178,7 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+        <hr className="border-t-2 border-outline-variant/70 shadow-sm w-full mb-space-md -mt-2" />
 
         {filteredSellers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
@@ -255,51 +264,56 @@ export default function Dashboard() {
             
             <div className="p-space-lg flex-1 overflow-y-auto flex flex-col gap-space-lg">
               <div className="grid grid-cols-2 gap-space-sm">
-                <div className="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col">
-                  <span className="font-caption text-caption text-on-surface-variant">Account Status</span>
-                  <div className="mt-1 flex items-center gap-1.5">
-                    <span className={`w-2 h-2 rounded-full ${selectedSeller.status === 'active' ? 'bg-secondary' : 'bg-outline'}`}></span>
-                    <span className="font-label-md text-label-md font-semibold text-on-surface">{selectedSeller.status === 'active' ? 'Active' : 'Inactive'}</span>
-                  </div>
+                <div className="p-space-md rounded-xl bg-blue-50 border border-blue-100 flex flex-col relative overflow-hidden shadow-sm">
+                  <span className="font-caption text-caption text-blue-600 font-semibold z-10">Overall Orders</span>
+                  <span className="font-headline-sm text-headline-sm font-bold text-blue-900 mt-1 z-10">{selectedSeller.overallOrders}</span>
+                  <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-blue-500/10 z-0 select-none pointer-events-none">shopping_cart</span>
                 </div>
-                <div className="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col">
-                  <span className="font-caption text-caption text-on-surface-variant">Total Jars Delivered</span>
-                  <span className="font-headline-sm text-headline-sm font-bold text-primary mt-1">{selectedSeller.totalDelivered}</span>
+                
+                <div className="p-space-md rounded-xl bg-amber-50 border border-amber-100 flex flex-col relative overflow-hidden shadow-sm">
+                  <span className="font-caption text-caption text-amber-700 font-semibold z-10">Orders in Process</span>
+                  <span className="font-headline-sm text-headline-sm font-bold text-amber-900 mt-1 z-10">{selectedSeller.ordersInProcess}</span>
+                  <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-amber-500/10 z-0 select-none pointer-events-none">local_shipping</span>
+                </div>
+                
+                <div className="col-span-2 p-space-md rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between relative overflow-hidden shadow-sm">
+                  <div className="flex flex-col z-10">
+                    <span className="font-caption text-caption text-emerald-700 font-semibold">Monthly Orders (This Month)</span>
+                    <span className="font-headline-sm text-headline-sm font-bold text-emerald-900 mt-1">{selectedSeller.monthlyOrders}</span>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 z-10 shadow-sm border border-emerald-200">
+                    <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+                  </div>
                 </div>
               </div>
 
               <div className="flex flex-col gap-space-md">
                 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Operational Info</span>
                 <div className="flex flex-col gap-space-sm divide-y divide-outline-variant/20">
-                  <div className="pt-2 first:pt-0 flex items-center justify-between">
-                    <span className="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] text-tertiary">call</span> Phone Contact
+                  <div className="pt-2 first:pt-0 flex items-start justify-between gap-4">
+                    <span className="font-body-md text-body-md text-on-surface-variant flex items-start gap-2 shrink-0">
+                      <span className="material-symbols-outlined text-[18px] text-tertiary mt-0.5">call</span> Phone Contact
                     </span>
-                    <span className="font-label-md text-label-md text-on-surface font-mono">{selectedSeller.phone}</span>
+                    <span className="font-label-md text-label-md text-on-surface font-mono text-right break-words">{selectedSeller.phone}</span>
                   </div>
-                  <div className="pt-2 flex items-center justify-between">
-                    <span className="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] text-tertiary">chat</span> WhatsApp Alert
+                  <div className="pt-3 flex items-start justify-between gap-4">
+                    <span className="font-body-md text-body-md text-on-surface-variant flex items-start gap-2 shrink-0">
+                      <span className="material-symbols-outlined text-[18px] text-tertiary mt-0.5">chat</span> WhatsApp Alert
                     </span>
-                    <span className="font-caption text-caption text-secondary font-semibold bg-secondary-fixed/30 px-2 py-0.5 rounded-full">Connected</span>
+                    <span className="font-caption text-caption text-secondary font-semibold bg-secondary-fixed/30 px-2 py-0.5 rounded-full shrink-0">Connected</span>
                   </div>
-                  <div className="pt-2 flex items-center justify-between">
-                    <span className="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] text-tertiary">warehouse</span> Distribution Hub
+                  <div className="pt-3 flex items-start justify-between gap-4">
+                    <span className="font-body-md text-body-md text-on-surface-variant flex items-start gap-2 shrink-0">
+                      <span className="material-symbols-outlined text-[18px] text-tertiary mt-0.5">warehouse</span> Distribution Hub
                     </span>
-                    <span className="font-label-md text-label-md text-on-surface">{selectedSeller.hub}</span>
+                    <span className="font-label-md text-label-md text-on-surface text-right break-words">{selectedSeller.hub}</span>
                   </div>
-                  <div className="pt-2 flex items-center justify-between">
-                    <span className="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] text-tertiary">speed</span> Daily Quota
+
+                  <div className="pt-3 flex items-start justify-between gap-4">
+                    <span className="font-body-md text-body-md text-on-surface-variant flex items-start gap-2 shrink-0">
+                      <span className="material-symbols-outlined text-[18px] text-tertiary mt-0.5">calendar_today</span> Registered Since
                     </span>
-                    <span className="font-label-md text-label-md text-primary font-semibold">{selectedSeller.cap}</span>
-                  </div>
-                  <div className="pt-2 flex items-center justify-between">
-                    <span className="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] text-tertiary">calendar_today</span> Registered Since
-                    </span>
-                    <span className="font-label-md text-label-md text-on-surface">{selectedSeller.joined}</span>
+                    <span className="font-label-md text-label-md text-on-surface text-right shrink-0">{selectedSeller.joined}</span>
                   </div>
                 </div>
               </div>
@@ -312,13 +326,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="p-space-md rounded-xl bg-surface-container-low/50 border border-outline-variant/20 flex items-center gap-3">
-                <span className="material-symbols-outlined text-[24px] text-secondary">verified_user</span>
-                <div className="flex flex-col">
-                  <span className="font-label-sm text-label-sm text-on-surface font-semibold">FSSAI &amp; Water Quality Certified</span>
-                  <span className="font-caption text-caption text-on-surface-variant">Batch testing logs synchronized daily</span>
-                </div>
-              </div>
+
             </div>
 
             <div className="p-space-lg border-t border-outline-variant/20 bg-surface-container-low flex items-center gap-space-sm">

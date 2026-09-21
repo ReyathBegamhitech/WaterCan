@@ -5,6 +5,7 @@ export default function SellerList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Edit Modal State
   const [isEditing, setIsEditing] = useState(false);
@@ -138,6 +139,19 @@ export default function SellerList() {
         </p>
       </div>
 
+      <div className="flex items-center flex-wrap sm:flex-nowrap gap-space-sm">
+        <div className="relative w-full sm:w-96">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-tertiary">search</span>
+          <input
+            className="w-full pl-9 pr-3 py-2.5 bg-surface-container-lowest rounded-xl border border-outline-variant/40 text-on-surface font-body-md text-body-md placeholder-tertiary focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all shadow-sm"
+            placeholder="Search by ID, name, phone, or location..."
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -159,7 +173,14 @@ export default function SellerList() {
                   </td>
                 </tr>
               ) : (
-                sellers.map((seller) => (
+                sellers.filter(seller => {
+                  const q = searchQuery.toLowerCase();
+                  return !searchQuery || 
+                    (seller.organization_name && seller.organization_name.toLowerCase().includes(q)) || 
+                    (seller.seller_id && seller.seller_id.toLowerCase().includes(q)) || 
+                    (seller.phone_number && seller.phone_number.toLowerCase().includes(q)) ||
+                    (seller.location && seller.location.toLowerCase().includes(q));
+                }).map((seller) => (
                   <tr key={seller.seller_id} className="border-b border-outline-variant/10 hover:bg-surface-container-low/50 transition-colors">
                     <td className="py-4 px-6">
                       <span className="font-mono bg-primary/10 text-primary px-2 py-1 rounded text-sm font-semibold">

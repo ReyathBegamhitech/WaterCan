@@ -8,7 +8,7 @@ export default function Layout() {
       <Sidebar />
       <div className="pl-64 flex flex-col min-h-screen">
         <Header />
-        <main className="w-full pt-16 bg-surface-container flex-1 px-gutter py-space-lg">
+        <main className="w-full pt-24 bg-surface-container flex-1 px-gutter pb-space-lg">
           <Outlet />
         </main>
       </div>
