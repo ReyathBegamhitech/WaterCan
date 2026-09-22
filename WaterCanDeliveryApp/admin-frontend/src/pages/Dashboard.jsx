@@ -429,7 +429,7 @@ export default function Dashboard() {
                 </Link>
               </div>
               <button
-                className="w-full py-2.5 px-4 rounded-xl bg-secondary-fixed/30 hover:bg-secondary-fixed/50 text-secondary font-label-md text-label-md transition-colors shadow-sm flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-label-md text-label-md transition-colors shadow-sm flex items-center justify-center gap-2 font-bold"
                 onClick={() => fetchCustomers(selectedSeller.sellerId)}
               >
                 <span className="material-symbols-outlined text-[18px]">group</span>
