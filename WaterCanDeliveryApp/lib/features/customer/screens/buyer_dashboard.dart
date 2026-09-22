@@ -327,8 +327,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        side: const BorderSide(color: AppColors.error),
+                        foregroundColor: AppColors.onSurfaceVariant,
+                        side: BorderSide(color: AppColors.outline.withOpacity(0.3)),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       icon: const Icon(Icons.logout),
@@ -357,6 +357,59 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                                   }
                                 },
                                 child: const Text('Yes', style: TextStyle(color: AppColors.error)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        side: const BorderSide(color: AppColors.error),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      icon: const Icon(Icons.delete_forever),
+                      label: Text('Deactivate Account', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (dialogCtx) => AlertDialog(
+                            title: const Text('Deactivate Account'),
+                            content: const Text('Are you sure you want to deactivate your account? This will completely erase all your data.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(dialogCtx),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  final success = await userCtrl.deleteAccount();
+                                  if (context.mounted) {
+                                    Navigator.pop(dialogCtx);
+                                    if (success) {
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                        (route) => false,
+                                      );
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Account deactivated successfully')),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Failed to deactivate account')),
+                                      );
+                                    }
+                                  }
+                                },
+                                child: const Text('Deactivate', style: TextStyle(color: AppColors.error)),
                               ),
                             ],
                           ),

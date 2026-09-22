@@ -12,4 +12,5 @@ class ApiConstants {
   static String get updateAddress => '$baseUrl/api/auth/address';
   static String get orders => '$baseUrl/api/orders';
   static String get getSellerDetails => '$baseUrl/api/auth/seller-details';
+  static String get deleteAccount => '$baseUrl/api/auth/delete';
 }

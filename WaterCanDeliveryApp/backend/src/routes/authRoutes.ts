@@ -582,3 +582,42 @@ router.delete('/admin/seller/:id', async (req: Request, res: Response): Promise<
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
+
+// User Deletion endpoint
+router.delete('/delete', async (req: Request, res: Response): Promise<void> => {
+  const { phone } = req.body;
+  if (!phone) {
+    res.status(400).json({ success: false, message: 'Phone number is required' });
+    return;
+  }
+  const cleanPhone = phone.toString().trim().replace(/\D/g, '').slice(-10);
+
+  try {
+    const userResult = await pool.query('SELECT id FROM users WHERE phone_number = $1', [cleanPhone]);
+    if (userResult.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+    const userId = userResult.rows[0].id;
+
+    await pool.query('BEGIN');
+    
+    // Delete user addresses
+    await pool.query('DELETE FROM addresses WHERE user_id = $1', [userId]);
+    
+    // Delete orders linked to this user's phone number
+    await pool.query('DELETE FROM app_orders WHERE user_phone = $1 OR buyer_phone = $2', [cleanPhone, cleanPhone]);
+    
+    // Delete user record
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+    
+    await pool.query('COMMIT');
+    
+    console.log(`✅ [User Service] User with phone ${cleanPhone} completely deleted.`);
+    res.status(200).json({ success: true, message: 'User deleted successfully from database' });
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    console.error('Delete user error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error while deleting user' });
+  }
+});

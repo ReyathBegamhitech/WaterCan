@@ -466,6 +466,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           email: email,
           assignedSellerId: data['assigned_seller_id'] ?? '',
           shopName: data['shop_name'] ?? '',
+          shopAddress: data['shop_address'] ?? '',
         );
 
         if (!mounted) return;

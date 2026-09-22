@@ -6,11 +6,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/api_constants.dart';
 import '../models/order_model.dart';
 import '../models/product_model.dart';
+import '../../../core/services/notification_service.dart';
 
 class OrderController extends ChangeNotifier {
   List<OrderModel> _orders = [];
   Timer? _pollingTimer;
   String? _currentUserPhone;
+  bool _isSellerMode = false;
 
   static const String _keyOrders = 'cached_orders';
 
@@ -74,6 +76,7 @@ class OrderController extends ChangeNotifier {
 
   // Starts polling every 5 seconds for user orders
   void startPollingUserOrders(String phone) {
+    _isSellerMode = false;
     _currentUserPhone = phone;
     _stopPolling(); // Stop any existing
     fetchUserOrders(phone); // Initial fetch
@@ -84,6 +87,7 @@ class OrderController extends ChangeNotifier {
 
   // Starts polling every 5 seconds for seller orders
   void startPollingSellerOrders(String sellerId) {
+    _isSellerMode = true;
     _stopPolling();
     fetchSellerOrders(sellerId);
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
@@ -218,7 +222,19 @@ class OrderController extends ChangeNotifier {
       ));
     }
     
-    // Check if new orders differ from old orders
+    // Check if new orders differ from old orders and notify seller
+    if (_isSellerMode && _orders.isNotEmpty) {
+      final oldIds = _orders.map((o) => o.id).toSet();
+      final newItems = newOrders.where((o) => !oldIds.contains(o.id)).toList();
+      
+      for (var newOrder in newItems) {
+        NotificationService.showNotification(
+          title: 'New Order Received! 🛒',
+          body: 'You received a new order from ${newOrder.customerName}.',
+        );
+      }
+    }
+    
     _orders = newOrders;
     _saveOrdersLocally();
     notifyListeners();

@@ -5,8 +5,11 @@ import 'core/constants/app_colors.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/customer/controllers/order_controller.dart';
 import 'features/customer/controllers/user_controller.dart';
+import 'core/services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initialize();
   runApp(const WaterCanDeliveryApp());
 }
 
