@@ -304,8 +304,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Phone/Email Field
                         CustomTextField(
                           controller: _phoneController,
-                          label: 'Phone Number / Email',
-                          hintText: 'Enter Phone Number / Email',
+                          label: 'Phone Number',
+                          hintText: 'Enter Phone Number',
                           prefixIcon: Icons.account_circle_outlined,
                         ),
                         const SizedBox(height: 16), // space-md

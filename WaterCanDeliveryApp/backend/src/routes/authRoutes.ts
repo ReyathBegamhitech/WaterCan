@@ -320,6 +320,28 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Check if it's a seller logging in by Phone Number
+    const sellerByPhoneResult = await pool.query('SELECT seller_id, organization_name, password_hash, location, phone_number, plain_password FROM app_sellers WHERE phone_number = $1', [phone]);
+    if (sellerByPhoneResult.rows.length > 0) {
+      const seller = sellerByPhoneResult.rows[0];
+      const isMatch = await bcrypt.compare(password, seller.password_hash);
+      if (isMatch) {
+        res.status(200).json({
+          success: true,
+          message: 'Seller Login successful',
+          user: {
+            isSeller: true,
+            seller_id: seller.seller_id,
+            fullName: seller.organization_name,
+            phone: seller.phone_number || seller.seller_id,
+            doorNo: seller.location,
+          }
+        });
+        return;
+      }
+    }
+
+    // Check if it's a regular user logging in by Phone Number
     const userResult = await pool.query('SELECT id, full_name, password_hash, assigned_seller_id FROM users WHERE phone_number = $1', [phone]);
     if (userResult.rows.length === 0) {
       res.status(401).json({ success: false, message: 'Invalid phone number or password' });
