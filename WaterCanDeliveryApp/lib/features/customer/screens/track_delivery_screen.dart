@@ -328,9 +328,7 @@ class TrackDeliveryScreen extends StatelessWidget {
                       height: 1.4,
                     ),
                     children: const [
-                      TextSpan(text: 'Delivery partner '),
-                      TextSpan(text: 'Rajesh', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.onSurface)),
-                      TextSpan(text: ' is on the way with 2 cans. Expected arrival in '),
+                      TextSpan(text: 'A delivery partner is on the way with your order. Expected arrival in '),
                       TextSpan(text: '15 mins', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary)),
                       TextSpan(text: '.'),
                     ],
