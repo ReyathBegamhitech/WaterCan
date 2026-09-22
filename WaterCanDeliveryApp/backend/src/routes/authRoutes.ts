@@ -506,7 +506,8 @@ router.get('/admin/sellers', async (req: Request, res: Response): Promise<void> 
         COUNT(o.id) as overall_orders,
         SUM(CASE WHEN o.status IN ('Placed', 'Accepted', 'Out for Delivery') THEN 1 ELSE 0 END) as orders_in_process,
         SUM(CASE WHEN EXTRACT(MONTH FROM o.created_at) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 ELSE 0 END) as monthly_orders,
-        SUM(CASE WHEN o.status = 'Delivered' AND DATE(o.created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as delivered_today
+        SUM(CASE WHEN o.status = 'Delivered' AND DATE(o.created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as delivered_today,
+        SUM(CASE WHEN o.status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled_orders
       FROM app_sellers s
       LEFT JOIN app_orders o ON s.seller_id = o.seller_id
       GROUP BY s.seller_id, s.organization_name, s.location, s.phone_number, s.plain_password, s.created_at
@@ -601,6 +602,47 @@ router.delete('/admin/seller/:id', async (req: Request, res: Response): Promise<
     res.status(200).json({ success: true, message: 'Seller deleted successfully' });
   } catch (error) {
     console.error('Delete seller error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Admin: Get seller income by date
+router.get('/admin/sellers/:id/income', async (req: Request, res: Response): Promise<void> => {
+  const sellerId = req.params.id;
+  const dateStr = req.query.date as string;
+
+  if (!dateStr) {
+    res.status(400).json({ success: false, message: 'Date is required' });
+    return;
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT payment_method, SUM(total_price) as total 
+       FROM app_orders 
+       WHERE seller_id = $1 
+         AND DATE(created_at AT TIME ZONE 'Asia/Kolkata') = $2 
+         AND status = 'Delivered'
+       GROUP BY payment_method`,
+      [sellerId, dateStr]
+    );
+
+    let codIncome = 0;
+    let upiIncome = 0;
+
+    result.rows.forEach(row => {
+      const pm = (row.payment_method || '').toLowerCase();
+      const amount = parseFloat(row.total) || 0;
+      if (pm.includes('cod') || pm.includes('cash')) {
+        codIncome += amount;
+      } else if (pm.includes('upi') || pm.includes('online')) {
+        upiIncome += amount;
+      }
+    });
+
+    res.status(200).json({ success: true, codIncome, upiIncome });
+  } catch (error) {
+    console.error('Fetch seller income error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });

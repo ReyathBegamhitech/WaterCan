@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import CountUp from '../components/CountUp';
 
 export default function Dashboard() {
   const [sellers, setSellers] = useState([]);
@@ -8,6 +9,28 @@ export default function Dashboard() {
   const [isForcedEmpty, setIsForcedEmpty] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Income by Date State
+  const [incomeDate, setIncomeDate] = useState(new Date().toISOString().split('T')[0]);
+  const [codIncome, setCodIncome] = useState(0);
+  const [upiIncome, setUpiIncome] = useState(0);
+  const [isIncomeLoading, setIsIncomeLoading] = useState(false);
+
+  // Fetch Income Data
+  useEffect(() => {
+    if (!selectedSeller) return;
+    setIsIncomeLoading(true);
+    fetch(`${import.meta.env.VITE_API_URL}/auth/admin/sellers/${selectedSeller.sellerId}/income?date=${incomeDate}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setCodIncome(data.codIncome);
+          setUpiIncome(data.upiIncome);
+        }
+      })
+      .catch(err => console.error("Failed to fetch seller income:", err))
+      .finally(() => setIsIncomeLoading(false));
+  }, [selectedSeller, incomeDate]);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/auth/admin/sellers`)
@@ -30,6 +53,7 @@ export default function Dashboard() {
               ordersInProcess: s.orders_in_process || '0',
               monthlyOrders: s.monthly_orders || '0',
               deliveredToday: s.delivered_today || '0',
+              cancelledOrders: s.cancelled_orders || '0',
               initials: s.organization_name.substring(0, 2).toUpperCase()
             };
           });
@@ -280,13 +304,60 @@ export default function Dashboard() {
                   <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-amber-500/10 z-0 select-none pointer-events-none">local_shipping</span>
                 </div>
                 
-                <div className="col-span-2 p-space-md rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between relative overflow-hidden shadow-sm">
-                  <div className="flex flex-col z-10">
-                    <span className="font-caption text-caption text-emerald-700 font-semibold">Monthly Orders (This Month)</span>
-                    <span className="font-headline-sm text-headline-sm font-bold text-emerald-900 mt-1">{selectedSeller.monthlyOrders}</span>
+                <div className="p-space-md rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col relative overflow-hidden shadow-sm">
+                  <span className="font-caption text-caption text-emerald-700 font-semibold z-10">Monthly Orders</span>
+                  <span className="font-headline-sm text-headline-sm font-bold text-emerald-900 mt-1 z-10">{selectedSeller.monthlyOrders}</span>
+                  <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-emerald-500/10 z-0 select-none pointer-events-none">calendar_month</span>
+                </div>
+
+                <div className="p-space-md rounded-xl bg-rose-50 border border-rose-100 flex flex-col relative overflow-hidden shadow-sm">
+                  <span className="font-caption text-caption text-rose-700 font-semibold z-10">Cancelled Orders</span>
+                  <span className="font-headline-sm text-headline-sm font-bold text-rose-900 mt-1 z-10">{selectedSeller.cancelledOrders}</span>
+                  <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-rose-500/10 z-0 select-none pointer-events-none">cancel</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-space-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Income by Date</span>
+                  <span className="font-caption text-caption text-[#e87a3f] font-bold bg-[#fed7aa]/30 px-2 py-0.5 rounded-full shrink-0">Track Revenue</span>
+                </div>
+                
+                <div className="w-full relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[#e87a3f]">calendar_today</span>
+                  <input 
+                    type="date"
+                    value={incomeDate}
+                    onChange={(e) => setIncomeDate(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 bg-surface-container-lowest rounded-xl border border-[#fed7aa] text-on-surface font-label-md text-label-md focus:outline-none focus:border-[#f97316] transition-colors shadow-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-space-sm">
+                  <div className="p-space-md rounded-xl bg-[#fff7ed] border border-[#ffedd5] flex flex-col justify-between relative overflow-hidden shadow-sm h-[90px]">
+                    <div className="flex items-center justify-between z-10 w-full">
+                      <div className="w-7 h-7 rounded-lg bg-[#fdba74] flex items-center justify-center text-[#9a3412]">
+                        <span className="material-symbols-outlined text-[16px]">payments</span>
+                      </div>
+                      <span className="font-caption text-[10px] text-[#9a3412] font-bold bg-[#ffedd5] px-1.5 py-0.5 rounded">COD</span>
+                    </div>
+                    <span className="font-headline-md text-headline-md font-bold text-on-surface z-10 flex items-center gap-0.5 tracking-tight">
+                      <span className="material-symbols-outlined text-[20px] font-bold">currency_rupee</span>
+                      {isIncomeLoading ? '...' : <CountUp value={codIncome} />}
+                    </span>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 z-10 shadow-sm border border-emerald-200">
-                    <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+
+                  <div className="p-space-md rounded-xl bg-[#eff6ff] border border-[#dbeafe] flex flex-col justify-between relative overflow-hidden shadow-sm h-[90px]">
+                    <div className="flex items-center justify-between z-10 w-full">
+                      <div className="w-7 h-7 rounded-lg bg-[#93c5fd] flex items-center justify-center text-[#1e40af]">
+                        <span className="material-symbols-outlined text-[16px]">qr_code_2</span>
+                      </div>
+                      <span className="font-caption text-[10px] text-[#1e40af] font-bold bg-[#dbeafe] px-1.5 py-0.5 rounded">UPI</span>
+                    </div>
+                    <span className="font-headline-md text-headline-md font-bold text-on-surface z-10 flex items-center gap-0.5 tracking-tight">
+                      <span className="material-symbols-outlined text-[20px] font-bold">currency_rupee</span>
+                      {isIncomeLoading ? '...' : <CountUp value={upiIncome} />}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -300,12 +371,7 @@ export default function Dashboard() {
                     </span>
                     <span className="font-label-md text-label-md text-on-surface font-mono text-right break-words">{selectedSeller.phone}</span>
                   </div>
-                  <div className="pt-3 flex items-start justify-between gap-4">
-                    <span className="font-body-md text-body-md text-on-surface-variant flex items-start gap-2 shrink-0">
-                      <span className="material-symbols-outlined text-[18px] text-tertiary mt-0.5">chat</span> WhatsApp Alert
-                    </span>
-                    <span className="font-caption text-caption text-secondary font-semibold bg-secondary-fixed/30 px-2 py-0.5 rounded-full shrink-0">Connected</span>
-                  </div>
+
                   <div className="pt-3 flex items-start justify-between gap-4">
                     <span className="font-body-md text-body-md text-on-surface-variant flex items-start gap-2 shrink-0">
                       <span className="material-symbols-outlined text-[18px] text-tertiary mt-0.5">warehouse</span> Distribution Hub
@@ -322,13 +388,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-space-xs">
-                <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Assigned Dispatch Corridors</span>
-                <div className="p-space-md bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-start gap-2 text-on-surface-variant">
-                  <span className="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">alt_route</span>
-                  <p className="font-body-md text-body-md leading-relaxed text-on-surface">{selectedSeller.routes}</p>
-                </div>
-              </div>
+
 
 
             </div>
