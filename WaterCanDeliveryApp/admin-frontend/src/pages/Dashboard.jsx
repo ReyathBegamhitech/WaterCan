@@ -29,6 +29,7 @@ export default function Dashboard() {
               overallOrders: s.overall_orders || '0',
               ordersInProcess: s.orders_in_process || '0',
               monthlyOrders: s.monthly_orders || '0',
+              deliveredToday: s.delivered_today || '0',
               initials: s.organization_name.substring(0, 2).toUpperCase()
             };
           });
@@ -101,38 +102,41 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-space-sm">
-        <div className="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
-          <div className="flex flex-col">
-            <span className="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Total Sellers</span>
-            <span className="font-headline-lg text-headline-lg text-on-surface mt-0.5">{sellers.length}</span>
-            <span className="font-caption text-caption text-secondary flex items-center gap-0.5 mt-0.5">
-              <span className="material-symbols-outlined text-[14px]">arrow_upward</span> +3 this month
-            </span>
-          </div>
-          <div className="w-11 h-11 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-[24px]">local_shipping</span>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-sm">
+        <div className="p-space-lg rounded-2xl bg-blue-50 border border-blue-100 flex flex-col relative overflow-hidden shadow-sm">
+          <span className="font-caption text-caption text-blue-600 uppercase tracking-wider font-bold z-10">Total Sellers</span>
+          <span className="font-headline-lg text-headline-lg text-blue-950 mt-1 z-10">{sellers.length}</span>
+          <span className="font-label-sm text-label-sm text-blue-700 flex items-center gap-1 mt-1 z-10">
+            <span className="material-symbols-outlined text-[16px]">trending_up</span> +3 this month
+          </span>
+          <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-[80px] text-blue-500/10 z-0 select-none pointer-events-none">storefront</span>
         </div>
-        <div className="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
-          <div className="flex flex-col">
-            <span className="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Active Now</span>
-            <span className="font-headline-lg text-headline-lg text-secondary mt-0.5">{sellers.filter(s => s.status === 'active').length}</span>
-            <span className="font-caption text-caption text-on-surface-variant mt-0.5">91.6% operational</span>
-          </div>
-          <div className="w-11 h-11 rounded-xl bg-secondary-fixed/40 flex items-center justify-center text-secondary">
-            <span className="material-symbols-outlined text-[24px]">verified</span>
-          </div>
+
+        <div className="p-space-lg rounded-2xl bg-emerald-50 border border-emerald-100 flex flex-col relative overflow-hidden shadow-sm">
+          <span className="font-caption text-caption text-emerald-600 uppercase tracking-wider font-bold z-10">Active Now</span>
+          <span className="font-headline-lg text-headline-lg text-emerald-950 mt-1 z-10">{sellers.filter(s => s.status === 'active').length}</span>
+          <span className="font-label-sm text-label-sm text-emerald-700 mt-1 z-10">
+            {sellers.length > 0 ? Math.round((sellers.filter(s => s.status === 'active').length / sellers.length) * 100) : 0}% operational
+          </span>
+          <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-[80px] text-emerald-500/10 z-0 select-none pointer-events-none">verified</span>
         </div>
-        <div className="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between shadow-sm">
-          <div className="flex flex-col">
-            <span className="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Daily Delivered Cans</span>
-            <span className="font-headline-lg text-headline-lg text-primary mt-0.5">1,840</span>
-            <span className="font-caption text-caption text-on-surface-variant mt-0.5">20L Standard Jars</span>
-          </div>
-          <div className="w-11 h-11 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: '"FILL" 1' }}>water_drop</span>
-          </div>
+
+        <div className="p-space-lg rounded-2xl bg-amber-50 border border-amber-100 flex flex-col relative overflow-hidden shadow-sm">
+          <span className="font-caption text-caption text-amber-700 uppercase tracking-wider font-bold z-10">Orders in Progress</span>
+          <span className="font-headline-lg text-headline-lg text-amber-950 mt-1 z-10">
+            {sellers.reduce((sum, s) => sum + parseInt(s.ordersInProcess || 0), 0)}
+          </span>
+          <span className="font-label-sm text-label-sm text-amber-700 mt-1 z-10">Across all active sellers</span>
+          <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-[80px] text-amber-500/10 z-0 select-none pointer-events-none">local_shipping</span>
+        </div>
+
+        <div className="p-space-lg rounded-2xl bg-purple-50 border border-purple-100 flex flex-col relative overflow-hidden shadow-sm">
+          <span className="font-caption text-caption text-purple-600 uppercase tracking-wider font-bold z-10">Delivered Today</span>
+          <span className="font-headline-lg text-headline-lg text-purple-950 mt-1 z-10">
+            {sellers.reduce((sum, s) => sum + parseInt(s.deliveredToday || 0), 0)}
+          </span>
+          <span className="font-label-sm text-label-sm text-purple-700 mt-1 z-10">Successfully completed</span>
+          <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-[80px] text-purple-500/10 z-0 select-none pointer-events-none">task_alt</span>
         </div>
       </div>
 

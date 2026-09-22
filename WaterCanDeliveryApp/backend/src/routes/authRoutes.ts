@@ -483,7 +483,8 @@ router.get('/admin/sellers', async (req: Request, res: Response): Promise<void> 
         s.created_at,
         COUNT(o.id) as overall_orders,
         SUM(CASE WHEN o.status IN ('Placed', 'Accepted', 'Out for Delivery') THEN 1 ELSE 0 END) as orders_in_process,
-        SUM(CASE WHEN EXTRACT(MONTH FROM o.created_at) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 ELSE 0 END) as monthly_orders
+        SUM(CASE WHEN EXTRACT(MONTH FROM o.created_at) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM CURRENT_DATE) THEN 1 ELSE 0 END) as monthly_orders,
+        SUM(CASE WHEN o.status = 'Delivered' AND DATE(o.created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as delivered_today
       FROM app_sellers s
       LEFT JOIN app_orders o ON s.seller_id = o.seller_id
       GROUP BY s.seller_id, s.organization_name, s.location, s.phone_number, s.plain_password, s.created_at
