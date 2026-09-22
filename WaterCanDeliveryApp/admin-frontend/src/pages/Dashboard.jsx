@@ -294,25 +294,25 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-space-sm">
                 <div className="p-space-md rounded-xl bg-blue-50 border border-blue-100 flex flex-col relative overflow-hidden shadow-sm">
                   <span className="font-caption text-caption text-blue-600 font-semibold z-10">Overall Orders</span>
-                  <span className="font-headline-sm text-headline-sm font-bold text-blue-900 mt-1 z-10">{selectedSeller.overallOrders}</span>
+                  <span className="font-headline-sm text-headline-sm font-bold text-blue-900 mt-1 z-10"><CountUp value={selectedSeller.overallOrders} /></span>
                   <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-blue-500/10 z-0 select-none pointer-events-none">shopping_cart</span>
                 </div>
                 
                 <div className="p-space-md rounded-xl bg-amber-50 border border-amber-100 flex flex-col relative overflow-hidden shadow-sm">
                   <span className="font-caption text-caption text-amber-700 font-semibold z-10">Orders in Process</span>
-                  <span className="font-headline-sm text-headline-sm font-bold text-amber-900 mt-1 z-10">{selectedSeller.ordersInProcess}</span>
+                  <span className="font-headline-sm text-headline-sm font-bold text-amber-900 mt-1 z-10"><CountUp value={selectedSeller.ordersInProcess} /></span>
                   <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-amber-500/10 z-0 select-none pointer-events-none">local_shipping</span>
                 </div>
                 
                 <div className="p-space-md rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col relative overflow-hidden shadow-sm">
                   <span className="font-caption text-caption text-emerald-700 font-semibold z-10">Monthly Orders</span>
-                  <span className="font-headline-sm text-headline-sm font-bold text-emerald-900 mt-1 z-10">{selectedSeller.monthlyOrders}</span>
+                  <span className="font-headline-sm text-headline-sm font-bold text-emerald-900 mt-1 z-10"><CountUp value={selectedSeller.monthlyOrders} /></span>
                   <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-emerald-500/10 z-0 select-none pointer-events-none">calendar_month</span>
                 </div>
 
                 <div className="p-space-md rounded-xl bg-rose-50 border border-rose-100 flex flex-col relative overflow-hidden shadow-sm">
                   <span className="font-caption text-caption text-rose-700 font-semibold z-10">Cancelled Orders</span>
-                  <span className="font-headline-sm text-headline-sm font-bold text-rose-900 mt-1 z-10">{selectedSeller.cancelledOrders}</span>
+                  <span className="font-headline-sm text-headline-sm font-bold text-rose-900 mt-1 z-10"><CountUp value={selectedSeller.cancelledOrders} /></span>
                   <span className="material-symbols-outlined absolute -bottom-2 -right-2 text-[64px] text-rose-500/10 z-0 select-none pointer-events-none">cancel</span>
                 </div>
               </div>
