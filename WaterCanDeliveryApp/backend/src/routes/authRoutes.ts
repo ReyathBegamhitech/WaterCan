@@ -647,6 +647,25 @@ router.get('/admin/sellers/:id/income', async (req: Request, res: Response): Pro
   }
 });
 
+// Admin: Get distinct customers for a seller
+router.get('/admin/sellers/:id/customers', async (req: Request, res: Response): Promise<void> => {
+  const sellerId = req.params.id;
+
+  try {
+    const result = await pool.query(
+      `SELECT DISTINCT buyer_name as name, buyer_phone as phone, delivery_address as address
+       FROM app_orders 
+       WHERE seller_id = $1 AND buyer_phone IS NOT NULL`,
+      [sellerId]
+    );
+
+    res.status(200).json({ success: true, customers: result.rows });
+  } catch (error) {
+    console.error('Fetch seller customers error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // User Deletion endpoint
 router.delete('/delete', async (req: Request, res: Response): Promise<void> => {
   const { phone } = req.body;

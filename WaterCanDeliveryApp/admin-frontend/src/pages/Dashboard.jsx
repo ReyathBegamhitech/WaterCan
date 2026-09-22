@@ -16,6 +16,25 @@ export default function Dashboard() {
   const [upiIncome, setUpiIncome] = useState(0);
   const [isIncomeLoading, setIsIncomeLoading] = useState(false);
 
+  // Customer Details Modal State
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [customerList, setCustomerList] = useState([]);
+  const [isCustomersLoading, setIsCustomersLoading] = useState(false);
+
+  const fetchCustomers = (sellerId) => {
+    setIsCustomerModalOpen(true);
+    setIsCustomersLoading(true);
+    fetch(`${import.meta.env.VITE_API_URL}/auth/admin/sellers/${sellerId}/customers`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setCustomerList(data.customers);
+        }
+      })
+      .catch(err => console.error("Failed to fetch customers:", err))
+      .finally(() => setIsCustomersLoading(false));
+  };
+
   // Fetch Income Data
   useEffect(() => {
     if (!selectedSeller) return;
@@ -393,24 +412,92 @@ export default function Dashboard() {
 
             </div>
 
-            <div className="p-space-lg border-t border-outline-variant/20 bg-surface-container-low flex items-center gap-space-sm">
+            <div className="p-space-lg border-t border-outline-variant/20 bg-surface-container-low flex flex-col gap-space-sm">
+              <div className="flex items-center gap-space-sm">
+                <button
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-outline-variant/50 hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors"
+                  onClick={() => toggleSellerStatus(selectedSeller.sellerId)}
+                >
+                  {selectedSeller.status === 'active' ? 'Deactivate Seller' : 'Activate Seller'}
+                </button>
+                <Link 
+                  to="/sellers"
+                  state={{ search: selectedSeller.sellerId, openEdit: true }}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md text-center hover:bg-primary-container transition-colors shadow-sm"
+                >
+                  Edit Vendor
+                </Link>
+              </div>
               <button
-                className="flex-1 py-2.5 px-4 rounded-xl border border-outline-variant/50 hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors"
-                onClick={() => toggleSellerStatus(selectedSeller.sellerId)}
+                className="w-full py-2.5 px-4 rounded-xl bg-secondary-fixed/30 hover:bg-secondary-fixed/50 text-secondary font-label-md text-label-md transition-colors shadow-sm flex items-center justify-center gap-2"
+                onClick={() => fetchCustomers(selectedSeller.sellerId)}
               >
-                {selectedSeller.status === 'active' ? 'Deactivate Seller' : 'Activate Seller'}
+                <span className="material-symbols-outlined text-[18px]">group</span>
+                Show Customer Details
               </button>
-              <Link 
-                to="/sellers"
-                state={{ search: selectedSeller.sellerId, openEdit: true }}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md text-center hover:bg-primary-container transition-colors shadow-sm"
-              >
-                Edit Vendor
-              </Link>
             </div>
           </>
         )}
       </aside>
+
+      {/* CUSTOMER DETAILS MODAL */}
+      {isCustomerModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/40">
+          <div className="bg-surface rounded-2xl shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-space-lg border-b border-outline-variant/20 flex items-center justify-between bg-surface-container-low shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-secondary-fixed/30 text-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[20px]">group</span>
+                </div>
+                <div>
+                  <h3 className="font-headline-sm text-headline-sm text-on-surface">Customer Details</h3>
+                  <p className="font-caption text-caption text-on-surface-variant">Customers for {selectedSeller?.name}</p>
+                </div>
+              </div>
+              <button
+                className="w-8 h-8 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors"
+                onClick={() => setIsCustomerModalOpen(false)}
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-space-lg bg-surface">
+              {isCustomersLoading ? (
+                <div className="flex items-center justify-center h-40">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : customerList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 text-on-surface-variant">
+                  <span className="material-symbols-outlined text-[48px] mb-2 opacity-50">person_off</span>
+                  <p>No customers found for this seller yet.</p>
+                </div>
+              ) : (
+                <div className="w-full border border-outline-variant/30 rounded-xl overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-surface-container-lowest">
+                      <tr>
+                        <th className="p-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-b border-outline-variant/30">Name</th>
+                        <th className="p-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-b border-outline-variant/30">Phone</th>
+                        <th className="p-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-b border-outline-variant/30">Address</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/20">
+                      {customerList.map((customer, idx) => (
+                        <tr key={idx} className="hover:bg-surface-container-lowest/50 transition-colors">
+                          <td className="p-4 font-body-md text-body-md text-on-surface">{customer.name || 'Unknown'}</td>
+                          <td className="p-4 font-label-md text-label-md text-on-surface font-mono">{customer.phone}</td>
+                          <td className="p-4 font-body-sm text-body-sm text-on-surface-variant max-w-[300px] break-words">{customer.address || 'N/A'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
