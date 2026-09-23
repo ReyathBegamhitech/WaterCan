@@ -149,18 +149,14 @@ export default function Dashboard() {
         <div className="p-space-lg rounded-2xl bg-blue-50 border border-blue-100 flex flex-col relative overflow-hidden shadow-sm">
           <span className="font-caption text-caption text-blue-600 uppercase tracking-wider font-bold z-10">Total Sellers</span>
           <span className="font-headline-lg text-headline-lg text-blue-950 mt-1 z-10">{sellers.length}</span>
-          <span className="font-label-sm text-label-sm text-blue-700 flex items-center gap-1 mt-1 z-10">
-            <span className="material-symbols-outlined text-[16px]">trending_up</span> +3 this month
-          </span>
+
           <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-[80px] text-blue-500/10 z-0 select-none pointer-events-none">storefront</span>
         </div>
 
         <div className="p-space-lg rounded-2xl bg-emerald-50 border border-emerald-100 flex flex-col relative overflow-hidden shadow-sm">
           <span className="font-caption text-caption text-emerald-600 uppercase tracking-wider font-bold z-10">Active Now</span>
           <span className="font-headline-lg text-headline-lg text-emerald-950 mt-1 z-10">{sellers.filter(s => s.status === 'active').length}</span>
-          <span className="font-label-sm text-label-sm text-emerald-700 mt-1 z-10">
-            {sellers.length > 0 ? Math.round((sellers.filter(s => s.status === 'active').length / sellers.length) * 100) : 0}% operational
-          </span>
+
           <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-[80px] text-emerald-500/10 z-0 select-none pointer-events-none">verified</span>
         </div>
 
