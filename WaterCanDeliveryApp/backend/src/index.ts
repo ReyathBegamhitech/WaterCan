@@ -4,6 +4,24 @@ import dotenv from 'dotenv';
 import pool from './config/db';
 import authRoutes from './routes/authRoutes';
 import orderRoutes from './routes/orderRoutes';
+import * as admin from 'firebase-admin';
+import * as path from 'path';
+
+// Initialize Firebase Admin SDK
+try {
+  // Check if FIREBASE_SERVICE_ACCOUNT is set in .env or Render dashboard
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('🔥 Firebase Admin initialized successfully');
+  } else {
+    console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT environment variable is missing. Push notifications will not work.');
+  }
+} catch (error) {
+  console.error('❌ Error initializing Firebase Admin:', error);
+}
 
 dotenv.config();
 

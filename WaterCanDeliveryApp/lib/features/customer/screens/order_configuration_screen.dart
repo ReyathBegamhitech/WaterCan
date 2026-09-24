@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../models/order_model.dart';
 import '../models/product_model.dart';
@@ -23,7 +24,8 @@ class OrderConfigurationScreen extends StatefulWidget {
   });
 
   @override
-  State<OrderConfigurationScreen> createState() => _OrderConfigurationScreenState();
+  State<OrderConfigurationScreen> createState() =>
+      _OrderConfigurationScreenState();
 }
 
 class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
@@ -31,13 +33,18 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
   bool _isProcessing = false;
 
   String _getEffectiveDeliveryAddress(BuildContext context) {
-    if (_customDeliveryAddress != null && _customDeliveryAddress!.trim().isNotEmpty) {
+    if (_customDeliveryAddress != null &&
+        _customDeliveryAddress!.trim().isNotEmpty) {
       return _customDeliveryAddress!;
     }
-    if (widget.deliveryAddress != null && widget.deliveryAddress!.trim().isNotEmpty) {
+    if (widget.deliveryAddress != null &&
+        widget.deliveryAddress!.trim().isNotEmpty) {
       return widget.deliveryAddress!;
     }
-    final userAddress = Provider.of<UserController>(context, listen: false).fullAddress;
+    final userAddress = Provider.of<UserController>(
+      context,
+      listen: false,
+    ).fullAddress;
     if (userAddress.isNotEmpty && userAddress != 'No address provided') {
       return userAddress;
     }
@@ -101,7 +108,9 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
               decoration: InputDecoration(
                 labelText: 'Delivery Address',
                 labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 prefixIcon: const Icon(Icons.location_on_outlined, size: 20),
               ),
             ),
@@ -113,7 +122,9 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                     onPressed: () => Navigator.pop(sheetContext),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     child: Text(
                       'Cancel',
@@ -135,7 +146,11 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                         });
                         Navigator.pop(sheetContext);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Delivery address updated for this order!')),
+                          const SnackBar(
+                            content: Text(
+                              'Delivery address updated for this order!',
+                            ),
+                          ),
                         );
                       }
                     },
@@ -143,11 +158,15 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     child: Text(
                       'Update',
-                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -182,7 +201,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
 
   int _calculateTotal() {
     int total = 0;
-    
+
     // 25L logic
     total += qty25L * price25L;
     if (hasEmpty25L && empty25L > 0) {
@@ -251,7 +270,9 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.surface, // slate-50
-        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)), // slate-300
+        border: Border.all(
+          color: AppColors.outlineVariant.withOpacity(0.5),
+        ), // slate-300
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -268,7 +289,9 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: value > min ? AppColors.onSurface : AppColors.onSurfaceVariant.withOpacity(0.5),
+                  color: value > min
+                      ? AppColors.onSurface
+                      : AppColors.onSurfaceVariant.withOpacity(0.5),
                 ),
               ),
             ),
@@ -341,7 +364,9 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: const Color(0xFFEFF6FF).withOpacity(0.6), // blue-50
-              border: Border.all(color: const Color(0xFFDBEAFE).withOpacity(0.8)), // blue-100
+              border: Border.all(
+                color: const Color(0xFFDBEAFE).withOpacity(0.8),
+              ), // blue-100
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -366,7 +391,7 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          
+
           // Right Controls
           Expanded(
             child: Column(
@@ -485,7 +510,12 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 100),
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 12,
+              bottom: 100,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -500,15 +530,21 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                         height: 36,
                         decoration: BoxDecoration(
                           color: AppColors.surfaceContainerLowest,
-                          border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
+                          border: Border.all(
+                            color: AppColors.outlineVariant.withOpacity(0.5),
+                          ),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.arrow_back, size: 20, color: AppColors.onSurface),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          size: 20,
+                          color: AppColors.onSurface,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Payment Details',
+                      'Order Details',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -519,8 +555,6 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-
 
                 // 25L CAN Section
                 _buildProductSection(
@@ -536,7 +570,8 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                     });
                   },
                   onHasEmptyChanged: (val) => setState(() => hasEmpty25L = val),
-                  onEmptyQtyChanged: (val) => setState(() => empty25L = val > qty25L ? qty25L : val),
+                  onEmptyQtyChanged: (val) =>
+                      setState(() => empty25L = val > qty25L ? qty25L : val),
                 ),
 
                 // 15L CAN Section
@@ -553,7 +588,8 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                     });
                   },
                   onHasEmptyChanged: (val) => setState(() => hasEmpty15L = val),
-                  onEmptyQtyChanged: (val) => setState(() => empty15L = val > qty15L ? qty15L : val),
+                  onEmptyQtyChanged: (val) =>
+                      setState(() => empty15L = val > qty15L ? qty15L : val),
                 ),
 
                 // 5L CAN Section
@@ -570,10 +606,9 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                     });
                   },
                   onHasEmptyChanged: (val) => setState(() => hasEmpty5L = val),
-                  onEmptyQtyChanged: (val) => setState(() => empty5L = val > qty5L ? qty5L : val),
+                  onEmptyQtyChanged: (val) =>
+                      setState(() => empty5L = val > qty5L ? qty5L : val),
                 ),
-
-
 
                 // DELIVERY OPTIONS Section
                 Container(
@@ -581,7 +616,9 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceContainerLowest,
-                    border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
+                    border: Border.all(
+                      color: AppColors.outlineVariant.withOpacity(0.5),
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -599,7 +636,11 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                               letterSpacing: 0.5,
                             ),
                           ),
-                          const Icon(Icons.local_shipping, size: 16, color: AppColors.primary),
+                          const Icon(
+                            Icons.local_shipping,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -608,8 +649,14 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: !_isFastDelivery ? const Color(0xFFF0FDF4) : Colors.transparent,
-                            border: Border.all(color: !_isFastDelivery ? const Color(0xFF16A34A) : AppColors.outlineVariant.withOpacity(0.5)),
+                            color: !_isFastDelivery
+                                ? const Color(0xFFF0FDF4)
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: !_isFastDelivery
+                                  ? const Color(0xFF16A34A)
+                                  : AppColors.outlineVariant.withOpacity(0.5),
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -617,7 +664,8 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                               Radio<bool>(
                                 value: false,
                                 groupValue: _isFastDelivery,
-                                onChanged: (val) => setState(() => _isFastDelivery = val!),
+                                onChanged: (val) =>
+                                    setState(() => _isFastDelivery = val!),
                                 activeColor: AppColors.primary,
                                 visualDensity: VisualDensity.compact,
                               ),
@@ -626,12 +674,32 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Standard Delivery', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                                    Text('Delivered by end of day', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.onSurfaceVariant)),
+                                    Text(
+                                      'Standard Delivery',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.onSurface,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Delivered by end of day',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        color: AppColors.onSurfaceVariant,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                              Text('FREE', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w900, color: const Color(0xFF16A34A))),
+                              Text(
+                                'FREE',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                  color: const Color(0xFF16A34A),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -642,8 +710,14 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: _isFastDelivery ? const Color(0xFFFFF1F2) : Colors.transparent,
-                            border: Border.all(color: _isFastDelivery ? const Color(0xFFE11D48) : AppColors.outlineVariant.withOpacity(0.5)),
+                            color: _isFastDelivery
+                                ? const Color(0xFFFFF1F2)
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: _isFastDelivery
+                                  ? const Color(0xFFE11D48)
+                                  : AppColors.outlineVariant.withOpacity(0.5),
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -651,7 +725,8 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                               Radio<bool>(
                                 value: true,
                                 groupValue: _isFastDelivery,
-                                onChanged: (val) => setState(() => _isFastDelivery = val!),
+                                onChanged: (val) =>
+                                    setState(() => _isFastDelivery = val!),
                                 activeColor: const Color(0xFFE11D48),
                                 visualDensity: VisualDensity.compact,
                               ),
@@ -662,20 +737,56 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                                   children: [
                                     Row(
                                       children: [
-                                        Text('Fast Delivery', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFFE11D48))),
+                                        Text(
+                                          'Fast Delivery',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFFE11D48),
+                                          ),
+                                        ),
                                         const SizedBox(width: 6),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(color: const Color(0xFFE11D48), borderRadius: BorderRadius.circular(4)),
-                                          child: Text('⚡ PRIORITY', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5)),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFE11D48),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '⚡ PRIORITY',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
-                                    Text('Delivered in 30-45 mins', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.onSurfaceVariant)),
+                                    Text(
+                                      'Delivered in 30-45 mins',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        color: AppColors.onSurfaceVariant,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                              Text('+₹50', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w900, color: const Color(0xFFE11D48))),
+                              Text(
+                                '+₹50',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                  color: const Color(0xFFE11D48),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -690,7 +801,9 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                   margin: const EdgeInsets.only(bottom: 24),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceContainerLowest,
-                    border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
+                    border: Border.all(
+                      color: AppColors.outlineVariant.withOpacity(0.5),
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -708,50 +821,106 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                       const SizedBox(height: 12),
                       Builder(
                         builder: (context) {
-                          int subtotal = (qty25L * price25L) + (qty15L * price15L) + (qty5L * price5L);
+                          int subtotal =
+                              (qty25L * price25L) +
+                              (qty15L * price15L) +
+                              (qty5L * price5L);
                           int emptyDiscount = 0;
-                          if (hasEmpty25L && empty25L > 0) emptyDiscount += empty25L * 10;
-                          if (hasEmpty15L && empty15L > 0) emptyDiscount += empty15L * 10;
-                          if (hasEmpty5L && empty5L > 0) emptyDiscount += empty5L * 10;
+                          if (hasEmpty25L && empty25L > 0)
+                            emptyDiscount += empty25L * 10;
+                          if (hasEmpty15L && empty15L > 0)
+                            emptyDiscount += empty15L * 10;
+                          if (hasEmpty5L && empty5L > 0)
+                            emptyDiscount += empty5L * 10;
                           int finalTotal = _calculateTotal();
                           return Column(
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Item Subtotal', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.onSurface)),
-                                  Text('₹$subtotal', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                  Text(
+                                    'Item Subtotal',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13,
+                                      color: AppColors.onSurface,
+                                    ),
+                                  ),
+                                  Text(
+                                    '₹$subtotal',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.onSurface,
+                                    ),
+                                  ),
                                 ],
                               ),
                               if (emptyDiscount > 0) ...[
                                 const SizedBox(height: 8),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
-                                        const Icon(Icons.recycling, size: 14, color: Color(0xFF16A34A)),
+                                        const Icon(
+                                          Icons.recycling,
+                                          size: 14,
+                                          color: Color(0xFF16A34A),
+                                        ),
                                         const SizedBox(width: 4),
-                                        Text('Empty Can Discount', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: const Color(0xFF16A34A))),
+                                        Text(
+                                          'Empty Can Discount',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 13,
+                                            color: const Color(0xFF16A34A),
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                    Text('-₹$emptyDiscount', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF16A34A))),
+                                    Text(
+                                      '-₹$emptyDiscount',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF16A34A),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
                               if (_isFastDelivery) ...[
                                 const SizedBox(height: 8),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
-                                        const Icon(Icons.bolt, size: 14, color: Color(0xFFE11D48)),
+                                        const Icon(
+                                          Icons.bolt,
+                                          size: 14,
+                                          color: Color(0xFFE11D48),
+                                        ),
                                         const SizedBox(width: 4),
-                                        Text('Fast Delivery Fee', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColors.onSurface)),
+                                        Text(
+                                          'Fast Delivery Fee',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 13,
+                                            color: AppColors.onSurface,
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                    Text('+₹50', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                                    Text(
+                                      '+₹50',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.onSurface,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -760,15 +929,24 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                                 child: Divider(height: 1),
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'TO PAY',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.onSurface),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.onSurface,
+                                    ),
                                   ),
                                   Text(
                                     '₹$finalTotal',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.primary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -789,10 +967,19 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 24),
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 12,
+                bottom: 24,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLowest,
-                border: Border(top: BorderSide(color: AppColors.outlineVariant.withOpacity(0.2))),
+                border: Border(
+                  top: BorderSide(
+                    color: AppColors.outlineVariant.withOpacity(0.2),
+                  ),
+                ),
               ),
               child: SafeArea(
                 child: Center(
@@ -800,103 +987,122 @@ class _OrderConfigurationScreenState extends State<OrderConfigurationScreen> {
                     width: 280, // Medium-lengthened width
                     height: 52,
                     child: ElevatedButton(
-                    onPressed: _isProcessing ? null : () async {
-                      if (_calculateTotal() == 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please add at least 1 water can to proceed.'),
-                            behavior: SnackBarBehavior.floating,
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                        return;
-                      }
+                      onPressed: _isProcessing
+                          ? null
+                          : () async {
+                              if (_calculateTotal() == 0) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please add at least 1 water can to proceed.',
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                                return;
+                              }
 
-                      setState(() {
-                        _isProcessing = true;
-                      });
-                      
-                      final items = <CartItem>[];
-                      if (qty25L > 0) {
-                        items.add(CartItem(
-                          quantity: qty25L,
-                          returnEmptyCans: hasEmpty25L ? empty25L : 0,
-                          product: ProductModel(
-                            id: 'p1',
-                            name: '25L Refill Can',
-                            price: price25L.toDouble(),
-                            imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBtFDY8L4f3JKhamQcGZaXg9fa3RstoZchc3JyiqdlCNdnoRt3Qcx-nqXK6C8KSNnLdAVkSLH0Khz0Gjfs1iqcSazsbdqrIdHyiCWDlN5zWyCoyjQQNDczOhlThRGzp_LzSDQ2Nz09alZY_AGfZsVC0LmgNveXjKZNx4OlCrdScsnSvLD289zYwQg2zj4qj6ZKYCIih2Z3FCEpQ8gCVbVwBXNMvyme2fFUzskpD8cCUrBVLis1pbaR2',
-                            shopName: widget.shop['name'] ?? 'Blue Drop Water Co.',
-                          ),
-                        ));
-                      }
-                      if (qty15L > 0) {
-                        items.add(CartItem(
-                          quantity: qty15L,
-                          returnEmptyCans: hasEmpty15L ? empty15L : 0,
-                          product: ProductModel(
-                            id: 'p2',
-                            name: '15L Dispenser Can',
-                            price: price15L.toDouble(),
-                            imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdgL5IALKwRiltkZqoDMPcUa05FP4rMG9v-qW6t8D4_zGjCmXjT3G-9136bYs4gNs1gwqj4Jhu8tKzSN5lYDggj7q8OWb9wN8ZYR_Zq3MeXiRtfI4B-j4OH1vu_Ytth_s5CS1d66rgOrMPT-yN5sCA4JNi9-gJwvG_UEkRCpHmSmJx6lBK37PXHS0p01SfsVvpKIz5U40POAZZAQnGDXkozBGSxWHHKC5PGnkqtlUcBdulK-w9xpi_',
-                            shopName: widget.shop['name'] ?? 'Blue Drop Water Co.',
-                          ),
-                        ));
-                      }
-                      if (qty5L > 0) {
-                        items.add(CartItem(
-                          quantity: qty5L,
-                          returnEmptyCans: hasEmpty5L ? empty5L : 0,
-                          product: ProductModel(
-                            id: 'p3',
-                            name: '5L Mini Bottle',
-                            price: price5L.toDouble(),
-                            imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAet-1rb_NdGWMMjB0XFPCWZs2tPo8xJNywp8bDviNbrW1eTNTvTqz1DncuC9UeqWDgVcJ1bThd1934sHn2W06qu1I66hWvCwXinOF2P3b2k16ZaytIs71YkQtu7D4MJs1ziN9RhomXmlwrD-nEHxfXf1ewFzMWe_VWURXG5vlGv80c5UgH4nHuLubO2b4VRABwgmNL1Z5VrnOJzHgj6sihTjjWy1lWQw_qw8ykVRG5Pw23NdZ83OOh',
-                            shopName: widget.shop['name'] ?? 'Blue Drop Water Co.',
-                          ),
-                        ));
-                      }
-                      
-                      final totalAmount = _calculateTotal().toDouble();
-                      final currentShopName = widget.shop['name'] ?? 'Blue Drop Water Co.';
-                      final effectiveDeliveryAddress = _getEffectiveDeliveryAddress(context);
+                              setState(() {
+                                _isProcessing = true;
+                              });
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentMethodScreen(
-                            items: items,
-                            totalAmount: totalAmount,
-                            shopName: currentShopName,
-                            deliveryAddress: effectiveDeliveryAddress,
-                            isFastDelivery: _isFastDelivery,
-                            sellerId: widget.shop['id'] ?? '',
-                          ),
+                              final items = <CartItem>[];
+                              if (qty25L > 0) {
+                                items.add(
+                                  CartItem(
+                                    quantity: qty25L,
+                                    returnEmptyCans: hasEmpty25L ? empty25L : 0,
+                                    product: ProductModel(
+                                      id: 'p1',
+                                      name: '25L Refill Can',
+                                      price: price25L.toDouble(),
+                                      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBtFDY8L4f3JKhamQcGZaXg9fa3RstoZchc3JyiqdlCNdnoRt3Qcx-nqXK6C8KSNnLdAVkSLH0Khz0Gjfs1iqcSazsbdqrIdHyiCWDlN5zWyCoyjQQNDczOhlThRGzp_LzSDQ2Nz09alZY_AGfZsVC0LmgNveXjKZNx4OlCrdScsnSvLD289zYwQg2zj4qj6ZKYCIih2Z3FCEpQ8gCVbVwBXNMvyme2fFUzskpD8cCUrBVLis1pbaR2',
+                                      shopName:
+                                          widget.shop['name'] ??
+                                          'Blue Drop Water Co.',
+                                    ),
+                                  ),
+                                );
+                              }
+                              if (qty15L > 0) {
+                                items.add(
+                                  CartItem(
+                                    quantity: qty15L,
+                                    returnEmptyCans: hasEmpty15L ? empty15L : 0,
+                                    product: ProductModel(
+                                      id: 'p2',
+                                      name: '15L Dispenser Can',
+                                      price: price15L.toDouble(),
+                                      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdgL5IALKwRiltkZqoDMPcUa05FP4rMG9v-qW6t8D4_zGjCmXjT3G-9136bYs4gNs1gwqj4Jhu8tKzSN5lYDggj7q8OWb9wN8ZYR_Zq3MeXiRtfI4B-j4OH1vu_Ytth_s5CS1d66rgOrMPT-yN5sCA4JNi9-gJwvG_UEkRCpHmSmJx6lBK37PXHS0p01SfsVvpKIz5U40POAZZAQnGDXkozBGSxWHHKC5PGnkqtlUcBdulK-w9xpi_',
+                                      shopName:
+                                          widget.shop['name'] ??
+                                          'Blue Drop Water Co.',
+                                    ),
+                                  ),
+                                );
+                              }
+                              if (qty5L > 0) {
+                                items.add(
+                                  CartItem(
+                                    quantity: qty5L,
+                                    returnEmptyCans: hasEmpty5L ? empty5L : 0,
+                                    product: ProductModel(
+                                      id: 'p3',
+                                      name: '5L Mini Bottle',
+                                      price: price5L.toDouble(),
+                                      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAet-1rb_NdGWMMjB0XFPCWZs2tPo8xJNywp8bDviNbrW1eTNTvTqz1DncuC9UeqWDgVcJ1bThd1934sHn2W06qu1I66hWvCwXinOF2P3b2k16ZaytIs71YkQtu7D4MJs1ziN9RhomXmlwrD-nEHxfXf1ewFzMWe_VWURXG5vlGv80c5UgH4nHuLubO2b4VRABwgmNL1Z5VrnOJzHgj6sihTjjWy1lWQw_qw8ykVRG5Pw23NdZ83OOh',
+                                      shopName:
+                                          widget.shop['name'] ??
+                                          'Blue Drop Water Co.',
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              final totalAmount = _calculateTotal().toDouble();
+                              final currentShopName =
+                                  widget.shop['name'] ?? 'Blue Drop Water Co.';
+                              final effectiveDeliveryAddress =
+                                  _getEffectiveDeliveryAddress(context);
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PaymentMethodScreen(
+                                    items: items,
+                                    totalAmount: totalAmount,
+                                    shopName: currentShopName,
+                                    deliveryAddress: effectiveDeliveryAddress,
+                                    isFastDelivery: _isFastDelivery,
+                                    sellerId: widget.shop['id'] ?? '',
+                                  ),
+                                ),
+                              ).then((_) {
+                                if (mounted)
+                                  setState(() => _isProcessing = false);
+                              });
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.onPrimary,
+                        elevation: 4,
+                        shadowColor: AppColors.primary.withOpacity(0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ).then((_) {
-                        if (mounted) setState(() => _isProcessing = false);
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.onPrimary,
-                      elevation: 4,
-                      shadowColor: AppColors.primary.withOpacity(0.4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    child: Text(
-                      'PROCEED TO PAYMENT',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
+                      child: Text(
+                        'PROCEED TO PAYMENT',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
               ),
             ),
           ),

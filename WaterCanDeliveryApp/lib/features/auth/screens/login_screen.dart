@@ -11,6 +11,8 @@ import '../../seller/screens/seller_dashboard.dart';
 import 'register_screen.dart';
 import 'package:provider/provider.dart';
 import '../../customer/controllers/user_controller.dart';
+import '../../../core/services/notification_service.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -102,12 +104,15 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() { _isLoading = true; });
 
     try {
+      String? fcmToken = await NotificationService.getToken();
+
       final response = await http.post(
         Uri.parse(ApiConstants.login),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'phone': _phoneController.text,
           'password': _passwordController.text,
+          'fcmToken': fcmToken,
         }),
       );
 

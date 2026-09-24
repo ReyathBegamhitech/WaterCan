@@ -10,6 +10,11 @@ import 'core/services/notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.initialize();
+  try {
+    await NotificationService.initializeFirebase();
+  } catch (e) {
+    print("Firebase initialization failed. You need to run flutterfire configure first.");
+  }
   runApp(const WaterCanDeliveryApp());
 }
 

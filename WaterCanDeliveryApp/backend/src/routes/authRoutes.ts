@@ -198,7 +198,7 @@ router.post('/verify-otp', async (req: Request, res: Response): Promise<void> =>
 });
 
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
-  const { customerName, phone, whatsapp, email, doorNo, street, city, pincode, password, seller_id } = req.body;
+  const { customerName, phone, whatsapp, email, doorNo, street, city, pincode, password, seller_id, fcmToken } = req.body;
 
   if (!customerName || !phone || !doorNo || !street || !city || !pincode || !password) {
     res.status(400).json({ success: false, message: 'Missing required fields' });
@@ -246,9 +246,9 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     // 3. Insert into users table
     const userResult = await client.query(
-      `INSERT INTO users (full_name, phone_number, email, password_hash, assigned_seller_id) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-      [customerName, cleanPhone, email || null, passwordHash, assignedSellerId]
+      `INSERT INTO users (full_name, phone_number, email, password_hash, assigned_seller_id, fcm_token) 
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+      [customerName, cleanPhone, email || null, passwordHash, assignedSellerId, fcmToken || null]
     );
     const userId = userResult.rows[0].id;
 
@@ -282,7 +282,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 });
 
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
-  const { phone, password } = req.body;
+  const { phone, password, fcmToken } = req.body;
 
   if (!phone || !password) {
     res.status(400).json({ success: false, message: 'Missing phone or password' });
@@ -306,6 +306,11 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         return;
       }
 
+      // Update FCM token if provided
+      if (fcmToken) {
+        await pool.query('UPDATE app_sellers SET fcm_token = $1 WHERE seller_id = $2', [fcmToken, seller.seller_id]);
+      }
+
       res.status(200).json({
         success: true,
         message: 'Seller Login successful',
@@ -326,6 +331,9 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       const seller = sellerByPhoneResult.rows[0];
       const isMatch = await bcrypt.compare(password, seller.password_hash);
       if (isMatch) {
+        if (fcmToken) {
+          await pool.query('UPDATE app_sellers SET fcm_token = $1 WHERE seller_id = $2', [fcmToken, seller.seller_id]);
+        }
         res.status(200).json({
           success: true,
           message: 'Seller Login successful',
@@ -367,6 +375,10 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         shopName = shopResult.rows[0].organization_name;
         shopAddress = shopResult.rows[0].location;
       }
+    }
+
+    if (fcmToken) {
+      await pool.query('UPDATE users SET fcm_token = $1 WHERE id = $2', [fcmToken, user.id]);
     }
 
     res.status(200).json({

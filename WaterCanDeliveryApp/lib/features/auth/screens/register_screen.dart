@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../customer/controllers/user_controller.dart';
 import '../../customer/screens/buyer_dashboard.dart';
+import '../../../core/services/notification_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -427,6 +428,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
+      String? fcmToken = await NotificationService.getToken();
+
       final response = await http.post(
         Uri.parse(ApiConstants.register),
         headers: {'Content-Type': 'application/json'},
@@ -441,6 +444,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'city': _cityController.text,
           'pincode': _pincodeController.text,
           'password': _passwordController.text,
+          'fcmToken': fcmToken,
         }),
       );
 

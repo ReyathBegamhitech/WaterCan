@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import pool from '../config/db';
+import * as admin from 'firebase-admin';
 
 const router = Router();
 
@@ -17,6 +18,29 @@ router.post('/', async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
       [user_phone, buyer_name, buyer_phone, shop_name, quantity, price_per_can, total_price, time, delivery_address || '', latitude || null, longitude || null, order_details ? JSON.stringify(order_details) : null, payment_method || 'Cash on Delivery', is_fast_delivery || false, seller_id]
     );
+
+    // Fetch the seller's FCM token
+    try {
+      const sellerResult = await pool.query('SELECT fcm_token FROM app_sellers WHERE seller_id = $1', [seller_id]);
+      if (sellerResult.rows.length > 0) {
+        const sellerFcmToken = sellerResult.rows[0].fcm_token;
+        if (sellerFcmToken) {
+          const message = {
+            notification: {
+              title: 'New Order Received! 🛒',
+              body: `You received a new order from ${buyer_name || 'a customer'}.`
+            },
+            token: sellerFcmToken,
+          };
+          
+          admin.messaging().send(message)
+            .then(response => console.log('✅ Successfully sent push message:', response))
+            .catch(error => console.error('❌ Error sending push message:', error));
+        }
+      }
+    } catch (pushError) {
+      console.error('Error fetching FCM token or sending push:', pushError);
+    }
 
     res.status(201).json({ success: true, order: result.rows[0] });
   } catch (error) {

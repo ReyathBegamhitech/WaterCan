@@ -24,11 +24,11 @@ dependencies:
   dotted_border: ^3.1.0
   shared_preferences: ^2.5.5
 
-  # Firebase (Temporarily commented out to fix web build for UI preview)
-  # firebase_core: ^2.15.1
+  # Firebase
+  firebase_core: ^2.15.1
   # firebase_auth: ^4.9.0
   # cloud_firestore: ^4.9.1
-  # firebase_messaging: ^14.6.7
+  firebase_messaging: ^14.6.7
 
   # Location & Maps
   flutter_map: ^7.0.2

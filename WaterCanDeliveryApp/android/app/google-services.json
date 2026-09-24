@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "38171146362",
+    "project_id": "watercan-delivery-app",
+    "storage_bucket": "watercan-delivery-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:38171146362:android:72535ba3ddcbfa68dea3c3",
+        "android_client_info": {
+          "package_name": "com.example.water_can_delivery_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPFQppJZO5ODZh-3rYOBuz34BlnNHphXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
