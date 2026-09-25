@@ -38,6 +38,18 @@ class NotificationService {
       },
     );
 
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'order_updates_channel', // id
+      'Order Updates', // name
+      description: 'Notifications for new orders', // description
+      importance: Importance.max,
+    );
+
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
     _notificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()

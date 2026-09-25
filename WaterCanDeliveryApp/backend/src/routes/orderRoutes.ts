@@ -25,10 +25,19 @@ router.post('/', async (req, res) => {
       if (sellerResult.rows.length > 0) {
         const sellerFcmToken = sellerResult.rows[0].fcm_token;
         if (sellerFcmToken) {
-          const message = {
+          const message: admin.messaging.Message = {
             notification: {
               title: 'New Order Received! 🛒',
               body: `You received a new order from ${buyer_name || 'a customer'}.`
+            },
+            android: {
+              priority: 'high' as const,
+              notification: {
+                channelId: 'order_updates_channel'
+              }
+            },
+            data: {
+              click_action: 'FLUTTER_NOTIFICATION_CLICK'
             },
             token: sellerFcmToken,
           };

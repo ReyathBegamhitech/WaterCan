@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 
 class UpiAppInfo {
@@ -29,12 +30,14 @@ class UpiPaymentSheet extends StatefulWidget {
   final double totalAmount;
   final String orderId;
   final String shopName;
+  final String upiId;
 
   const UpiPaymentSheet({
     super.key,
     required this.totalAmount,
     required this.orderId,
     this.shopName = 'Blue Drop Water Co.',
+    required this.upiId,
   });
 
   static Future<String?> show({
@@ -42,6 +45,7 @@ class UpiPaymentSheet extends StatefulWidget {
     required double totalAmount,
     required String orderId,
     String shopName = 'Blue Drop Water Co.',
+    required String upiId,
   }) {
     return showModalBottomSheet<String>(
       context: context,
@@ -51,6 +55,7 @@ class UpiPaymentSheet extends StatefulWidget {
         totalAmount: totalAmount,
         orderId: orderId,
         shopName: shopName,
+        upiId: upiId,
       ),
     );
   }
@@ -63,8 +68,6 @@ class _UpiPaymentSheetState extends State<UpiPaymentSheet> {
   bool _showQrCode = false;
   bool _isProcessing = false;
   String? _processingApp;
-
-  final String _upiVpa = 'bluedropwater@okhdfcbank';
 
   List<UpiAppInfo> get _upiApps => [
         UpiAppInfo(
@@ -280,7 +283,7 @@ class _UpiPaymentSheetState extends State<UpiPaymentSheet> {
 
   String _buildUpiUrl({String scheme = 'upi://pay'}) {
     final queryParams = {
-      'pa': _upiVpa,
+      'pa': widget.upiId,
       'pn': widget.shopName,
       'mc': '5411',
       'tr': widget.orderId,
@@ -347,7 +350,7 @@ class _UpiPaymentSheetState extends State<UpiPaymentSheet> {
           appName: appName,
           amount: widget.totalAmount,
           orderId: widget.orderId,
-          vpa: _upiVpa,
+          vpa: widget.upiId,
         );
       },
     );
@@ -649,11 +652,14 @@ class _UpiPaymentSheetState extends State<UpiPaymentSheet> {
             ),
             child: Column(
               children: [
-                Icon(
-                  Icons.qr_code_2_rounded,
-                  size: 140,
-                  color: AppColors.onSurface.withOpacity(0.85),
+                QrImageView(
+                  data: _buildUpiUrl(),
+                  version: QrVersions.auto,
+                  size: 160.0,
+                  backgroundColor: Colors.white,
+                  padding: const EdgeInsets.all(8),
                 ),
+                const SizedBox(height: 8),
                 Text(
                   '₹${widget.totalAmount.toStringAsFixed(0)}',
                   style: GoogleFonts.plusJakartaSans(
@@ -671,7 +677,7 @@ class _UpiPaymentSheetState extends State<UpiPaymentSheet> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'UPI ID: $_upiVpa',
+                'UPI ID: ${widget.upiId}',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -681,7 +687,7 @@ class _UpiPaymentSheetState extends State<UpiPaymentSheet> {
               const SizedBox(width: 8),
               InkWell(
                 onTap: () {
-                  Clipboard.setData(ClipboardData(text: _upiVpa));
+                  Clipboard.setData(ClipboardData(text: widget.upiId));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('UPI ID copied to clipboard!'),

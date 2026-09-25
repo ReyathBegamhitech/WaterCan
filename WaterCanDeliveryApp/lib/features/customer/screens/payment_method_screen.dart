@@ -792,11 +792,15 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                         String finalPaymentMethod = 'Cash on Delivery';
 
                         if (_paymentMethod == 'upi') {
+                          // Assign correct UPI ID for Seller ID 1001 (Ragul) or a default one
+                          final upiId = widget.sellerId == '1001' ? 'ragulcbs64-1@okaxis' : 'bluedropwater@okhdfcbank';
+
                           final selectedApp = await UpiPaymentSheet.show(
                             context: context,
                             totalAmount: widget.totalAmount,
                             orderId: orderId,
                             shopName: widget.shopName,
+                            upiId: upiId,
                           );
 
                           if (selectedApp == null) {

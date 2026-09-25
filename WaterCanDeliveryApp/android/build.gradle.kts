@@ -19,6 +19,13 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+subprojects {
+    extra.set("compileSdkVersion", 34)
+    extra.set("compileSdk", 34)
+}
+
+
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }

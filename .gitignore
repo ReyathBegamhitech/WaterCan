@@ -8,3 +8,4 @@ Thumbs.db
 
 firebase-adminsdk-key.json
 node_modules/
+**/.env
