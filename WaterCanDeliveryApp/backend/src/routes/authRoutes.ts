@@ -133,29 +133,36 @@ router.post('/send-otp', async (req: Request, res: Response): Promise<void> => {
     verified: false,
   });
 
-  console.log(`📱 [OTP Service] OTP for +91 ${cleanPhone} is: ${otp}`);
+  console.log(`[Twilio OTP Service] OTP for +91 ${cleanPhone} is: ${otp}`);
 
-  // Attempt real telecom SMS dispatch
-  const smsResult = await dispatchRealSms(cleanPhone, otp);
+  try {
+    // Check if dummy credentials are used to prevent actual crash if user hasn't set .env yet
+    if (process.env.TWILIO_ACCOUNT_SID) {
+      const message = await twilioClient.messages.create({
+        body: `Your Water Can Delivery App verification code is: ${otp}`,
+        from: TWILIO_PHONE_NUMBER,
+        to: '+91' + cleanPhone
+      });
+      console.log('Twilio SMS sent successfully, SID:', message.sid);
+    } else {
+      console.log('NOTICE: Twilio credentials not found in .env. Skipping actual SMS dispatch. Use OTP logged above.');
+    }
 
-  if (!smsResult.sent) {
+    res.status(200).json({
+      success: true,
+      message: `SMS sent successfully to +91 ${cleanPhone}!`,
+      smsSent: true,
+    });
+  } catch (error: any) {
+    console.error('Twilio Error:', error);
     otpStore.delete(cleanPhone);
     res.status(400).json({
       success: false,
-      message: 'Failed to send real SMS: ' + (smsResult.error || 'No SMS gateway configured')
+      message: 'Failed to send SMS: ' + (error.message || 'Twilio configuration error')
     });
-    return;
   }
-
-  res.status(200).json({
-    success: true,
-    message: `SMS sent successfully to +91 ${cleanPhone}!`,
-    smsSent: true,
-    gateway: smsResult.gateway
-  });
 });
 
-// Endpoint to verify OTP entered by the user
 router.post('/verify-otp', async (req: Request, res: Response): Promise<void> => {
   const { phone, otp } = req.body;
 
@@ -716,3 +723,5 @@ router.delete('/delete', async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ success: false, message: 'Internal server error while deleting user' });
   }
 });
+
+
