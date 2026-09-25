@@ -136,29 +136,32 @@ router.post('/send-otp', async (req: Request, res: Response): Promise<void> => {
   console.log(`[Twilio OTP Service] OTP for +91 ${cleanPhone} is: ${otp}`);
 
   try {
-    // Check if dummy credentials are used to prevent actual crash if user hasn't set .env yet
-    if (process.env.TWILIO_ACCOUNT_SID) {
-      const message = await twilioClient.messages.create({
-        body: `Your Water Can Delivery App verification code is: ${otp}`,
-        from: TWILIO_PHONE_NUMBER,
-        to: '+91' + cleanPhone
-      });
-      console.log('Twilio SMS sent successfully, SID:', message.sid);
+    const TWOFACTOR_API_KEY = process.env.TWOFACTOR_API_KEY;
+    if (!TWOFACTOR_API_KEY) {
+      console.warn('TWOFACTOR_API_KEY is missing. OTP not actually sent.');
     } else {
-      console.log('NOTICE: Twilio credentials not found in .env. Skipping actual SMS dispatch. Use OTP logged above.');
+      // Use 2factor.in SMS API
+      const url = `https://2factor.in/API/V1/${TWOFACTOR_API_KEY}/SMS/${cleanPhone}/${otp}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log('2factor.in SMS response:', data);
+      
+      if (data.Status !== 'Success') {
+        throw new Error(data.Details || '2factor.in API rejected the SMS');
+      }
     }
 
     res.status(200).json({
       success: true,
-      message: `SMS sent successfully to +91 ${cleanPhone}!`,
+      message: `SMS OTP sent successfully to +91 ${cleanPhone}!`,
       smsSent: true,
     });
   } catch (error: any) {
-    console.error('Twilio Error:', error);
+    console.error('2factor.in Error:', error);
     otpStore.delete(cleanPhone);
     res.status(400).json({
       success: false,
-      message: 'Failed to send SMS: ' + (error.message || 'Twilio configuration error')
+      message: 'Failed to send SMS OTP: ' + (error.message || 'Unknown error')
     });
   }
 });
