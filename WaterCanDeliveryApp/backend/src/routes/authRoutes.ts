@@ -135,35 +135,22 @@ router.post('/send-otp', async (req: Request, res: Response): Promise<void> => {
 
   console.log(`[Twilio OTP Service] OTP for +91 ${cleanPhone} is: ${otp}`);
 
-  try {
-    const TWOFACTOR_API_KEY = process.env.TWOFACTOR_API_KEY;
-    if (!TWOFACTOR_API_KEY) {
-      console.warn('TWOFACTOR_API_KEY is missing. OTP not actually sent.');
-    } else {
-      // Use 2factor.in SMS API
-      const url = `https://2factor.in/API/V1/${TWOFACTOR_API_KEY}/SMS/${cleanPhone}/${otp}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      console.log('2factor.in SMS response:', data);
-      
-      if (data.Status !== 'Success') {
-        throw new Error(data.Details || '2factor.in API rejected the SMS');
-      }
+  const result = await dispatchRealSms(cleanPhone, otp);
+    
+    if (!result.sent && result.gateway !== 'none') {
+      otpStore.delete(cleanPhone);
+      res.status(400).json({
+        success: false,
+        message: 'Failed to send SMS: ' + (result.error || 'Gateway configuration error')
+      });
+      return;
     }
 
     res.status(200).json({
       success: true,
-      message: `SMS OTP sent successfully to +91 ${cleanPhone}!`,
-      smsSent: true,
+      message: `OTP sent successfully to +91 ${cleanPhone}!`,
+      smsSent: result.sent,
     });
-  } catch (error: any) {
-    console.error('2factor.in Error:', error);
-    otpStore.delete(cleanPhone);
-    res.status(400).json({
-      success: false,
-      message: 'Failed to send SMS OTP: ' + (error.message || 'Unknown error')
-    });
-  }
 });
 
 router.post('/verify-otp', async (req: Request, res: Response): Promise<void> => {
